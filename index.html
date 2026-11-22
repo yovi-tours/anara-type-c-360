@@ -1,0 +1,1129 @@
+<title>Anara Villa Type C Tour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap">
+<style>
+[hidden]{display:none!important}
+/* Anara tokens — liquid-glass chrome over a full-bleed panorama.
+   Layout: logo + breadcrumb top-start · floor switcher top-centre · language top-end · tool rail on the end edge ·
+   room card bottom-start · room dock bottom-centre · minimap + actions bottom-end. */
+:root{
+  --olive-950:#262b16; --olive-900:#3f4727; --olive-700:#5f654a; --olive-500:#80856e; --olive-200:#c6c8bd; --olive-50:#eaebe7;
+  --gold-600:#9b9265; --gold-500:#b0a57a; --gold-300:#d3ccb3; --gold-200:#e4dfd0; --gold-50:#f5f4ee;
+  --night-900:#12150a;
+  --ink:#1d2110; --ink-muted:#1d2110b3; --ink-light:#f3f1e7;
+  --tint:#ffffff85; --tint-strong:#ffffffc2; --tint-dark:#14180a8f; --rim:#ffffff80; --radius:.75rem;
+  --primary:var(--olive-900); --primary-fg:var(--gold-50);
+  --ease-swell:cubic-bezier(.34,1.56,.64,1); --ease-soft:cubic-bezier(.22,1,.36,1);
+  --f:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --gl:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
+  --top:calc(env(safe-area-inset-top,0px) + 16px); --bot:calc(env(safe-area-inset-bottom,0px) + 16px);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--night-900);color:var(--ink);font-family:var(--f);overflow:hidden;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+button,a{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0;text-decoration:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--olive-900);outline-offset:2px}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+#stage{position:fixed;inset:0;touch-action:none;cursor:grab}
+#stage.drag{cursor:grabbing}#stage.go{cursor:pointer}
+body.measuring #stage{cursor:crosshair}
+#stage canvas{display:block;width:100%;height:100%}
+/* soft vignette so glass chrome always reads */
+#vig{position:fixed;inset:0;pointer-events:none;z-index:1;background:
+  linear-gradient(#0f120859,#0f120800 18%),linear-gradient(0deg,#0f120866,#0f120800 26%)}
+
+/* ---------- liquid glass ---------- */
+.glass{position:relative;isolation:isolate;color:var(--ink);border-radius:999px;box-shadow:0 12px 32px -10px rgba(18,21,10,.42),0 2px 6px rgba(18,21,10,.14)}
+.glass::before,.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;transition:inset .7s var(--ease-swell)}
+.glass::before{backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3)}
+.glass::after{background:var(--tint);box-shadow:inset 2px 2px 1px #ffffff80,inset -1px -1px 1px 1px #ffffff80}
+.glass.ink-light{color:var(--ink-light)}.glass.ink-light::after{background:var(--tint-dark)}
+.glass.card{border-radius:calc(var(--radius) * 1.5)}.glass.card::after{background:var(--tint-strong)}
+.glass.hov:hover::before,.glass.hov:hover::after{inset:-3px}
+.chip{height:34px;padding:0 14px;border-radius:999px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .2s,color .2s,box-shadow .2s}
+.chip:hover{background:#ffffff4d;box-shadow:inset 0 1px 0 #ffffffb3}
+.chip[aria-pressed="true"],.chip[aria-current="true"],.chip[aria-selected="true"]{background:var(--olive-900);color:var(--gold-50);box-shadow:inset 0 1px 0 #ffffff26,0 6px 16px -6px #1e220e99}
+.ibtn{width:42px;height:42px;border-radius:999px;display:grid;place-items:center;transition:background .2s,color .2s;position:relative}
+.ibtn:hover{background:#ffffff26}
+.ibtn svg{transition:scale .6s var(--ease-swell)}.ibtn:hover svg{scale:1.1}
+.ibtn[aria-pressed="true"]{background:var(--olive-500);color:#fff;box-shadow:inset 0 1px 0 #ffffff40}
+#big .ibtn:hover,#mini .ibtn:hover{background:#ffffff66}
+.ibtn[data-tip]::after{content:attr(data-tip);position:absolute;inset-inline-end:calc(100% + 10px);top:50%;transform:translateY(-50%) translateX(4px);white-space:nowrap;
+  padding:6px 11px;border-radius:999px;background:var(--olive-950);color:var(--gold-50);font-size:12px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .15s,transform .25s var(--ease-soft)}
+[dir="rtl"] .ibtn[data-tip]::after{transform:translateY(-50%) translateX(-4px)}
+.ibtn[data-tip]:hover::after,.ibtn[data-tip]:focus-visible::after{opacity:1;transform:translateY(-50%)}
+@media (hover:none){.ibtn[data-tip]::after{display:none}}
+.primary{height:44px;padding:0 20px;border-radius:999px;background:var(--primary);color:var(--primary-fg);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:9px;
+  box-shadow:0 10px 28px -10px #1e220e8c;flex:0 0 auto;transition:transform .4s var(--ease-swell),background .2s}
+.primary:hover{transform:translateY(-1px);background:var(--olive-950)}
+.secondary{height:44px;padding:0 18px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:9px;flex:0 0 auto}
+.chrome{transition:opacity .6s var(--ease-soft),transform .6s var(--ease-soft)}
+body.presenting .chrome{opacity:0;pointer-events:none}
+body:has(#intro:not([hidden]):not(.out)) :is(.chrome,.chrome-keep,#tags,.stairs,#arrows){opacity:0!important;pointer-events:none!important}
+.chrome-keep{transition:opacity .6s var(--ease-soft)}
+body.doll .pano-only{opacity:0;pointer-events:none}
+
+/* ---------- top ---------- */
+.tl{position:fixed;inset-inline-start:var(--gl);top:var(--top);z-index:6;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.logo{width:108px;height:auto;display:block;--logo-star:#fff;--logo-word:#fff;filter:drop-shadow(0 1px 10px rgba(0,0,0,.35))}
+.homebtn{display:block;border-radius:12px}
+.crumb{display:flex;align-items:center;gap:7px;padding:7px 15px;font-size:12.5px;font-weight:500}
+.crumb span{color:var(--ink-muted);font-weight:400}
+.crumb svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;opacity:.5}
+[dir="rtl"] .crumb svg{transform:scaleX(-1)}
+.floors{position:fixed;top:var(--top);left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:2px;padding:4px}
+.row2{display:flex;gap:8px;align-items:center}
+.lang{display:flex;gap:2px;padding:4px;height:44px;align-items:center}
+.lang .chip{height:32px;padding:0 12px;font-size:12.5px}
+
+/* ---------- tool rail ---------- */
+.tools{position:fixed;inset-inline-end:var(--gr);top:calc(var(--top) + 44px);z-index:6;display:flex;flex-direction:column;gap:2px;padding:5px;border-radius:28px}
+.tools hr{border:0;height:1px;background:#f3f1e72e;margin:4px 10px}
+
+/* ---------- room card ---------- */
+.room{transition:opacity .6s var(--ease-soft);position:fixed;inset-inline-start:var(--gl);bottom:var(--bot);z-index:6;width:min(310px,calc(100vw - 32px));padding:16px 18px 14px}
+.room .eyebrow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-muted);font-weight:500}
+[dir="rtl"] .room .eyebrow{letter-spacing:0}
+.room .eyebrow .code{padding:1px 9px;border-radius:999px;background:var(--olive-900);color:var(--gold-50);font-variant-numeric:tabular-nums}
+.room h1{margin:6px 0 0;font-size:clamp(24px,2.6vw,30px);font-weight:500;line-height:1.15;color:var(--ink);text-wrap:balance}
+.room .ar2{font-size:14px;color:var(--ink-muted);margin-top:2px}
+.room .meta{display:flex;gap:18px;margin-top:14px;padding-top:12px;border-top:1px solid #1d21101a}
+.room .meta div{display:flex;flex-direction:column;gap:1px}
+.room .meta b{font-size:17px;font-weight:500;font-variant-numeric:tabular-nums}
+.room .meta span{font-size:11.5px;color:var(--ink-muted)}
+.room .fin{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.room .fin li{font-size:12px;padding:4px 10px;border-radius:999px;background:#ffffff99;box-shadow:inset 0 0 0 1px #1d211014}
+.room .note{font-size:11px;color:var(--ink-muted);margin-top:10px}
+.room.collapsed .meta,.room.collapsed .fin,.room.collapsed .note{display:none}
+.room .swap{animation:swapin .6s var(--ease-soft)}
+@keyframes swapin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- dock ---------- */
+.dock{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--top) + 54px);z-index:6;max-width:min(calc(100vw - 340px),860px)}
+.rooms .chip{height:30px;font-size:13px;padding:0 12px}
+.rooms{display:flex;gap:2px;padding:5px;overflow-x:auto;scrollbar-width:none;border-radius:999px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);scroll-padding-inline:24px}
+.rooms::-webkit-scrollbar{display:none}
+.actions{position:fixed;inset-inline-end:var(--gr);bottom:var(--bot);z-index:6;display:flex;gap:8px;align-items:center}
+
+/* ---------- minimap ---------- */
+#mini{position:fixed;inset-inline-end:var(--gr);bottom:calc(var(--bot) + 62px);z-index:5;width:220px;padding:9px}
+@media (max-height:640px){.room .note{display:none}.room h1{font-size:22px}.room .meta{margin-top:8px;padding-top:8px}.room{padding:12px 16px 12px}}
+@media (max-height:820px) and (min-width:861px){#mini:not(.mid){top:calc(var(--top) + 92px);bottom:auto;inset-inline-end:auto;inset-inline-start:var(--gl);width:170px}#mini header{font-size:11.5px}}
+#mini header{display:flex;justify-content:space-between;align-items:center;padding:2px 5px 7px;font-size:12px;font-weight:600}
+#mini header button{font-size:12px;font-weight:500;color:var(--ink-muted);display:flex;align-items:center;gap:4px}
+#mini header svg{width:13px;height:13px}
+.map{position:relative;border-radius:14px;overflow:hidden;background:var(--gold-200);line-height:0;cursor:pointer}
+.map img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.map .pins{position:absolute;inset:0}
+.pin{scale:calc(1 / var(--z,1));position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--olive-900);border:0;padding:0;box-shadow:0 0 0 2px #f5f4eef2,0 1px 4px #1e220e80;z-index:2;transition:scale .3s var(--ease-swell),background .2s}
+.pin::before{content:"";position:absolute;inset:-9px;border-radius:50%}
+.pin:hover{scale:calc(1.35 / var(--z,1));background:var(--olive-500)}
+.pin[aria-current="true"]{width:11px;height:11px;margin:-5.5px 0 0 -5.5px;background:var(--gold-300);box-shadow:0 0 0 2.5px var(--olive-900),0 0 0 4.5px #f5f4eee6,0 2px 6px #1e220e80;z-index:3}
+.pin[aria-current="true"]::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--olive-900);animation:pinPulse 2.2s ease-out infinite;pointer-events:none}
+@keyframes pinPulse{from{transform:scale(1);opacity:.7}to{transform:scale(2.6);opacity:0}}
+.cone{position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;pointer-events:none;z-index:1}
+.plbl{scale:calc(1 / var(--z,1));transform-origin:0 0;position:absolute;transform:translate(-50%,12px);font-size:11.5px;font-weight:500;line-height:1.2;white-space:nowrap;padding:3px 8px;border-radius:999px;background:#ffffffe0;color:var(--ink);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.15);text-align:center}
+.plbl small{display:block;font-size:10.5px;color:var(--olive-700);font-variant-numeric:tabular-nums}
+#mini .plbl{display:none}
+#mini{transition:width .45s var(--ease-soft)}
+#mini.mid{width:min(440px,36vw)}
+#mini.mid .plbl{font-size:10.5px;padding:2px 8px;transform:translate(-50%,10px);z-index:4}#mini.mid .pin[aria-current="true"]+.plbl,#mini.mid .pin:hover+.plbl{display:block}#mini.mid .plbl small{display:none}
+#mini.mid .pin{width:10px;height:10px;margin:-5px 0 0 -5px}
+#mini .sz{display:flex;align-items:center;gap:2px;padding:2px;border-radius:999px;background:#ffffff73;box-shadow:inset 0 0 0 1px #3f47271a}
+#mini .sz button{width:28px;height:24px;font-size:11.5px;font-weight:600;border-radius:999px;display:grid;place-items:center;color:var(--olive-700);gap:0}
+#mini .sz button:hover{background:#ffffffb3}
+#mini .sz button[aria-pressed="true"]{background:var(--olive-900);color:var(--gold-50)}
+#mini .sz svg{width:17px;height:14px}
+#mini.mid{width:min(440px,36vw,calc((100vh - 250px) * .95))}
+
+/* ---------- enlarged plan ---------- */
+#big{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:#12150a8c;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) var(--gr) calc(env(safe-area-inset-bottom,0px) + 16px) var(--gl)}
+#big .sheet{width:min(100%,1040px);height:100%;display:flex;flex-direction:column;gap:10px;padding:14px;min-height:0}
+#big .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+#big .grp{display:flex;gap:2px;padding:3px;border-radius:999px;background:#ffffff59}
+#big .viewport{position:relative;overflow:hidden;touch-action:none;cursor:grab;background:var(--gold-200);border-radius:14px;min-height:0;flex:1 1 0}
+#big .viewport.drag{cursor:grabbing}
+#big .map{margin:0;position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;border-radius:0;background:none}
+#big .pin{width:12px;height:12px;margin:-6px 0 0 -6px;box-shadow:0 0 0 2.5px #f5f4eef2,0 2px 6px #1e220e80}
+#big .pin[aria-current="true"]{width:15px;height:15px;margin:-7.5px 0 0 -7.5px;box-shadow:0 0 0 3px var(--olive-900),0 0 0 5.5px #f5f4eee6,0 2px 8px #1e220e80}
+#big .foot{font-size:12.5px;color:var(--ink-muted)}
+
+/* ---------- pano overlays ---------- */
+#hov::after{background:#3f4727e0}#hov{color:var(--gold-50)!important;position:fixed;left:0;top:0;z-index:4;padding:6px 13px;font-size:12.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+#hov.on{opacity:1}
+#arrows{position:fixed;inset:0;pointer-events:none;z-index:7;overflow:hidden}
+.stairbtn{position:absolute;left:0;top:0;width:0;height:0;opacity:0;pointer-events:none;transition:opacity .3s}
+.stairbtn.on{opacity:1;pointer-events:auto}
+.stairbtn .arr{position:absolute;left:-28px;top:-28px;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;animation:bob 2.4s ease-in-out infinite;transition:scale .4s var(--ease-swell)}
+.stairbtn .arr::after{background:#ffffffc4}
+.stairbtn .arr svg{width:26px;height:26px;stroke:var(--olive-900);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.stairbtn .lbl{position:absolute;left:0;top:36px;transform:translateX(-50%);white-space:nowrap;padding:5px 12px;font-size:12.5px;font-weight:500}
+.stairbtn:hover .arr{scale:1.12}.stairbtn:hover .arr::after{background:var(--olive-900)}.stairbtn:hover .arr svg{stroke:var(--gold-50)}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -5px}}
+#mlayer{position:fixed;inset:0;pointer-events:none;z-index:3}
+#mlayer svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.mlbl{position:absolute;transform:translate(-50%,-50%);padding:5px 12px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill-bar{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--top) + 104px);z-index:7;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 16px;font-size:13px}
+[dir="rtl"] .pill-bar{padding:6px 16px 6px 6px}
+.pill-bar .chip{height:30px}
+
+/* ---------- guided tour ---------- */
+#tourbar .dots{display:flex;gap:4px}
+#tourbar .dots i{width:6px;height:6px;border-radius:50%;background:#1d211033;transition:background .3s,width .3s}
+#tourbar .dots i.on{width:18px;border-radius:3px;background:var(--olive-900)}
+#tourbar .dots i.done{background:var(--olive-500)}
+body.presenting #tourbar{opacity:.25;transition:opacity .4s}
+body.presenting #tourbar:hover{opacity:1}
+
+#chap{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:8;padding:18px 30px 20px;text-align:center;display:flex;flex-direction:column;gap:4px;animation:capin .8s var(--ease-soft);transition:opacity .6s}
+#chap.out{opacity:0}
+#chap span{font-size:13px;color:var(--ink-muted);font-weight:500}
+#chap b{font-size:30px;font-weight:500;line-height:1.2}
+#summary{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:16;width:min(480px,calc(100vw - 32px));padding:26px 28px 24px}
+#summary h2{margin:0 0 12px;font-size:24px;font-weight:500}
+#summary ul{margin:0 0 20px;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+#summary li{font-size:14.5px;line-height:1.45;padding-inline-start:22px;position:relative}
+#summary li::before{content:"";position:absolute;inset-inline-start:2px;top:.5em;width:8px;height:8px;border-radius:50%;background:var(--olive-900)}
+#summary .row{display:flex;gap:8px;flex-wrap:wrap}
+#summary .sumlead{margin:0 0 14px;font-size:14px;color:var(--ink-muted);line-height:1.5}
+body.touring #mini,body.touring .actions,body.touring .room{opacity:0;pointer-events:none}
+#cap{position:fixed;inset-inline-start:var(--gl);bottom:var(--bot);z-index:12;width:min(600px,calc(100vw - 32px));padding:20px 24px 18px;border-radius:24px;color:var(--gold-50)}
+#cap::after{background:linear-gradient(160deg,#12150ad1,#262b16c7)!important;box-shadow:inset 0 1px 0 #f5f4ee2e,inset 0 0 0 1px #f5f4ee14!important}
+#cap .meta{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12.5px;font-weight:500;color:var(--gold-300);margin-bottom:10px}
+#cap .meta .step{font-variant-numeric:tabular-nums;color:#f5f4ee99}
+#cap .head{display:block;font-size:clamp(22px,2.4vw,30px);font-weight:400;line-height:1.25;color:#fff;margin-bottom:6px;text-wrap:balance}
+#cap p{margin:0;font-size:16px;line-height:1.65;color:#f5f4eed1;text-wrap:pretty;max-width:52ch}
+#cap .prog{margin-top:16px;height:2px;border-radius:2px;background:#f5f4ee24;overflow:hidden}
+#cap .prog i{display:block;height:100%;width:100%;transform-origin:left center;transform:scaleX(0);background:linear-gradient(90deg,var(--olive-200),var(--gold-300))}
+[dir="rtl"] #cap .prog i{transform-origin:right center}
+#cap .prog i.run{animation:capfill var(--d,5s) linear forwards}
+body.tourpaused #cap .prog i.run{animation-play-state:paused}
+@keyframes capfill{to{transform:scaleX(1)}}
+#cap.in .head{animation:capin .7s var(--ease-soft) both}
+#cap.in p{animation:capin .7s .12s var(--ease-soft) both}
+@keyframes capin{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+body.presenting .room{opacity:0;pointer-events:none}
+@media (max-width:860px){#cap{bottom:calc(var(--bot) + 8px);padding:16px 18px 14px}#cap p{font-size:14.5px}}
+/* ---------- popovers ---------- */
+.pop{position:fixed;z-index:25;width:min(320px,calc(100vw - 32px));padding:16px;display:flex;flex-direction:column;gap:10px}
+.pop h3{margin:0;font-size:15px;font-weight:600}
+.pop p{margin:0;font-size:12.5px;color:var(--ink-muted);line-height:1.5}
+.pop .row{display:flex;gap:8px;flex-wrap:wrap}
+.pop{user-select:text;-webkit-user-select:text}
+.pop .link{font:12px/1.4 ui-monospace,Menlo,monospace;background:#ffffffb3;border-radius:10px;padding:8px 10px;word-break:break-all;user-select:all}
+#tags{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.ftag{position:absolute;left:0;top:0;width:0;height:0;opacity:0;pointer-events:none;transition:opacity .35s}
+.ftag.on{opacity:1;pointer-events:auto}
+.ftag .dot{position:absolute;left:-15px;top:-15px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#3f4727d9;color:var(--gold-50);box-shadow:0 0 0 2px #f5f4eecc,0 6px 16px rgba(0,0,0,.35);transition:scale .35s var(--ease-swell)}
+.ftag .dot svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none}
+.ftag .dot::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid #f5f4ee99;animation:ping 2.6s ease-out infinite}
+@keyframes ping{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.ftag:hover .dot,.ftag.open .dot{scale:1.12}
+.ftag .ftc{position:absolute;left:24px;top:-26px;width:max-content;max-width:290px;text-align:start;display:flex;flex-direction:column;gap:3px;padding:13px 16px 14px;border-radius:16px;opacity:0;transform:translateX(-6px);transition:opacity .2s,transform .3s var(--ease-soft);pointer-events:none}
+[dir="rtl"] .ftag .ftc{left:auto;right:22px;transform:translateX(6px)}
+.ftag .ftc::after{background:var(--tint-strong)}
+.ftag .ftc b{display:block;font-size:15px;font-weight:600;color:var(--olive-950);line-height:1.3}
+.ftag .ftc .ey{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--olive-500)}[lang="ar"] .ftag .ftc .ey{letter-spacing:0;font-size:12px}
+.ftag .ftc em{font-style:normal;display:flex;gap:7px;align-items:flex-start;margin-top:7px;padding-top:8px;border-top:1px solid #3f47271f;font-size:12.5px;line-height:1.45;font-weight:500;color:var(--olive-900)}
+.ftag .ftc em svg{flex:none;width:15px;height:15px;margin-top:1px;padding:2px;border-radius:50%;background:var(--olive-900);stroke:var(--gold-50);stroke-width:3;fill:none}
+.ftag .ftc span{display:block;font-size:12.5px;line-height:1.45;color:var(--ink)}
+.ftag:hover .ftc,.ftag.open .ftc{opacity:1;transform:none}
+body.touring #tags{display:none}
+#floorCard{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:8;padding:20px 26px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(580px,calc(100vw - 32px));overflow:hidden;cursor:pointer;transition:opacity .6s,transform .6s var(--ease-soft)}
+#floorCard.out{opacity:0;transform:translate(-50%,-46%)}
+#floorCard>span{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--olive-700)}[lang="ar"] #floorCard>span{letter-spacing:0;font-size:12.5px}
+#floorCard>b{font-size:30px;font-weight:500;color:var(--olive-950);line-height:1.2}
+#floorCard>p{margin:2px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink-muted);max-width:46ch}
+#fcStats{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:12px;border-radius:16px;background:linear-gradient(135deg,var(--olive-900),var(--olive-950));color:var(--gold-50)}
+#fcStats div{padding:11px 10px;position:relative}#fcStats div+div::before{content:"";position:absolute;inset-inline-start:0;top:12px;bottom:12px;width:1px;background:#f5f4ee2e}
+#fcStats b{display:block;font-size:20px;font-weight:500;line-height:1.15;font-variant-numeric:tabular-nums}#fcStats div:first-child b{color:var(--gold-300)}
+#fcStats small{display:block;font-size:11.5px;color:var(--olive-200);margin-top:2px;line-height:1.3}
+#fcRooms{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:12px 0 16px}
+#fcRooms span{padding:4px 11px;border-radius:999px;font-size:12px;font-weight:500;background:#3f472714;color:var(--olive-900);box-shadow:inset 0 0 0 1px #3f472722}
+#fcProg{align-self:stretch;margin:0 -26px;height:3px;background:#3f472714}#fcProg i{display:block;height:100%;background:linear-gradient(90deg,var(--olive-500),var(--olive-900));transform-origin:left;transform:scaleX(0)}
+[dir="rtl"] #fcProg i{transform-origin:right}
+@media (max-width:640px){#floorCard>b{font-size:24px}#fcStats b{font-size:17px}#floorCard{top:26%}}
+#factsPop{left:50%;transform:translateX(-50%);top:calc(var(--top) + 64px);bottom:calc(var(--bot) + 64px);width:min(780px,calc(100vw - 32px));max-height:none;padding:20px 22px 16px;gap:14px;overscroll-behavior:contain;z-index:26}
+@media (min-height:900px){#factsPop{top:auto;max-height:calc(100vh - var(--top) - var(--bot) - 150px)}}
+#factsPop>*{flex-shrink:0}#factsPop{overflow:hidden}
+#factsPop .kfs{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;margin:0 -8px;padding:0 8px 4px;-webkit-mask-image:linear-gradient(#000 calc(100% - 18px),#0000);mask-image:linear-gradient(#000 calc(100% - 18px),#0000)}
+#kfBody{display:flex;flex-direction:column;gap:12px}
+.kffl h4{margin:0 0 6px;font-size:12.5px;color:var(--olive-900)}
+.kfh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.kfh .ey{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--olive-700);margin-bottom:3px}
+[lang="ar"] .kfh .ey{letter-spacing:0}
+#factsPop h3{font-size:20px;font-weight:600;color:var(--olive-950)}
+.kfx{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ffffff80;color:var(--olive-900)}.kfx:hover{background:#fff}.kfx svg{width:16px;height:16px}
+.kfhero{display:grid;grid-template-columns:1.35fr repeat(3,1fr);border-radius:18px;overflow:hidden;background:linear-gradient(135deg,var(--olive-900),var(--olive-950));color:var(--gold-50);box-shadow:inset 0 1px 0 #ffffff1f}
+.kfhero div{padding:14px 16px;position:relative}.kfhero div+div::before{content:"";position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:1px;background:#f5f4ee2e}
+.kfhero b{display:block;font-size:26px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}.kfhero div:first-child b{font-size:30px;color:var(--gold-300)}
+.kfhero span{display:block;font-size:12px;color:var(--olive-200);margin-top:4px;line-height:1.35}
+.kfcols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kfbox{padding:14px 16px;border-radius:16px;background:#ffffff94;box-shadow:inset 0 1px 0 #fff}
+.kfbox h4{margin:0 0 10px;font-size:12.5px;font-weight:600;color:var(--olive-700);display:flex;justify-content:space-between;gap:8px}
+.kfbox h4 em{font-style:normal;font-weight:500;color:var(--olive-900);font-variant-numeric:tabular-nums}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.4fr) auto;align-items:center;gap:10px;font-size:12.5px}
+.bar2 .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.bar2 .tr{height:8px;border-radius:99px;background:var(--olive-50);overflow:hidden}
+.bar2 .tr i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--olive-500),var(--olive-900));transform-origin:left;animation:barIn .9s var(--ease-soft) both}
+[dir="rtl"] .bar2 .tr i{transform-origin:right;background:linear-gradient(270deg,var(--olive-500),var(--olive-900))}
+.bar2 .v{font-variant-numeric:tabular-nums;font-weight:500;color:var(--olive-900);min-width:58px;text-align:end}
+.bars.big .bar2 .tr{height:12px}
+.split{display:flex;gap:3px;height:14px;margin-top:16px;border-radius:99px;overflow:hidden}.split i{display:block;height:100%}
+.split i:nth-child(1),.legend .c0{background:var(--olive-900)}.split i:nth-child(2),.legend .c1{background:var(--olive-500)}.split i:nth-child(3),.legend .c2{background:var(--gold-500)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:12px;color:var(--ink-muted)}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:8px;height:8px;border-radius:50%}.legend b{color:var(--olive-900);font-weight:600}
+.kfp{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--ink-muted)}
+@keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.kffl{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kffl ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:12.5px;line-height:1.4}
+.kffl li{position:relative;padding-inline-start:13px}.kffl li::before{content:"";position:absolute;inset-inline-start:0;top:.55em;width:5px;height:5px;border-radius:50%;background:var(--gold-500)}
+.kfchips{display:flex;flex-wrap:wrap;gap:7px}
+.kfchips span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:500;background:#3f472714;color:var(--olive-900);box-shadow:inset 0 0 0 1px #3f472722}
+.kfchips span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--olive-500)}
+@media (max-width:700px){.kfhero{grid-template-columns:1fr 1fr}.kfhero div:nth-child(3)::before{display:none}.kfcols,.kffl{grid-template-columns:1fr}#factsPop{padding:18px 16px 14px}}
+#regPop{inset-inline-end:var(--gr);bottom:calc(var(--bot) + 60px);width:min(360px,calc(100vw - 32px))}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;color:var(--ink-muted)}
+.fld input{font:inherit;font-size:15px;color:var(--ink);padding:10px 12px;border-radius:12px;border:1px solid #1d211026;background:#ffffffd9;outline:none}
+.fld input:focus{border-color:var(--olive-900);box-shadow:0 0 0 3px #3f472733}
+.seg{display:flex;gap:4px;padding:3px;border-radius:999px;background:#ffffff66;flex-wrap:wrap}
+.seg .chip{height:30px;font-size:12.5px;flex:1;justify-content:center}
+.err{margin:0;font-size:12.5px;color:#a33a2a}
+@media (max-width:860px){#factsPop,#regPop{bottom:calc(var(--bot) + 120px)}}
+#sharePop{inset-inline-end:calc(var(--gr) + 62px);top:calc(var(--top) + 44px)}
+
+
+/* ---------- dollhouse ---------- */
+#doll{position:fixed;inset:0;z-index:9;background:radial-gradient(ellipse at 50% 40%,var(--gold-50),var(--gold-200) 70%,#cfc7ad);opacity:0;pointer-events:none;transition:opacity .6s var(--ease-soft)}
+#doll.on{opacity:1;pointer-events:auto}
+#doll.cine .dhead,#doll.cine .dback,#doll.cine .dhint,#doll.cine .dpins{display:none}
+#doll.cine{pointer-events:none}
+#doll.cine~#chap,#chap{z-index:12}
+#tourbar{z-index:13}
+#doll canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+#doll canvas.drag{cursor:grabbing}
+#doll .dpins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dpin{position:absolute;left:0;top:0;pointer-events:auto;width:0;height:0}
+.dpin i{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:#fff;border:2.5px solid var(--olive-900);box-shadow:0 2px 8px rgba(0,0,0,.35);transition:scale .3s var(--ease-swell)}
+.dpin.cur i{background:var(--olive-900);border-color:#fff}
+.dpin b{position:absolute;left:0;bottom:12px;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;background:#ffffffe6;box-shadow:0 4px 12px rgba(0,0,0,.18);opacity:0;transition:opacity .15s;pointer-events:none}
+.dpin:hover i{scale:1.3}.dpin:hover b,.dpin.cur b{opacity:1}
+.dpin.dim{opacity:.0;pointer-events:none}
+#doll .dhead{position:absolute;top:var(--top);left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:4px}
+#doll .dback{position:absolute;inset-inline-end:var(--gr);top:var(--top)}
+#doll .dhint{position:absolute;left:50%;bottom:var(--bot);transform:translateX(-50%);padding:8px 16px;font-size:13px}
+
+/* ---------- intro ---------- */
+#intro{position:fixed;inset:0;z-index:18;transition:opacity .9s var(--ease-soft);color:var(--gold-50)}
+#intro.out{opacity:0;pointer-events:none}
+#intro .shade{position:absolute;inset:0;background:linear-gradient(90deg,#12150af2 0%,#12150acc 30%,#12150a59 58%,#12150a1a 78%),linear-gradient(0deg,#12150ad9 0%,#12150a00 38%),linear-gradient(180deg,#12150a80 0%,#12150a00 22%)}
+[dir="rtl"] #intro .shade{background:linear-gradient(270deg,#12150af2 0%,#12150acc 30%,#12150a59 58%,#12150a1a 78%),linear-gradient(0deg,#12150ad9 0%,#12150a00 38%),linear-gradient(180deg,#12150a80 0%,#12150a00 22%)}
+#intro .bar{position:absolute;top:var(--top);inset-inline:max(40px,var(--gl)) max(40px,var(--gr));display:flex;justify-content:space-between;align-items:center}
+#intro .bar .logo{width:128px}
+#intro .in{position:absolute;inset-inline-start:max(48px,var(--gl));top:50%;transform:translateY(-54%);width:min(600px,calc(100vw - 48px));display:flex;flex-direction:column;animation:rise 1.2s var(--ease-soft) both}
+#intro.out .in{opacity:0;transition:opacity .5s}
+@keyframes rise{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
+#intro .eyebrow{margin:0 0 18px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
+[dir="rtl"] #intro .eyebrow{letter-spacing:0;font-size:14px}
+#intro .eyebrow::before{content:"";width:36px;height:1px;background:var(--gold-300)}
+#intro h2{margin:0;font-size:clamp(48px,7.4vw,104px);font-weight:300;line-height:.98;letter-spacing:-.02em;color:#fff}
+[dir="rtl"] #intro h2{letter-spacing:0;line-height:1.15}
+#intro .sub{margin:20px 0 0;font-size:17px;line-height:1.7;color:#f5f4eecc;max-width:42ch;text-wrap:pretty}
+#intro .facts{display:flex;margin:32px 0 34px;padding:0;list-style:none}
+#intro .facts li{display:flex;flex-direction:column;gap:4px;padding-inline:0 26px;margin-inline-end:26px;border-inline-end:1px solid #f5f4ee33}
+#intro .facts li:last-child{border:0;margin:0;padding:0}
+#intro .facts b{font-size:30px;font-weight:300;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+#intro .facts span{font-size:12.5px;color:#f5f4eeb3;white-space:nowrap}
+#intro .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+#intro .cta{height:56px;padding:0 30px;border-radius:999px;background:var(--gold-50);color:var(--olive-950);font-size:15.5px;font-weight:600;display:inline-flex;align-items:center;gap:10px;box-shadow:0 16px 40px -12px #000c;transition:transform .4s var(--ease-swell),background .2s}
+#intro .cta:hover{transform:translateY(-2px);background:#fff}
+#intro .watch{height:56px;padding:0 8px;display:inline-flex;align-items:center;gap:12px;color:var(--gold-50);font-size:15px;font-weight:500}
+#intro .watch .pl{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #f5f4ee80;transition:background .2s,box-shadow .2s}
+#intro .watch:hover .pl{background:#f5f4ee26;box-shadow:inset 0 0 0 1.5px #fff}
+#intro .floorsrow{position:absolute;inset-inline-end:max(40px,var(--gr));bottom:max(40px,var(--bot));display:flex;flex-direction:column;gap:10px;animation:rise 1.4s .2s var(--ease-soft) both}
+#intro .floorsrow h4{margin:0;font-size:12.5px;font-weight:500;color:var(--gold-300)}
+#intro .floorsrow .cards{display:flex;gap:10px}
+#intro .fcard{width:168px;padding:13px 15px 14px;border-radius:16px;text-align:start;display:flex;flex-direction:column;gap:3px;color:var(--gold-50);background:#12150a59;-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:inset 0 0 0 1px #f5f4ee2e,0 12px 30px -12px #000a;transition:transform .45s var(--ease-swell),background .3s}
+#intro .fcard:hover{transform:translateY(-4px);background:#3f472799}
+#intro .fcard b{font-size:14px;font-weight:600}
+#intro .fcard em{font-style:normal;font-size:20px;font-weight:500;color:var(--gold-300);font-variant-numeric:tabular-nums;line-height:1.2}
+#intro .fcard small{font-size:11.5px;line-height:1.4;color:var(--olive-200)}
+@media (max-width:980px){#intro .floorsrow{display:none}}
+@media (max-width:640px){#intro .in{top:auto;bottom:calc(var(--bot) + 8px);transform:none;inset-inline-start:var(--gl)}#intro .facts{margin:22px 0 24px}#intro .facts li{padding-inline-end:14px;margin-inline-end:14px}#intro .facts b{font-size:24px}#intro .bar .logo{width:104px}}
+@media (max-height:620px){#intro .facts{margin:18px 0 20px}#intro .sub{margin-top:12px}#intro h2{font-size:clamp(40px,6vw,72px)}}
+#boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,var(--olive-900),var(--night-900) 75%);transition:opacity .8s var(--ease-soft)}
+#boot.out{opacity:0;pointer-events:none}
+#boot .b{display:flex;flex-direction:column;align-items:center;gap:22px;color:var(--gold-300);font-size:13px}
+#boot .logo{width:170px;animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.75}50%{opacity:1}}
+#boot .bar{width:200px;height:3px;border-radius:3px;background:#f5f4ee26;overflow:hidden}
+#boot .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--olive-200),var(--gold-300));transition:width .5s var(--ease-soft)}
+@media (max-width:640px){#intro .in{inset-inline-start:var(--gl);bottom:calc(var(--bot) + 8px)}#intro .logo{width:120px}#intro .facts li{font-size:12.5px}}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+
+.loader{position:fixed;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--olive-500),var(--olive-900));z-index:40;width:0;transition:width .3s,opacity .4s;opacity:0}
+.toast{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:8;padding:10px 18px;font-size:13.5px;font-weight:500;pointer-events:none;transition:opacity .6s;opacity:0}
+.err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:50;background:var(--gold-50)}
+
+@media (max-width:1240px){.actions .lbl-sm{display:none}.actions .secondary{padding:0 13px}}
+@media (max-width:860px){
+  .dock{display:none}
+  .floors{top:calc(var(--top) + 96px)}
+  .pill-bar{top:calc(var(--top) + 146px)}
+  .floors .chip{height:30px;padding:0 11px;font-size:12px}
+  .crumb{display:none}
+  #mini{display:none}
+  .tools{top:auto;bottom:calc(var(--bot) + 62px);transform:none}
+  .room{bottom:calc(var(--bot) + 62px);width:calc(100vw - 100px);padding:14px 16px 12px}
+  .room .meta{margin-top:10px;padding-top:9px}
+  .actions{inset-inline-start:var(--gl);justify-content:flex-end}
+  .actions .lbl-sm{display:none}
+  #sharePop{top:auto;bottom:calc(var(--bot) + 62px);transform:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+</style>
+
+<div id="stage"></div>
+<div id="vig"></div>
+<div id="mlayer" class="pano-only"><svg></svg></div>
+<div id="hov" class="glass" aria-hidden="true"></div>
+<div id="arrows" class="pano-only"></div><div id="tags" class="pano-only"></div>
+<div class="loader" id="loader"></div>
+
+<div class="tl chrome">
+  <button id="home" class="homebtn"><svg viewBox="784.91 416.85 350.18 246.29" role="img" aria-label="Anara" class="logo"><g fill="var(--logo-star)"><path d="M986.14 478.59C992.11 478.80 996.84 479.26 1002.01 480.91C1002.50 481.07 1004.03 481.40 1005.70 481.76L1007.07 482.06C1008.00 482.27 1008.66 481.79 1008.88 481.25C1008.94 481.11 1008.97 480.95 1008.98 480.78C1008.98 480.70 1008.97 480.61 1008.96 480.52C1008.91 480.23 1008.74 479.81 1008.23 479.48C1006.23 478.20 1005.01 477.43 1004.58 477.21C996.10 472.74 988.20 469.46 977.18 467.95C976.86 467.91 973.75 467.72 972.86 468.03C971.88 468.37 971.36 469.42 971.67 470.41C972.02 471.49 973.35 472.87 973.35 472.88C976.96 476.65 980.90 478.42 986.14 478.59"/><path d="M933.86 457.07C927.89 456.87 923.16 456.41 917.99 454.76C917.50 454.60 915.97 454.27 914.30 453.90L912.93 453.60C912.00 453.40 911.34 453.88 911.12 454.41C911.06 454.56 911.03 454.72 911.02 454.88C911.02 454.97 911.03 455.06 911.04 455.14C911.09 455.43 911.26 455.85 911.77 456.18C913.77 457.47 914.99 458.23 915.42 458.46C923.90 462.92 931.80 466.21 942.82 467.71C943.14 467.76 946.25 467.95 947.14 467.64C948.12 467.29 948.64 466.25 948.33 465.25C947.98 464.18 946.65 462.80 946.65 462.79C943.04 459.01 939.10 457.25 933.86 457.07"/><path d="M970.76 441.69C970.96 435.73 971.42 430.99 973.08 425.82C973.24 425.33 973.57 423.80 973.930 422.13L974.23 420.76C974.43 419.83 973.95 419.17 973.42 418.95C973.27 418.89 973.11 418.86 972.95 418.85C972.86 418.85 972.78 418.86 972.69 418.87C972.40 418.92 971.98 419.09 971.65 419.61C970.36 421.60 969.60 422.83 969.37 423.26C964.91 431.73 961.63 439.63 960.12 450.65C960.08 450.97 959.88 454.09 960.19 454.97C960.54 455.95 961.59 456.47 962.58 456.16C963.65 455.82 965.04 454.49 965.04 454.48C968.82 450.87 970.58 446.93 970.76 441.69"/><path d="M949.24 493.97C949.04 499.94 948.58 504.68 946.92 509.85C946.76 510.34 946.43 511.86 946.07 513.54L945.77 514.91C945.57 515.83 946.05 516.49 946.58 516.71C946.73 516.77 946.89 516.81 947.05 516.81C947.14 516.81 947.22 516.81 947.31 516.79C947.60 516.74 948.02 516.57 948.35 516.06C949.64 514.07 950.40 512.84 950.63 512.41C955.09 503.94 958.37 496.04 959.88 485.01C959.92 484.70 960.12 481.58 959.81 480.69C959.46 479.72 958.41 479.19 957.42 479.51C956.35 479.85 954.96 481.18 954.96 481.19C951.18 484.79 949.42 488.74 949.24 493.97"/><path d="M970.75 493.98C974.80 498.36 977.81 502.05 980.27 506.89C980.50 507.35 981.34 508.67 982.26 510.11L983.01 511.30C983.52 512.10 984.32 512.23 984.86 512.01C985.00 511.95 985.14 511.86 985.26 511.75C985.32 511.69 985.38 511.62 985.43 511.55C985.60 511.31 985.78 510.90 985.65 510.30C985.17 507.98 984.85 506.57 984.70 506.10C981.91 496.94 978.69 489.02 972.00 480.13C971.81 479.87 969.76 477.52 968.91 477.11C967.98 476.66 966.87 477.02 966.38 477.94C965.86 478.94 965.81 480.86 965.81 480.87C965.67 486.09 967.19 490.13 970.75 493.98"/><path d="M949.25 441.69C945.20 437.30 942.19 433.62 939.73 428.78C939.50 428.32 938.66 427.00 937.74 425.56L936.99 424.37C936.48 423.57 935.68 423.44 935.14 423.66C935.00 423.72 934.86 423.81 934.74 423.92C934.68 423.98 934.62 424.04 934.57 424.12C934.40 424.36 934.22 424.77 934.35 425.37C934.83 427.69 935.15 429.10 935.30 429.56C938.09 438.72 941.31 446.65 948.00 455.54C948.19 455.80 950.24 458.15 951.09 458.56C952.02 459.01 953.13 458.64 953.62 457.72C954.14 456.72 954.19 454.81 954.19 454.80C954.33 449.58 952.81 445.53 949.25 441.69"/><path d="M986.15 457.09C990.53 453.03 994.22 450.03 999.06 447.57C999.52 447.33 1000.83 446.49 1002.28 445.58L1003.46 444.82C1004.26 444.32 1004.39 443.51 1004.18 442.98C1004.11 442.83 1004.03 442.69 1003.91 442.57C1003.86 442.51 1003.79 442.45 1003.72 442.40C1003.48 442.23 1003.06 442.05 1002.47 442.18C1000.15 442.67 998.73 442.99 998.27 443.13C989.11 445.92 981.18 449.15 972.29 455.83C972.04 456.02 969.69 458.08 969.28 458.92C968.82 459.86 969.19 460.97 970.11 461.45C971.11 461.98 973.03 462.02 973.04 462.02C978.26 462.17 982.30 460.64 986.15 457.09"/><path d="M933.85 478.58C929.47 482.63 925.78 485.64 920.94 488.10C920.48 488.34 919.17 489.17 917.72 490.09L916.54 490.84C915.74 491.35 915.61 492.16 915.82 492.69C915.89 492.84 915.97 492.97 916.09 493.09C916.14 493.16 916.21 493.21 916.28 493.26C916.52 493.44 916.94 493.61 917.53 493.49C919.85 493.00 921.27 492.68 921.73 492.54C930.89 489.75 938.82 486.52 947.71 479.84C947.96 479.64 950.31 477.59 950.72 476.74C951.18 475.81 950.81 474.70 949.89 474.21C948.89 473.69 946.97 473.65 946.96 473.65C941.74 473.50 937.70 475.02 933.85 478.58"/></g><g fill="var(--logo-word)"><path d="M821.00 544.43L813.89 544.43L786.91 601.53L794.24 601.53L801.57 582.38L825.92 581.22L825.93 580.08L802.70 579.35L815.79 549.04L837.93 601.53L846.49 601.53L821.00 544.43"/><path d="M1107.60 544.43L1100.48 544.43L1073.51 601.53L1080.83 601.53L1088.17 582.38L1112.52 581.22L1112.52 580.08L1089.30 579.35L1102.39 549.04L1124.52 601.53L1133.09 601.53L1107.60 544.43"/><path d="M964.30 544.43L957.19 544.43L930.21 601.53L937.54 601.53L944.87 582.38L969.22 581.22L969.22 580.08L946.00 579.35L959.09 549.04L981.23 601.53L989.79 601.53L964.30 544.43"/><path d="M1041.54 574.04C1050.94 571.61 1056.12 566.24 1056.12 558.93C1056.12 549.20 1046.84 544.43 1029.12 544.43L1005.49 544.43L1005.49 601.53L1013.93 601.53L1013.93 547.68L1028.88 547.68C1041.29 547.68 1048.17 553.56 1048.17 562.48C1048.17 568.57 1042.14 572.12 1030.93 572.12L1017.23 572.12L1017.23 573.25L1033.82 575.26L1049.37 601.53L1057.81 601.53L1041.54 574.04"/><path d="M866.40 557.57L865.08 557.57L865.08 601.53L871.83 601.53L869.18 575.67L866.40 557.57M907.76 544.43L911.74 570.29L911.74 593.62L870.27 544.43L860.86 544.43L908.85 601.53L915.84 601.53L915.84 544.43L907.76 544.43"/><path d="M919.91 633.61L919.63 633.61C919.42 634.32 919.10 635.11 918.68 636.00C918.26 636.87 917.89 637.58 917.55 638.08C919.28 639.86 920.62 641.46 921.52 642.88C922.41 644.32 922.85 645.40 922.85 646.13C922.85 647.66 921.94 649.34 920.10 651.20C918.26 653.06 915.95 654.72 913.12 656.16C910.28 657.60 907.53 658.50 904.80 658.84L904.80 659.12C905.14 659.20 905.72 659.44 906.53 659.83C907.45 660.25 908.26 660.57 908.92 660.80C909.60 661.02 910.31 661.15 911.04 661.15C913.14 661.15 915.14 660.41 917.05 658.99C918.94 657.58 920.49 655.61 921.67 653.09C922.83 650.57 923.43 647.76 923.43 644.66C923.43 642.75 923.12 640.91 922.51 639.18C921.88 637.47 921.02 635.61 919.91 633.61"/><path d="M1005.78 638.42C1005.47 637.71 1005.34 637.34 1005.34 637.34L1005.07 637.34C1004.78 638.15 1004.44 638.99 1004.00 639.89C1003.58 640.78 1003.18 641.43 1002.87 641.80C1004.02 642.90 1005.10 644.22 1006.10 645.74C1007.09 647.29 1007.59 648.49 1007.59 649.36C1007.59 649.94 1007.22 650.44 1006.46 650.88C1005.70 651.30 1004.57 651.64 1003.10 651.91C1001.63 652.17 999.85 652.30 997.75 652.30L987.59 652.30L938.94 652.30C937.13 652.30 935.69 652.06 934.64 651.62C933.59 651.15 932.85 650.44 932.38 649.41C931.91 648.42 931.67 647.05 931.67 645.32C931.67 643.35 931.70 640.31 931.81 636.21C931.91 632.06 931.96 633.91 931.96 631.81C931.96 630.28 931.88 628.26 931.78 625.72C931.70 624.38 931.67 623.30 931.67 622.49L931.38 622.49C930.96 623.20 930.47 623.99 929.81 624.85C929.18 625.72 928.58 626.40 928.03 626.95C928.37 628.84 929.08 630.99 929.18 634.06C929.31 637.10 929.42 641.70 929.49 647.81C929.55 650.25 929.86 652.14 930.41 653.53C930.99 654.92 931.88 655.92 933.09 656.50C934.32 657.10 935.98 657.42 938.05 657.42L986.73 657.42L996.88 657.42L996.91 657.42C1000.79 657.42 1003.66 656.68 1005.49 655.24C1007.33 653.77 1008.22 651.54 1008.22 648.49C1008.22 646.50 1007.99 644.69 1007.54 643.11C1007.07 641.54 1006.49 639.96 1005.78 638.42"/><path d="M1003.00 632.98L1005.91 629.78C1005.57 629.23 1005.07 628.65 1004.36 628.05C1003.63 627.42 1002.95 626.97 1002.29 626.68L999.64 629.94L999.64 630.23C1000.14 630.46 1000.71 630.86 1001.42 631.43C1002.11 632.01 1002.63 632.51 1003.00 632.98"/><path d="M1014.65 627.95C1014.60 627.08 1014.57 626.06 1014.52 624.85C1014.47 623.64 1014.44 622.86 1014.44 622.49L1014.15 622.49C1013.76 623.20 1013.24 623.99 1012.60 624.85C1011.95 625.72 1011.37 626.40 1010.82 626.95C1011.03 628.05 1012.89 653.35 1012.89 656.24C1012.89 657.21 1012.87 657.89 1012.87 658.28L1013.16 658.28L1013.76 655.50C1014.13 653.90 1014.39 652.59 1014.57 651.51C1014.76 650.44 1014.92 649.10 1015.02 647.50C1015.12 645.87 1015.20 643.85 1015.20 641.41C1015.20 637.00 1014.99 635.82 1014.65 627.95"/><path d="M908.63 627.95C908.57 627.08 908.55 626.06 908.50 624.85C908.44 623.64 908.42 622.86 908.42 622.49L908.13 622.49C907.74 623.20 907.21 623.99 906.58 624.85C905.92 625.72 905.35 626.40 904.80 626.95C905.01 628.05 906.87 650.66 906.87 653.55C906.87 654.52 906.84 655.20 906.84 655.60L907.13 655.60L907.74 652.81C908.10 651.21 908.37 649.90 908.55 648.82C908.73 647.75 908.89 646.41 909.00 644.81C909.10 643.18 909.18 641.16 909.18 638.72C909.18 634.31 909.10 635.48 908.63 627.95"/></g></svg>
+</button>
+</div>
+<nav class="floors glass chrome" id="floors" role="tablist"></nav>
+
+<div class="tools glass ink-light chrome" role="toolbar">
+  <button class="ibtn" id="zIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="ibtn" id="zOut"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+  <hr>
+  <button class="ibtn" id="bDoll" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg></button>
+  <button class="ibtn" id="bMeasure" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 17.5 17.5 3 21 6.5 6.5 21z"/><path d="M7 13.5l1.8 1.8M10 10.5l1.8 1.8M13 7.5l1.8 1.8"/></svg></button>
+  <button class="ibtn" id="bInfo" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
+  <hr>
+  <button class="ibtn" id="bRotate" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></button>
+  <button class="ibtn" id="bSound" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
+  <button class="ibtn" id="bShare"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
+  <button class="ibtn" id="bFull"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+
+<section class="room glass card chrome-keep" id="room" aria-live="polite"><div id="roomIn"></div></section>
+
+<div id="mbar" class="pill-bar glass" hidden><span id="mText"></span><button class="chip" id="mClear"></button><button class="chip" id="mDone"></button></div>
+<div id="tourbar" class="pill-bar glass" hidden><button class="ibtn" id="tPlay"></button><span id="tText"></span><span class="dots" id="tDots"></span><button class="chip" id="tStop"></button></div>
+
+<aside id="mini" class="glass card chrome pano-only"><header><span id="miniFloor"></span><span class="sz" role="group" id="miniSz"><button id="miniS" aria-pressed="true"><svg viewBox="0 0 20 16"><rect x="1" y="1" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="8.5" width="5.5" height="4" rx="1" fill="currentColor"/></svg></button><button id="miniM" aria-pressed="false"><svg viewBox="0 0 20 16"><rect x="1" y="1" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="7" y="5" width="9.5" height="7.5" rx="1.2" fill="currentColor"/></svg></button><button id="miniOpen"><svg viewBox="0 0 20 16"><path d="M2 6V2h4M18 6V2h-4M2 10v4h4M18 10v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span></header>
+  <div class="map" id="miniMap"><img alt="" id="miniImg"><div class="pins"></div></div></aside>
+
+<div class="dock glass chrome pano-only"><div class="rooms" id="rooms"></div></div>
+<div class="actions chrome">
+  <nav class="lang glass" aria-label="Language"><button class="chip" data-l="en">EN</button><button class="chip" data-l="ar" lang="ar">العربية</button></nav>
+  <button class="secondary glass hov" id="bTour"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg><span class="lbl-sm" id="bTourTxt"></span></button>
+  <button class="secondary glass hov" id="bFacts"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lbl-sm" id="bFactsTxt"></span></button>
+  <button class="primary" id="bReg"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10Z"/></svg><span class="lbl-sm" id="bRegTxt"></span></button>
+</div>
+
+<div class="pop glass card" id="sharePop" hidden><h3 id="shTitle"></h3><p id="shText"></p><div class="link" id="shLink"></div><div class="row"><button class="chip" id="shCopy" style="background:var(--primary);color:var(--primary-fg)"></button><a class="chip" id="shWa" target="_blank" rel="noopener" style="background:#ffffffb3">WhatsApp</a><button class="chip" id="shClose"></button></div></div>
+
+<div id="doll" aria-hidden="true"><div class="dpins" id="dpins"></div>
+  <div class="dhead glass" id="dFloors"></div>
+  <button class="primary dback" id="dBack"><svg class="i flip" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span id="dBackTxt"></span></button>
+  <div class="dhint glass" id="dHint"></div></div>
+
+<div id="big" hidden role="dialog" aria-modal="true"><div class="sheet glass card">
+  <div class="bar"><div class="grp" id="bigFloors"></div><div class="grp"><button class="ibtn" id="bzOut"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><button class="ibtn" id="bzIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button class="ibtn" id="bigClose"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
+  <div class="viewport" id="bigView"><div class="map" id="bigMap"><img alt="" id="bigImg"><div class="pins"></div></div></div>
+  <div class="foot" id="bigFoot"></div></div></div>
+
+<div id="chap" class="glass card" hidden><span id="chapNo"></span><b id="chapTitle"></b></div>
+<div id="summary" class="glass card" hidden><h2 id="sumTitle"></h2><ul id="sumList"></ul><p class="sumlead" id="sumLead"></p><div class="row"><a class="primary" id="sumCta" target="_blank" rel="noopener"></a><button class="secondary glass hov" id="sumReplay"></button><button class="secondary glass hov" id="sumExplore"></button></div></div>
+<div id="floorCard" class="glass card" hidden role="status"><span id="fcEyebrow"></span><b id="fcTitle"></b><p id="fcText"></p><div id="fcStats"></div><div id="fcRooms"></div><div id="fcProg"><i></i></div></div>
+<div class="pop glass card" id="factsPop" hidden role="dialog"><div class="kfh"><div><div class="ey" id="kfEy"></div><h3 id="kfTitle"></h3></div><button class="kfx" id="kfClose"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="kfs"><div id="kfBody"></div><p id="kfNote"></p></div></div>
+<form class="pop glass card" id="regPop" hidden novalidate><h3 id="rgTitle"></h3><p id="rgText"></p>
+  <label class="fld"><span id="rgNameL"></span><input id="rgName" autocomplete="name" required></label>
+  <label class="fld"><span id="rgPhoneL"></span><input id="rgPhone" type="tel" inputmode="tel" autocomplete="tel" required></label>
+  <div class="seg" id="rgPref"></div>
+  <p class="err" id="rgErr" hidden></p>
+  <div class="row"><button class="primary" id="rgSubmit" type="submit"></button><a class="primary" id="rgWa" target="_blank" rel="noopener" hidden></a><button class="chip" type="button" id="rgClose"></button></div></form>
+<div id="cap" class="glass card" hidden><div class="meta"><span id="capCh"></span><span class="step" id="capStep"></span></div><b class="head" id="capHead"></b><p id="capTxt"></p><div class="prog"><i id="capProg"></i></div></div>
+<div class="toast glass" id="toast"></div>
+<div id="intro"><div class="shade"></div>
+  <div class="bar"><svg viewBox="784.91 416.85 350.18 246.29" role="img" aria-label="Anara" class="logo"><g fill="var(--logo-star)"><path d="M986.14 478.59C992.11 478.80 996.84 479.26 1002.01 480.91C1002.50 481.07 1004.03 481.40 1005.70 481.76L1007.07 482.06C1008.00 482.27 1008.66 481.79 1008.88 481.25C1008.94 481.11 1008.97 480.95 1008.98 480.78C1008.98 480.70 1008.97 480.61 1008.96 480.52C1008.91 480.23 1008.74 479.81 1008.23 479.48C1006.23 478.20 1005.01 477.43 1004.58 477.21C996.10 472.74 988.20 469.46 977.18 467.95C976.86 467.91 973.75 467.72 972.86 468.03C971.88 468.37 971.36 469.42 971.67 470.41C972.02 471.49 973.35 472.87 973.35 472.88C976.96 476.65 980.90 478.42 986.14 478.59"/><path d="M933.86 457.07C927.89 456.87 923.16 456.41 917.99 454.76C917.50 454.60 915.97 454.27 914.30 453.90L912.93 453.60C912.00 453.40 911.34 453.88 911.12 454.41C911.06 454.56 911.03 454.72 911.02 454.88C911.02 454.97 911.03 455.06 911.04 455.14C911.09 455.43 911.26 455.85 911.77 456.18C913.77 457.47 914.99 458.23 915.42 458.46C923.90 462.92 931.80 466.21 942.82 467.71C943.14 467.76 946.25 467.95 947.14 467.64C948.12 467.29 948.64 466.25 948.33 465.25C947.98 464.18 946.65 462.80 946.65 462.79C943.04 459.01 939.10 457.25 933.86 457.07"/><path d="M970.76 441.69C970.96 435.73 971.42 430.99 973.08 425.82C973.24 425.33 973.57 423.80 973.930 422.13L974.23 420.76C974.43 419.83 973.95 419.17 973.42 418.95C973.27 418.89 973.11 418.86 972.95 418.85C972.86 418.85 972.78 418.86 972.69 418.87C972.40 418.92 971.98 419.09 971.65 419.61C970.36 421.60 969.60 422.83 969.37 423.26C964.91 431.73 961.63 439.63 960.12 450.65C960.08 450.97 959.88 454.09 960.19 454.97C960.54 455.95 961.59 456.47 962.58 456.16C963.65 455.82 965.04 454.49 965.04 454.48C968.82 450.87 970.58 446.93 970.76 441.69"/><path d="M949.24 493.97C949.04 499.94 948.58 504.68 946.92 509.85C946.76 510.34 946.43 511.86 946.07 513.54L945.77 514.91C945.57 515.83 946.05 516.49 946.58 516.71C946.73 516.77 946.89 516.81 947.05 516.81C947.14 516.81 947.22 516.81 947.31 516.79C947.60 516.74 948.02 516.57 948.35 516.06C949.64 514.07 950.40 512.84 950.63 512.41C955.09 503.94 958.37 496.04 959.88 485.01C959.92 484.70 960.12 481.58 959.81 480.69C959.46 479.72 958.41 479.19 957.42 479.51C956.35 479.85 954.96 481.18 954.96 481.19C951.18 484.79 949.42 488.74 949.24 493.97"/><path d="M970.75 493.98C974.80 498.36 977.81 502.05 980.27 506.89C980.50 507.35 981.34 508.67 982.26 510.11L983.01 511.30C983.52 512.10 984.32 512.23 984.86 512.01C985.00 511.95 985.14 511.86 985.26 511.75C985.32 511.69 985.38 511.62 985.43 511.55C985.60 511.31 985.78 510.90 985.65 510.30C985.17 507.98 984.85 506.57 984.70 506.10C981.91 496.94 978.69 489.02 972.00 480.13C971.81 479.87 969.76 477.52 968.91 477.11C967.98 476.66 966.87 477.02 966.38 477.94C965.86 478.94 965.81 480.86 965.81 480.87C965.67 486.09 967.19 490.13 970.75 493.98"/><path d="M949.25 441.69C945.20 437.30 942.19 433.62 939.73 428.78C939.50 428.32 938.66 427.00 937.74 425.56L936.99 424.37C936.48 423.57 935.68 423.44 935.14 423.66C935.00 423.72 934.86 423.81 934.74 423.92C934.68 423.98 934.62 424.04 934.57 424.12C934.40 424.36 934.22 424.77 934.35 425.37C934.83 427.69 935.15 429.10 935.30 429.56C938.09 438.72 941.31 446.65 948.00 455.54C948.19 455.80 950.24 458.15 951.09 458.56C952.02 459.01 953.13 458.64 953.62 457.72C954.14 456.72 954.19 454.81 954.19 454.80C954.33 449.58 952.81 445.53 949.25 441.69"/><path d="M986.15 457.09C990.53 453.03 994.22 450.03 999.06 447.57C999.52 447.33 1000.83 446.49 1002.28 445.58L1003.46 444.82C1004.26 444.32 1004.39 443.51 1004.18 442.98C1004.11 442.83 1004.03 442.69 1003.91 442.57C1003.86 442.51 1003.79 442.45 1003.72 442.40C1003.48 442.23 1003.06 442.05 1002.47 442.18C1000.15 442.67 998.73 442.99 998.27 443.13C989.11 445.92 981.18 449.15 972.29 455.83C972.04 456.02 969.69 458.08 969.28 458.92C968.82 459.86 969.19 460.97 970.11 461.45C971.11 461.98 973.03 462.02 973.04 462.02C978.26 462.17 982.30 460.64 986.15 457.09"/><path d="M933.85 478.58C929.47 482.63 925.78 485.64 920.94 488.10C920.48 488.34 919.17 489.17 917.72 490.09L916.54 490.84C915.74 491.35 915.61 492.16 915.82 492.69C915.89 492.84 915.97 492.97 916.09 493.09C916.14 493.16 916.21 493.21 916.28 493.26C916.52 493.44 916.94 493.61 917.53 493.49C919.85 493.00 921.27 492.68 921.73 492.54C930.89 489.75 938.82 486.52 947.71 479.84C947.96 479.64 950.31 477.59 950.72 476.74C951.18 475.81 950.81 474.70 949.89 474.21C948.89 473.69 946.97 473.65 946.96 473.65C941.74 473.50 937.70 475.02 933.85 478.58"/></g><g fill="var(--logo-word)"><path d="M821.00 544.43L813.89 544.43L786.91 601.53L794.24 601.53L801.57 582.38L825.92 581.22L825.93 580.08L802.70 579.35L815.79 549.04L837.93 601.53L846.49 601.53L821.00 544.43"/><path d="M1107.60 544.43L1100.48 544.43L1073.51 601.53L1080.83 601.53L1088.17 582.38L1112.52 581.22L1112.52 580.08L1089.30 579.35L1102.39 549.04L1124.52 601.53L1133.09 601.53L1107.60 544.43"/><path d="M964.30 544.43L957.19 544.43L930.21 601.53L937.54 601.53L944.87 582.38L969.22 581.22L969.22 580.08L946.00 579.35L959.09 549.04L981.23 601.53L989.79 601.53L964.30 544.43"/><path d="M1041.54 574.04C1050.94 571.61 1056.12 566.24 1056.12 558.93C1056.12 549.20 1046.84 544.43 1029.12 544.43L1005.49 544.43L1005.49 601.53L1013.93 601.53L1013.93 547.68L1028.88 547.68C1041.29 547.68 1048.17 553.56 1048.17 562.48C1048.17 568.57 1042.14 572.12 1030.93 572.12L1017.23 572.12L1017.23 573.25L1033.82 575.26L1049.37 601.53L1057.81 601.53L1041.54 574.04"/><path d="M866.40 557.57L865.08 557.57L865.08 601.53L871.83 601.53L869.18 575.67L866.40 557.57M907.76 544.43L911.74 570.29L911.74 593.62L870.27 544.43L860.86 544.43L908.85 601.53L915.84 601.53L915.84 544.43L907.76 544.43"/><path d="M919.91 633.61L919.63 633.61C919.42 634.32 919.10 635.11 918.68 636.00C918.26 636.87 917.89 637.58 917.55 638.08C919.28 639.86 920.62 641.46 921.52 642.88C922.41 644.32 922.85 645.40 922.85 646.13C922.85 647.66 921.94 649.34 920.10 651.20C918.26 653.06 915.95 654.72 913.12 656.16C910.28 657.60 907.53 658.50 904.80 658.84L904.80 659.12C905.14 659.20 905.72 659.44 906.53 659.83C907.45 660.25 908.26 660.57 908.92 660.80C909.60 661.02 910.31 661.15 911.04 661.15C913.14 661.15 915.14 660.41 917.05 658.99C918.94 657.58 920.49 655.61 921.67 653.09C922.83 650.57 923.43 647.76 923.43 644.66C923.43 642.75 923.12 640.91 922.51 639.18C921.88 637.47 921.02 635.61 919.91 633.61"/><path d="M1005.78 638.42C1005.47 637.71 1005.34 637.34 1005.34 637.34L1005.07 637.34C1004.78 638.15 1004.44 638.99 1004.00 639.89C1003.58 640.78 1003.18 641.43 1002.87 641.80C1004.02 642.90 1005.10 644.22 1006.10 645.74C1007.09 647.29 1007.59 648.49 1007.59 649.36C1007.59 649.94 1007.22 650.44 1006.46 650.88C1005.70 651.30 1004.57 651.64 1003.10 651.91C1001.63 652.17 999.85 652.30 997.75 652.30L987.59 652.30L938.94 652.30C937.13 652.30 935.69 652.06 934.64 651.62C933.59 651.15 932.85 650.44 932.38 649.41C931.91 648.42 931.67 647.05 931.67 645.32C931.67 643.35 931.70 640.31 931.81 636.21C931.91 632.06 931.96 633.91 931.96 631.81C931.96 630.28 931.88 628.26 931.78 625.72C931.70 624.38 931.67 623.30 931.67 622.49L931.38 622.49C930.96 623.20 930.47 623.99 929.81 624.85C929.18 625.72 928.58 626.40 928.03 626.95C928.37 628.84 929.08 630.99 929.18 634.06C929.31 637.10 929.42 641.70 929.49 647.81C929.55 650.25 929.86 652.14 930.41 653.53C930.99 654.92 931.88 655.92 933.09 656.50C934.32 657.10 935.98 657.42 938.05 657.42L986.73 657.42L996.88 657.42L996.91 657.42C1000.79 657.42 1003.66 656.68 1005.49 655.24C1007.33 653.77 1008.22 651.54 1008.22 648.49C1008.22 646.50 1007.99 644.69 1007.54 643.11C1007.07 641.54 1006.49 639.96 1005.78 638.42"/><path d="M1003.00 632.98L1005.91 629.78C1005.57 629.23 1005.07 628.65 1004.36 628.05C1003.63 627.42 1002.95 626.97 1002.29 626.68L999.64 629.94L999.64 630.23C1000.14 630.46 1000.71 630.86 1001.42 631.43C1002.11 632.01 1002.63 632.51 1003.00 632.98"/><path d="M1014.65 627.95C1014.60 627.08 1014.57 626.06 1014.52 624.85C1014.47 623.64 1014.44 622.86 1014.44 622.49L1014.15 622.49C1013.76 623.20 1013.24 623.99 1012.60 624.85C1011.95 625.72 1011.37 626.40 1010.82 626.95C1011.03 628.05 1012.89 653.35 1012.89 656.24C1012.89 657.21 1012.87 657.89 1012.87 658.28L1013.16 658.28L1013.76 655.50C1014.13 653.90 1014.39 652.59 1014.57 651.51C1014.76 650.44 1014.92 649.10 1015.02 647.50C1015.12 645.87 1015.20 643.85 1015.20 641.41C1015.20 637.00 1014.99 635.82 1014.65 627.95"/><path d="M908.63 627.95C908.57 627.08 908.55 626.06 908.50 624.85C908.44 623.64 908.42 622.86 908.42 622.49L908.13 622.49C907.74 623.20 907.21 623.99 906.58 624.85C905.92 625.72 905.35 626.40 904.80 626.95C905.01 628.05 906.87 650.66 906.87 653.55C906.87 654.52 906.84 655.20 906.84 655.60L907.13 655.60L907.74 652.81C908.10 651.21 908.37 649.90 908.55 648.82C908.73 647.75 908.89 646.41 909.00 644.81C909.10 643.18 909.18 641.16 909.18 638.72C909.18 634.31 909.10 635.48 908.63 627.95"/></g></svg>
+<nav class="lang glass ink-light" aria-label="Language"><button class="chip" data-l="en">EN</button><button class="chip" data-l="ar" lang="ar">العربية</button></nav></div>
+  <div class="in"><p class="eyebrow" id="iEyebrow"></p><h2 id="iTitle"></h2><p class="sub" id="iSub"></p><ul class="facts" id="iFacts"></ul>
+    <div class="row"><button class="cta" id="enter"><span id="enterTxt"></span><svg class="i flip" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="watch" id="enterTour"><span class="pl"><svg class="i" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M9 6.5v11l9-5.5-9-5.5Z"/></svg></span><span id="enterTourTxt"></span></button></div></div>
+  <div class="floorsrow"><h4 id="iByFloor"></h4><div class="cards" id="iFloors"></div></div></div>
+<div id="boot"><div class="b"><svg viewBox="784.91 416.85 350.18 246.29" role="img" aria-label="Anara" class="logo"><g fill="var(--logo-star)"><path d="M986.14 478.59C992.11 478.80 996.84 479.26 1002.01 480.91C1002.50 481.07 1004.03 481.40 1005.70 481.76L1007.07 482.06C1008.00 482.27 1008.66 481.79 1008.88 481.25C1008.94 481.11 1008.97 480.95 1008.98 480.78C1008.98 480.70 1008.97 480.61 1008.96 480.52C1008.91 480.23 1008.74 479.81 1008.23 479.48C1006.23 478.20 1005.01 477.43 1004.58 477.21C996.10 472.74 988.20 469.46 977.18 467.95C976.86 467.91 973.75 467.72 972.86 468.03C971.88 468.37 971.36 469.42 971.67 470.41C972.02 471.49 973.35 472.87 973.35 472.88C976.96 476.65 980.90 478.42 986.14 478.59"/><path d="M933.86 457.07C927.89 456.87 923.16 456.41 917.99 454.76C917.50 454.60 915.97 454.27 914.30 453.90L912.93 453.60C912.00 453.40 911.34 453.88 911.12 454.41C911.06 454.56 911.03 454.72 911.02 454.88C911.02 454.97 911.03 455.06 911.04 455.14C911.09 455.43 911.26 455.85 911.77 456.18C913.77 457.47 914.99 458.23 915.42 458.46C923.90 462.92 931.80 466.21 942.82 467.71C943.14 467.76 946.25 467.95 947.14 467.64C948.12 467.29 948.64 466.25 948.33 465.25C947.98 464.18 946.65 462.80 946.65 462.79C943.04 459.01 939.10 457.25 933.86 457.07"/><path d="M970.76 441.69C970.96 435.73 971.42 430.99 973.08 425.82C973.24 425.33 973.57 423.80 973.930 422.13L974.23 420.76C974.43 419.83 973.95 419.17 973.42 418.95C973.27 418.89 973.11 418.86 972.95 418.85C972.86 418.85 972.78 418.86 972.69 418.87C972.40 418.92 971.98 419.09 971.65 419.61C970.36 421.60 969.60 422.83 969.37 423.26C964.91 431.73 961.63 439.63 960.12 450.65C960.08 450.97 959.88 454.09 960.19 454.97C960.54 455.95 961.59 456.47 962.58 456.16C963.65 455.82 965.04 454.49 965.04 454.48C968.82 450.87 970.58 446.93 970.76 441.69"/><path d="M949.24 493.97C949.04 499.94 948.58 504.68 946.92 509.85C946.76 510.34 946.43 511.86 946.07 513.54L945.77 514.91C945.57 515.83 946.05 516.49 946.58 516.71C946.73 516.77 946.89 516.81 947.05 516.81C947.14 516.81 947.22 516.81 947.31 516.79C947.60 516.74 948.02 516.57 948.35 516.06C949.64 514.07 950.40 512.84 950.63 512.41C955.09 503.94 958.37 496.04 959.88 485.01C959.92 484.70 960.12 481.58 959.81 480.69C959.46 479.72 958.41 479.19 957.42 479.51C956.35 479.85 954.96 481.18 954.96 481.19C951.18 484.79 949.42 488.74 949.24 493.97"/><path d="M970.75 493.98C974.80 498.36 977.81 502.05 980.27 506.89C980.50 507.35 981.34 508.67 982.26 510.11L983.01 511.30C983.52 512.10 984.32 512.23 984.86 512.01C985.00 511.95 985.14 511.86 985.26 511.75C985.32 511.69 985.38 511.62 985.43 511.55C985.60 511.31 985.78 510.90 985.65 510.30C985.17 507.98 984.85 506.57 984.70 506.10C981.91 496.94 978.69 489.02 972.00 480.13C971.81 479.87 969.76 477.52 968.91 477.11C967.98 476.66 966.87 477.02 966.38 477.94C965.86 478.94 965.81 480.86 965.81 480.87C965.67 486.09 967.19 490.13 970.75 493.98"/><path d="M949.25 441.69C945.20 437.30 942.19 433.62 939.73 428.78C939.50 428.32 938.66 427.00 937.74 425.56L936.99 424.37C936.48 423.57 935.68 423.44 935.14 423.66C935.00 423.72 934.86 423.81 934.74 423.92C934.68 423.98 934.62 424.04 934.57 424.12C934.40 424.36 934.22 424.77 934.35 425.37C934.83 427.69 935.15 429.10 935.30 429.56C938.09 438.72 941.31 446.65 948.00 455.54C948.19 455.80 950.24 458.15 951.09 458.56C952.02 459.01 953.13 458.64 953.62 457.72C954.14 456.72 954.19 454.81 954.19 454.80C954.33 449.58 952.81 445.53 949.25 441.69"/><path d="M986.15 457.09C990.53 453.03 994.22 450.03 999.06 447.57C999.52 447.33 1000.83 446.49 1002.28 445.58L1003.46 444.82C1004.26 444.32 1004.39 443.51 1004.18 442.98C1004.11 442.83 1004.03 442.69 1003.91 442.57C1003.86 442.51 1003.79 442.45 1003.72 442.40C1003.48 442.23 1003.06 442.05 1002.47 442.18C1000.15 442.67 998.73 442.99 998.27 443.13C989.11 445.92 981.18 449.15 972.29 455.83C972.04 456.02 969.69 458.08 969.28 458.92C968.82 459.86 969.19 460.97 970.11 461.45C971.11 461.98 973.03 462.02 973.04 462.02C978.26 462.17 982.30 460.64 986.15 457.09"/><path d="M933.85 478.58C929.47 482.63 925.78 485.64 920.94 488.10C920.48 488.34 919.17 489.17 917.72 490.09L916.54 490.84C915.74 491.35 915.61 492.16 915.82 492.69C915.89 492.84 915.97 492.97 916.09 493.09C916.14 493.16 916.21 493.21 916.28 493.26C916.52 493.44 916.94 493.61 917.53 493.49C919.85 493.00 921.27 492.68 921.73 492.54C930.89 489.75 938.82 486.52 947.71 479.84C947.96 479.64 950.31 477.59 950.72 476.74C951.18 475.81 950.81 474.70 949.89 474.21C948.89 473.69 946.97 473.65 946.96 473.65C941.74 473.50 937.70 475.02 933.85 478.58"/></g><g fill="var(--logo-word)"><path d="M821.00 544.43L813.89 544.43L786.91 601.53L794.24 601.53L801.57 582.38L825.92 581.22L825.93 580.08L802.70 579.35L815.79 549.04L837.93 601.53L846.49 601.53L821.00 544.43"/><path d="M1107.60 544.43L1100.48 544.43L1073.51 601.53L1080.83 601.53L1088.17 582.38L1112.52 581.22L1112.52 580.08L1089.30 579.35L1102.39 549.04L1124.52 601.53L1133.09 601.53L1107.60 544.43"/><path d="M964.30 544.43L957.19 544.43L930.21 601.53L937.54 601.53L944.87 582.38L969.22 581.22L969.22 580.08L946.00 579.35L959.09 549.04L981.23 601.53L989.79 601.53L964.30 544.43"/><path d="M1041.54 574.04C1050.94 571.61 1056.12 566.24 1056.12 558.93C1056.12 549.20 1046.84 544.43 1029.12 544.43L1005.49 544.43L1005.49 601.53L1013.93 601.53L1013.93 547.68L1028.88 547.68C1041.29 547.68 1048.17 553.56 1048.17 562.48C1048.17 568.57 1042.14 572.12 1030.93 572.12L1017.23 572.12L1017.23 573.25L1033.82 575.26L1049.37 601.53L1057.81 601.53L1041.54 574.04"/><path d="M866.40 557.57L865.08 557.57L865.08 601.53L871.83 601.53L869.18 575.67L866.40 557.57M907.76 544.43L911.74 570.29L911.74 593.62L870.27 544.43L860.86 544.43L908.85 601.53L915.84 601.53L915.84 544.43L907.76 544.43"/><path d="M919.91 633.61L919.63 633.61C919.42 634.32 919.10 635.11 918.68 636.00C918.26 636.87 917.89 637.58 917.55 638.08C919.28 639.86 920.62 641.46 921.52 642.88C922.41 644.32 922.85 645.40 922.85 646.13C922.85 647.66 921.94 649.34 920.10 651.20C918.26 653.06 915.95 654.72 913.12 656.16C910.28 657.60 907.53 658.50 904.80 658.84L904.80 659.12C905.14 659.20 905.72 659.44 906.53 659.83C907.45 660.25 908.26 660.57 908.92 660.80C909.60 661.02 910.31 661.15 911.04 661.15C913.14 661.15 915.14 660.41 917.05 658.99C918.94 657.58 920.49 655.61 921.67 653.09C922.83 650.57 923.43 647.76 923.43 644.66C923.43 642.75 923.12 640.91 922.51 639.18C921.88 637.47 921.02 635.61 919.91 633.61"/><path d="M1005.78 638.42C1005.47 637.71 1005.34 637.34 1005.34 637.34L1005.07 637.34C1004.78 638.15 1004.44 638.99 1004.00 639.89C1003.58 640.78 1003.18 641.43 1002.87 641.80C1004.02 642.90 1005.10 644.22 1006.10 645.74C1007.09 647.29 1007.59 648.49 1007.59 649.36C1007.59 649.94 1007.22 650.44 1006.46 650.88C1005.70 651.30 1004.57 651.64 1003.10 651.91C1001.63 652.17 999.85 652.30 997.75 652.30L987.59 652.30L938.94 652.30C937.13 652.30 935.69 652.06 934.64 651.62C933.59 651.15 932.85 650.44 932.38 649.41C931.91 648.42 931.67 647.05 931.67 645.32C931.67 643.35 931.70 640.31 931.81 636.21C931.91 632.06 931.96 633.91 931.96 631.81C931.96 630.28 931.88 628.26 931.78 625.72C931.70 624.38 931.67 623.30 931.67 622.49L931.38 622.49C930.96 623.20 930.47 623.99 929.81 624.85C929.18 625.72 928.58 626.40 928.03 626.95C928.37 628.84 929.08 630.99 929.18 634.06C929.31 637.10 929.42 641.70 929.49 647.81C929.55 650.25 929.86 652.14 930.41 653.53C930.99 654.92 931.88 655.92 933.09 656.50C934.32 657.10 935.98 657.42 938.05 657.42L986.73 657.42L996.88 657.42L996.91 657.42C1000.79 657.42 1003.66 656.68 1005.49 655.24C1007.33 653.77 1008.22 651.54 1008.22 648.49C1008.22 646.50 1007.99 644.69 1007.54 643.11C1007.07 641.54 1006.49 639.96 1005.78 638.42"/><path d="M1003.00 632.98L1005.91 629.78C1005.57 629.23 1005.07 628.65 1004.36 628.05C1003.63 627.42 1002.95 626.97 1002.29 626.68L999.64 629.94L999.64 630.23C1000.14 630.46 1000.71 630.86 1001.42 631.43C1002.11 632.01 1002.63 632.51 1003.00 632.98"/><path d="M1014.65 627.95C1014.60 627.08 1014.57 626.06 1014.52 624.85C1014.47 623.64 1014.44 622.86 1014.44 622.49L1014.15 622.49C1013.76 623.20 1013.24 623.99 1012.60 624.85C1011.95 625.72 1011.37 626.40 1010.82 626.95C1011.03 628.05 1012.89 653.35 1012.89 656.24C1012.89 657.21 1012.87 657.89 1012.87 658.28L1013.16 658.28L1013.76 655.50C1014.13 653.90 1014.39 652.59 1014.57 651.51C1014.76 650.44 1014.92 649.10 1015.02 647.50C1015.12 645.87 1015.20 643.85 1015.20 641.41C1015.20 637.00 1014.99 635.82 1014.65 627.95"/><path d="M908.63 627.95C908.57 627.08 908.55 626.06 908.50 624.85C908.44 623.64 908.42 622.86 908.42 622.49L908.13 622.49C907.74 623.20 907.21 623.99 906.58 624.85C905.92 625.72 905.35 626.40 904.80 626.95C905.01 628.05 906.87 650.66 906.87 653.55C906.87 654.52 906.84 655.20 906.84 655.60L907.13 655.60L907.74 652.81C908.10 651.21 908.37 649.90 908.55 648.82C908.73 647.75 908.89 646.41 909.00 644.81C909.10 643.18 909.18 641.16 909.18 638.72C909.18 634.31 909.10 635.48 908.63 627.95"/></g></svg>
+<div class="bar"><i id="bootFill"></i></div><span id="bootTxt">Preparing your tour</span></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ======================= CONFIG =======================
+ ANARA_URL: where "Book a visit" and "Ask Anara" open (the Anara platform; its assistant lives there).
+ SHARE_BASE: the public address of this tour once it is hosted on the Anara platform. Empty = this page's own address. */
+const ANARA_URL="https://anara-staging.duckdns.org/en/masterplan";
+const SHARE_BASE="";
+/* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
+const SALES_WHATSAPP="";
+/* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
+const MUSIC_SRC="music_anara-ambient.mp3";
+/* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
+const TAGS={
+ "gf-majlis":[[.5,.42,{en:["Courtyard garden","Daylight from a private planted courtyard.","A green outlook for every gathering."],ar:["حديقة الفناء","ضوء النهار من فناء خاص مزروع.","إطلالة خضراء ترافق كل جلسة."]}],[.695,.5,{en:["Guest wash area","The majlis has its own wash area and toilet.","Guests stay on their side; the family keeps its privacy."],ar:["مغسلة الضيوف","للمجلس مغسلته ودورة مياهه الخاصة.","يبقى الضيف في جهته، وتحتفظ العائلة بخصوصيتها."]}]],
+ "gf-dining":[[.5,.27,{en:["Statement pendant","A sculptural light over the table.","Gives the dining area a natural focal point for hosting."],ar:["ثريا لافتة","إضاءة منحوتة فوق الطاولة.","يمنح غرفة الطعام حضورًا يليق بالعزائم."]}]],
+ "gf-stairs":[[.7,.42,{en:["Planted courtyard","The stair wraps around a courtyard tree, in glass.","Brings greenery and daylight into the centre of the home."],ar:["فناء مزروع","الدرج يلتف حول شجرة الفناء بالزجاج.","تُدخل الخضرة والنور إلى قلب البيت."]}]],
+ "gf-living":[[.3,.45,{en:["Full-height glass","The living area opens to the garden.","Daylight reaches deep into the family's main living space."],ar:["زجاج بارتفاع كامل","صالة المعيشة تنفتح على الحديقة.","يصل ضوء النهار إلى عمق المساحة التي تقضي فيها العائلة يومها."]}],[.04,.47,{en:["Media wall","A feature wall anchors the seating.","A ready focal point for the TV and the seating layout."],ar:["جدار التلفاز","جدار مميز يرتكز عليه الجلوس.","مكان جاهز للتلفاز يحدد توزيع الجلسة."]}]],
+ "gf-kitchen":[[.48,.14,{en:["Skylight","Natural light from above.","A brighter kitchen through the day."],ar:["فتحة سماوية","إضاءة طبيعية من الأعلى.","مطبخ أكثر إشراقًا طوال النهار."]}],[.69,.47,{en:["Built-in units","Tall units with integrated appliances.","Clean lines, and storage that keeps counters clear."],ar:["وحدات مدمجة","وحدات طويلة مع أجهزة مدمجة.","خطوط نظيفة وتخزين يُبقي الأسطح مرتبة."]}]],
+ "ff-bed-4":[[.63,.42,{en:["Tall windows","Layered curtains for light control.","Bright mornings, or full darkness when you want to rest."],ar:["نوافذ طويلة","ستائر متعددة الطبقات للتحكم بالضوء.","صباح مشرق، أو عتمة كاملة وقت الراحة."]}],[.29,.48,{en:["Dressing area","Glass-fronted wardrobes, with a private bathroom.","Get ready without disturbing the bedroom."],ar:["غرفة الملابس","خزائن بواجهات زجاجية، مع دورة مياه خاصة.","تتجهّز دون إزعاج من في الغرفة."]}]],
+ "ff-bed-4-dressing":[[.55,.47,{en:["Glass wardrobes","Display-style wardrobes along the dressing area.","Everything visible at a glance, and kept dust-free."],ar:["خزائن زجاجية","خزائن عرض على امتداد غرفة الملابس.","كل شيء أمام عينيك، وبعيد عن الغبار."]}]],
+ "ff-bed-3":[[.67,.42,{en:["Screened windows","Patterned screens soften the daylight.","Privacy and softer light, in a local design language."],ar:["نوافذ بمشربيات","مشربيات تُلطّف ضوء النهار.","خصوصية وضوء ألطف بروح معمارية محلية."]}],[.34,.46,{en:["Built-in wardrobe","Glass-fronted storage.","Storage that doesn't take floor space."],ar:["خزانة مدمجة","تخزين بواجهة زجاجية.","تخزين لا يقتطع من مساحة الغرفة."]}]],
+ "ff-bed-2":[[.97,.45,{en:["Private terrace","Just outside this bedroom.","Fresh air without leaving the bedroom floor."],ar:["تراس خاص","خارج هذه الغرفة مباشرة.","هواء طلق دون مغادرة دور النوم."]}],[.68,.47,{en:["Wardrobe and vanity","Dress and get ready in place.","The whole morning routine in one room."],ar:["خزانة وطاولة زينة","تجهّز في مكانك.","روتين الصباح كله في غرفة واحدة."]}]],
+ "2nd-floor-sitting-area":[[.72,.45,{en:["Roof terrace","A large outdoor sitting area.","Room for evening gatherings outdoors."],ar:["تراس السطح","جلسة خارجية واسعة.","مساحة للسهرات العائلية في الهواء الطلق."]}],[.93,.47,{en:["Media wall","For evenings in.","A second family lounge, away from the ground floor."],ar:["جدار التلفاز","للأمسيات العائلية.","صالة عائلية ثانية بعيدًا عن الدور الأرضي."]}]],
+ "2nd-floor-bedroom":[[.62,.45,{en:["Guest-ready","A bedroom with a bathroom next door.","Suits a guest, an older child or a home office."],ar:["جاهزة للضيوف","غرفة نوم بجانبها دورة مياه.","تناسب ضيفًا أو أحد الأبناء أو مكتبًا منزليًا."]}]]
+};
+/* Finishes per room, from the interior designer's schedule: { "gf-majlis": {en:["…"], ar:["…"]} }. Empty rooms show no finishes row. */
+const FINISHES={};
+/* Guided tour route */
+/* Sales tour — five chapters. beats = [u (panorama column to point at), lat, fov, {en:[headline, line], ar:[headline, line]}].
+   Arabic is written as Arabic marketing copy, not translated. Facts come only from the plans or what the renders show. */
+const CHAPTERS=[{en:"Arrival & hospitality",ar:"حفاوة الاستقبال"},{en:"Family living",ar:"دفء العائلة"},{en:"Kitchen & service",ar:"المطبخ والخدمات"},{en:"The bedroom floor",ar:"أجنحة النوم"},{en:"The roof retreat",ar:"ملحق السطح"}];
+const B=(u,la,f,eh,et,ah,at)=>[u,la,f,{en:[eh,et],ar:[ah,at]}];
+const ROUTE=[
+ {id:"gf-majlis",ch:0,b:[
+  B(.45,-4,72,"Hosting, done properly","Guests arrive through their own majlis entrance, straight into the men's majlis.","مجلس يليق بضيوفك","مدخل مستقل يقود ضيوفك مباشرة إلى مجلس الرجال، دون المرور بمساحات العائلة."),
+  B(.5,4,58,"Calm, natural light","Daylight comes in from a private courtyard garden.","إطلالة على فناء أخضر","نور طبيعي ينساب إلى المجلس من فناء خاص مزروع."),
+  B(.1,-10,66,"Room for real gatherings","About 16.7 m² of seating.","متّسع للمناسبات","قرابة ١٦٫٧ م² من الجلسات المريحة لاستقبال الأهل والضيوف."),
+  B(.69,-4,64,"Family privacy, protected","The majlis has its own wash area and toilet, so guests never cross into the family side.","خصوصية تامة للعائلة","مغسلة ودورة مياه خاصة بالمجلس؛ يبقى الضيف في جهته، وتبقى العائلة على راحتها.")]},
+ {id:"gf-dining",b:[
+  B(.5,4,66,"Serving made easy","The dining area links the majlis and the family side.","ضيافة بلا عناء","غرفة الطعام حلقة الوصل بين المجلس وجهة العائلة، فتُقدَّم الضيافة بسلاسة."),
+  B(.5,32,58,"A statement centrepiece","A sculptural pendant over the table.","لمسة تخطف الأنظار","ثريا منحوتة تتوسط الطاولة وتمنح المكان حضوره.")]},
+ {id:"gf-stairs",ch:1,b:[
+  B(.7,10,64,"The heart of the home","An open family hall around a planted courtyard.","قلب البيت","صالة عائلية مفتوحة تلتف حول فناء مزروع يملأ المكان حياة.")]},
+ {id:"gf-living",b:[
+  B(.42,-4,68,"Space to live together","With the hall, about 11 metres of open family space.","مساحة تجمع العائلة","مع الصالة الرئيسية، قرابة ١١ متراً من المساحات المفتوحة للجلسات اليومية."),
+  B(.3,2,60,"The garden, brought inside","Full-height glass opens the room to the garden.","الحديقة جزء من الصالة","واجهات زجاجية بكامل الارتفاع تفتح المعيشة على الخضرة."),
+  B(.04,-6,64,"Made for movie nights","A feature media wall anchors the seating.","لأمسيات العائلة","جدار تلفاز أنيق تلتف حوله الجلسة.")]},
+ {id:"gf-kitchen",ch:2,b:[
+  B(.48,-6,68,"A kitchen kept out of sight","A closed kitchen of about 3.5 × 3.5 m, on its own service side.","مطبخ بعيد عن الأنظار","مطبخ مغلق بمقاس يقارب ٣٫٥ × ٣٫٥ م، ضمن جهة خدمات مستقلة."),
+  B(.48,52,72,"Daylight from above","A skylight lights the kitchen naturally.","نور من السماء","فتحة سماوية تغمر المطبخ بالضوء الطبيعي."),
+  B(.69,-2,62,"Ready for daily life","Tall built-in units with integrated appliances. The laundry and maid's quarters are next door.","جاهز ليومك","خزائن طويلة بأجهزة مدمجة، وغرفة الغسيل وسكن الخادمة على بُعد خطوات.")]},
+ {id:"ff-bed-4",ch:3,b:[
+  B(.5,-6,68,"Four master bedrooms","Every bedroom upstairs is a master, with four bathrooms on the floor. This is Master Bedroom 04, about 4.1 × 3.5 m.","أربعة أجنحة رئيسية","جميع غرف الدور الأول رئيسية، ومعها أربع دورات مياه. هذا الجناح الرابع بنحو ٤٫١ × ٣٫٥ م."),
+  B(.63,4,60,"Rest, undisturbed","Tall windows with layered curtains.","سكينة تامة","نوافذ طويلة بستائر متعددة الطبقات، تتحكم معها بالضوء كما تحب."),
+  B(.29,-4,64,"A suite, not just a room","Its own dressing area with glass-fronted wardrobes, and a private bathroom.","جناح متكامل","غرفة ملابس بخزائن زجاجية، ودورة مياه خاصة.")]},
+ {id:"ff-bed-3",b:[
+  B(.5,-6,68,"Generous for every family member","Master Bedroom 03, about 3.3 × 4.0 m.","رحابة لكل فرد","الجناح الثالث بنحو ٣٫٣ × ٤٫٠ م."),
+  B(.67,4,58,"Soft, filtered light","Screened windows soften the daylight.","ضوء ناعم بلمسة مشربية","نوافذ بمشربيات تُهذّب ضوء النهار."),
+  B(.34,-2,62,"Storage, built in","A glass-fronted wardrobe.","تخزين مدروس","خزانة مدمجة بواجهة زجاجية.")]},
+ {id:"ff-bed-2",b:[
+  B(.32,-6,68,"Your own outdoor corner","Master Bedroom 02, about 4.5 × 3.0 m, sits next to a private terrace.","ركنك الخارجي","الجناح الثاني بنحو ٤٫٥ × ٣٫٠ م، ويجاوره تراس خاص."),
+  B(.68,-2,60,"Get ready in place","Its own wardrobe and vanity.","استعداد يومي مريح","خزانة ملابس وتسريحة خاصة داخل الجناح."),
+  B(.97,2,62,"Step outside","The private terrace is just beyond the window.","خطوة إلى الهواء الطلق","التراس الخاص خلف النافذة مباشرة.")]},
+ {id:"2nd-floor-sitting-area",ch:4,b:[
+  B(.48,-6,68,"A second living space","The top floor is a retreat of its own, starting with a family sitting room.","صالة ثانية للعائلة","دور السطح عالم قائم بذاته، يبدأ بصالة جلوس عائلية."),
+  B(.72,2,60,"Evenings outdoors","It opens onto a large outdoor sitting area on the roof terrace.","سهرات في الهواء الطلق","تنفتح الصالة على جلسة خارجية واسعة في تراس السطح."),
+  B(.93,-4,64,"Everything at hand","A media wall, and a pantry close by.","كل ما تحتاجه قريب","جدار تلفاز، ومطبخ تحضيري على بُعد خطوات.")]},
+ {id:"2nd-floor-bedroom",b:[
+  B(.5,-6,68,"Flexible for your family","A further bedroom, about 3.1 × 4.7 m, with a bathroom next door.","مرونة تناسب عائلتك","غرفة نوم إضافية بنحو ٣٫١ × ٤٫٧ م، تجاورها دورة مياه."),
+  B(.62,2,62,"Guest suite, or room to grow","Ideal for visiting family or older children.","لضيفك أو لأبنائك","مثالية لاستقبال الأقارب، أو جناحاً مستقلاً للأبناء.")]}
+];
+const SUMMARY={en:{title:"Villa Type C at a glance",items:["Separate majlis and family entrances","Men's majlis with its own wash area and toilet","Open family hall and living area around a planted courtyard","Closed kitchen with a skylight and a separate service side","Four master bedrooms and four bathrooms","Roof floor with sitting room, outdoor terrace, pantry and bedroom","Maid's room and driver's room, each with a bathroom"],replay:"Replay",explore:"Explore on your own",lead:"See which Type C villas are still available on the Anara masterplan.",cta:"View available villas"},
+ ar:{title:"فيلا C في سطور",items:["مدخلان مستقلان: للمجلس وللعائلة","مجلس رجال بمغسلته ودورة مياهه الخاصة","صالة عائلية مفتوحة حول فناء مزروع","مطبخ مغلق بفتحة سماوية، وجهة خدمات مستقلة","أربعة أجنحة رئيسية في الدور الأول","دور سطح بصالة وتراس خارجي ومطبخ تحضيري وغرفة نوم","غرفة للخادمة وأخرى للسائق، لكلٍّ منهما دورة مياه"],replay:"إعادة الجولة",explore:"تجوّل بنفسك",lead:"اكتشف فلل النموذج C المتاحة في المخطط العام لأنارا.",cta:"استعرض الفلل المتاحة"}};
+
+const T={
+ en:{proj:"Villa Type C",floors:["Ground Floor","First Floor","Second Floor"],plan:"Floor plan",enlarge:"Enlarge",mapS:"Small map",mapM:"Medium map",mapL:"Full plan",szS:"S",szM:"M",szL:"L",tapPin:"Tap a space to go there · Scroll or pinch to zoom · Drag to move",
+  measure:"Measure",info:"Room info",doll:"3D view",rotate:"Auto-rotate",sound:"Ambient music",share:"Share this view",full:"Full screen",zin:"Zoom in",zout:"Zoom out",close:"Close",
+  mStart:"Click a point on the floor",mNext:"Click a second point on the floor",mDoneT:"Floor distance",mFloorOnly:"Pick a point on the floor",clear:"Clear",done:"Done",
+  size:"Clear size",area:"Area",open:"Open-plan circulation",dimsNote:"Approximate sizes, scaled from the architectural plans",
+  hint:"Drag to look around · Click the floor to walk",noView:"No 360° view that way yet · use the floor plan",soon:"360° view coming soon",soonName:{mb01:"Master Bedroom 01"},enter:"Enter the home",tour:"Guided tour",watch:"Watch the guided tour",iEyebrow:"Anara · Riyadh",byFloor:"Explore by floor",fcShort:["Majlis · living · kitchen","4 master bedrooms","Sitting area · roof terrace"],iSub:"A family home on three floors, designed around privacy and generous hospitality.",
+  up:"Up to",down:"Down to",m:"m",m2:"m²",stop:"Stop tour",guide:"Your guide · Anara",facts:"Key facts",reg:"Register interest",boot:"Preparing your tour",
+  iFacts:[["5","Bedrooms"],["9","Bathrooms & WCs"],["3","Floors"],["2","Entrances"]],
+  kfEy:"Duplex villa · Type C",kfTitle:"Key facts",kfNote:"Areas per villa from the Anara master plan calculations (Duplex). Room sizes are approximate, scaled from the architectural plans.",
+  kf:{hero:[["346 m²","Net saleable area"],["5","Bedrooms"],["9","Bathrooms & WCs"],["3","Floors"]],
+   byFloor:"Built-up area by floor",splitNote:"Almost half the home is on the ground floor, where guests are hosted and the family spends the day.",largest:"Largest spaces",approx:"approx.",flTitle:"Floor by floor",hlTitle:"Designed for family living",
+   fl:[["Men's majlis with its own entrance","Dining area","Open living area & family hall","Closed kitchen & laundry","Maid's room with bathroom","Driver's room with bathroom","Majlis and family wash areas & WCs"],
+       ["4 master bedrooms","4 bathrooms","Dressing area","Central lobby","Private bedroom terrace"],
+       ["Sitting area","Bedroom","Bathroom & wash area","Pantry","Roof terrace"]],
+   hl:["Separate majlis & family entrances","Guest wash area & toilet","Kitchen on a separate service side","Staff rooms with own bathrooms","Planted courtyard by the stair","Roof terrace"]},
+  floorEyebrow:"You are now on the",fcArea:"Built-up area",fc:[{line:"Where guests are hosted and the family gathers — with the service side kept apart.",stats:[["48.2 m²","Living area & family hall"],["2","Staff rooms with bathrooms"]]},{line:"The family's private floor, away from guests.",stats:[["4","Master bedrooms"],["4","Bathrooms"]]},{line:"A quieter retreat that opens onto the roof terrace.",stats:[["18.1 m²","Sitting area"],["1","Bedroom with bathroom"]]}],
+  floorText:["Men's majlis · Dining · Family living · Kitchen · Maid's and driver's rooms","4 master bedrooms · 4 bathrooms · Dressing area · Private terrace","Sitting room · Bedroom · Bathroom · Pantry · Roof terrace"],
+  rgTitle:"Register your interest",rgText:"Leave your details and the Anara sales team will contact you.",rgName:"Full name",rgPhone:"Mobile number",rgPrefs:["Book a visit","Call me back"],rgSubmit:"Continue",rgWa:"Send on WhatsApp",rgErr:"Please add your name and a valid mobile number.",
+  rgMsg:"Hello Anara, I'm interested in Villa Type C.",shareMsg:"Take a look at Villa Type C at Anara:",next:"Next:",chapter:"Chapter {n} of {m}",pause:"Pause",play:"Resume",paused:"Paused",
+  shTitle:"Share this view",shText:"Opens the tour in this room, facing the same way.",copy:"Copy link",copied:"Link copied",
+  ask:"Ask Anara",askTitle:"Interested in Villa Type C?",askText:"Book a visit to the sales centre or ask Anara about availability, prices and payment plans.",book:"Book a visit",chat:"Ask Anara",askNote:"Opens the Anara platform.",
+  dHint:"Drag to rotate · Right-drag or two fingers to move · Scroll or pinch to zoom · Double-click to reset · Click a point to step inside",dBack:"Back to 360°",all:"All floors"},
+ ar:{proj:"فيلا النموذج C",floors:["الدور الأرضي","الدور الأول","الدور الثاني"],plan:"المخطط",enlarge:"تكبير",mapS:"خريطة صغيرة",mapM:"خريطة متوسطة",mapL:"المخطط كاملًا",szS:"ص",szM:"م",szL:"ك",tapPin:"اضغط على مساحة للانتقال · مرر أو قرّب بإصبعين للتكبير · اسحب للتحريك",
+  measure:"القياس",info:"معلومات الغرفة",doll:"عرض ثلاثي الأبعاد",rotate:"دوران تلقائي",sound:"موسيقى هادئة",share:"مشاركة هذا المشهد",full:"ملء الشاشة",zin:"تكبير",zout:"تصغير",close:"إغلاق",
+  mStart:"اضغط على نقطة في الأرضية",mNext:"اضغط على نقطة ثانية في الأرضية",mDoneT:"المسافة على الأرضية",mFloorOnly:"اختر نقطة على الأرضية",clear:"مسح",done:"تم",
+  size:"المقاس الصافي",area:"المساحة",open:"ممر مفتوح",dimsNote:"مقاسات تقريبية مأخوذة من المخططات المعمارية",
+  hint:"اسحب للتجول · اضغط على الأرضية للتنقل",noView:"لا يوجد مشهد ٣٦٠° في هذا الاتجاه بعد · استخدم المخطط",soon:"مشهد ٣٦٠° قريبًا",soonName:{mb01:"غرفة النوم الرئيسية ٠١"},enter:"ادخل المنزل",tour:"جولة موجّهة",watch:"شاهد الجولة الموجّهة",iEyebrow:"أنارا · الرياض",byFloor:"تصفّح حسب الدور",fcShort:["المجلس · المعيشة · المطبخ","٤ غرف نوم رئيسية","الجلسة · تراس السطح"],iSub:"بيت عائلي على ثلاثة أدوار، صُمّم ليجمع بين خصوصية العائلة وكرم الضيافة.",
+  up:"صعود إلى",down:"نزول إلى",m:"م",m2:"م²",stop:"إنهاء الجولة",guide:"مرشدك · أنارا",facts:"أبرز المواصفات",reg:"سجّل اهتمامك",boot:"جارٍ تجهيز جولتك",
+  iFacts:[["٥","غرف نوم"],["٩","دورات مياه"],["٣","أدوار"],["٢","مدخلان"]],
+  kfEy:"فيلا دوبلكس · النموذج C",kfTitle:"أبرز المواصفات",kfNote:"المساحات لكل فيلا من حسابات المخطط العام لأنارا (دوبلكس). مقاسات الغرف تقريبية ومأخوذة من المخططات المعمارية.",
+  kf:{hero:[["٣٤٦ م²","المساحة البيعية الصافية"],["٥","غرف نوم"],["٩","دورات مياه"],["٣","أدوار"]],
+   byFloor:"مسطحات البناء لكل دور",splitNote:"قرابة نصف مساحة البيت في الدور الأرضي، حيث استقبال الضيوف ويوم العائلة.",largest:"أرحب المساحات",approx:"تقريبي",flTitle:"تفاصيل الأدوار",hlTitle:"مصممة لحياة العائلة",
+   fl:[["مجلس رجال بمدخل مستقل","غرفة طعام","صالة معيشة وجلسة عائلية مفتوحة","مطبخ مغلق وغرفة غسيل","غرفة خادمة بدورة مياه","غرفة سائق بدورة مياه","مغاسل ودورات مياه للمجلس والعائلة"],
+       ["٤ غرف نوم رئيسية","٤ دورات مياه","غرفة ملابس","ردهة مركزية","تراس خاص لغرفة النوم"],
+       ["جلسة","غرفة نوم","دورة مياه ومغسلة","مطبخ تحضيري","تراس السطح"]],
+   hl:["مدخلان مستقلان للمجلس والعائلة","مغسلة ودورة مياه للضيوف","مطبخ في جهة خدمات مستقلة","غرف للعمالة بدورات مياه خاصة","فناء مزروع بجوار الدرج","تراس في السطح"]},
+  floorEyebrow:"أنت الآن في",fcArea:"مسطح البناء",fc:[{line:"هنا تستقبل ضيوفك وتجتمع العائلة، وجهة الخدمات بعيدة عن الأنظار.",stats:[["٤٨٫٢ م²","صالة المعيشة والجلسة العائلية"],["٢","غرف للعمالة بدورات مياه"]]},{line:"دور العائلة الخاص، بعيدًا عن الضيوف.",stats:[["٤","غرف نوم رئيسية"],["٤","دورات مياه"]]},{line:"ركن هادئ يطل على تراس السطح.",stats:[["١٨٫١ م²","الجلسة"],["١","غرفة نوم بدورة مياه"]]}],
+  floorText:["مجلس الرجال · الطعام · معيشة العائلة · المطبخ · غرفتا الخادمة والسائق","٤ غرف نوم رئيسية · ٤ دورات مياه · غرفة ملابس · تراس خاص","صالة جلوس · غرفة نوم · دورة مياه · مطبخ تحضيري · تراس السطح"],
+  rgTitle:"سجّل اهتمامك",rgText:"اترك بياناتك وسيتواصل معك فريق مبيعات أنارا.",rgName:"الاسم الكامل",rgPhone:"رقم الجوال",rgPrefs:["حجز زيارة","اتصلوا بي"],rgSubmit:"متابعة",rgWa:"إرسال عبر واتساب",rgErr:"يرجى إدخال الاسم ورقم جوال صحيح.",
+  rgMsg:"مرحباً أنارا، أنا مهتم بفيلا النموذج C.",shareMsg:"شاهد فيلا النموذج C في أنارا:",next:"التالي:",chapter:"الفصل {n} من {m}",pause:"إيقاف مؤقت",play:"متابعة",paused:"متوقفة",
+  shTitle:"مشاركة هذا المشهد",shText:"يفتح الجولة في هذه الغرفة وبنفس الاتجاه.",copy:"نسخ الرابط",copied:"تم نسخ الرابط",
+  ask:"اسأل أنارا",askTitle:"مهتم بفيلا النموذج C؟",askText:"احجز زيارة لمركز المبيعات أو اسأل أنارا عن التوفر والأسعار وخطط الدفع.",book:"احجز زيارة",chat:"اسأل أنارا",askNote:"يفتح منصة أنارا.",
+  dHint:"اسحب للتدوير · زر الفأرة الأيمن أو إصبعان للتحريك · مرر أو باعد أصابعك للتكبير · نقرتان لإعادة الضبط · اضغط على نقطة للدخول",dBack:"العودة إلى ٣٦٠°",all:"كل الأدوار"}
+};
+const FLOORS=[{plan:"plan_ground.webp",w:1744,h:1800},{plan:"plan_first.webp",w:1785,h:1800},{plan:"plan_second.webp",w:1800,h:1646}];
+/* Duplex (Type C) built-up area per villa by floor, m² — Anara master plan calculations (per plot ÷ 2) */
+const FLOOR_AREA=[166.64,118.94,60.56];
+const PTS=[
+ // id, en, ar, floor, x, y, heading, plan code, clear size [w,l] in metres (scaled from the architectural plans, ±0.1 m)
+ ["gf-living","Living Area","صالة المعيشة",0,38,31,259,"GF-05",[11.2,4.3]],
+ ["gf-stairs","Living Area · Stairs","صالة المعيشة · الدرج",0,68,33,277,"GF-05",[11.2,4.3]],
+ ["gf-majlis","Men Majlis","مجلس الرجال",0,85,60,65,"GF-01",[4.5,3.7]],
+ ["gf-men-wash","Majlis Wash Area","مغسلة المجلس",0,66,67,82,"GF-02",[1.3,1.8]],
+ ["gf-men-bath","Majlis Toilet","دورة مياه المجلس",0,65,56,259,"GF-03",[1.3,1.7]],
+ ["gf-dining","Dining Area","غرفة الطعام",0,48,62,90,"GF-04",[4.0,3.0]],
+ ["gf-lobby","Lobby","الردهة",0,57,17,252,"GF-06",null],
+ ["gf-kitchen","Kitchen","المطبخ",0,40,13,259,"GF-07",[3.5,3.5]],
+ ["gf-laundry","Laundry","غرفة الغسيل",0,57,8,282,"GF-10",[2.4,1.8]],
+ ["gf-women-wash","Family Wash Area","مغسلة العائلة",0,68,18,83,"GF-08",[1.8,1.5]],
+ ["gf-women-bath","Family Toilet","دورة مياه العائلة",0,78,16,96,"GF-09",[1.5,1.5]],
+ ["gf-maid-room","Maid Room","غرفة الخادمة",0,92,8,89,"GF-11",[2.15,2.1]],
+ ["gf-maid-bath","Maid Bathroom","دورة مياه الخادمة",0,92,18,65,"GF-12",[2.2,1.3]],
+ ["gf-driver-room","Driver Room","غرفة السائق",0,90,92,72,"GF-13",[2.7,2.3]],
+ ["gf-driver-bath","Driver Bathroom","دورة مياه السائق",0,75,90,79,"GF-14",[1.7,1.7]],
+ ["ff-lobby","Lobby","الردهة",1,67,45,106,"FF-01",[4.3,4.3]],
+ ["ff-bed-4","Master Bedroom 04","غرفة النوم الرئيسية ٤",1,14,17,109,"FF-08",[4.1,3.5]],
+ ["ff-bed-4-dressing","Dressing Area","غرفة الملابس",1,48,10,95,"FF-09",[4.3,1.5]],
+ ["ff-bath-1","Bathroom","دورة المياه",1,49,27,252,"FF-07",[2.4,1.5]],
+ ["ff-bath-3","Bathroom","دورة المياه",1,87,9,263,"FF-10",[2.6,1.5]],
+ ["ff-bed-3","Master Bedroom 03","غرفة النوم الرئيسية ٣",1,14,45,85,"FF-06",[3.3,4.0]],
+ ["ff-bath-2","Bathroom","دورة المياه",1,38,58,79,"FF-05",[1.45,2.4]],
+ ["ff-bed-2","Master Bedroom 02","غرفة النوم الرئيسية ٢",1,33,84,270,"FF-04",[4.5,3.0]],
+ ["ff-bath-4","Bathroom","دورة المياه",1,89,64,234,"FF-03",[2.4,1.5]],
+ ["2nd-floor-lobby","Lobby","الردهة",2,71,29,137,"RF-01",[4.3,3.0]],
+ ["2nd-floor-sitting-area","Sitting Area","الجلسة",2,83,57,165,"RF-02",[4.3,4.2]],
+ ["2nd-floor-pantry","Pantry","المطبخ التحضيري",2,59,35,138,"RF-05",[1.4,1.9]],
+ ["2nd-floor-bedroom","Bedroom","غرفة النوم",2,40,50,111,"RF-06",[3.1,4.7]],
+ ["2nd-floor-wash","Wash Area","المغسلة",2,58,52,0,"RF-03",[1.4,1.2]],
+ ["2nd-floor-bath","Bathroom","دورة المياه",2,58,64,0,"RF-04",[1.4,2.0]]
+];
+const SPOTS={
+ "gf-majlis":[[.695,.65,"gf-men-wash"]],
+ "gf-men-wash":[[.23,.66,"gf-majlis"],[.745,.69,"gf-dining"],[.015,.67,"gf-men-bath"]],
+ "gf-men-bath":[[.02,.68,"gf-men-wash"]],
+ "gf-dining":[[.09,.64,"gf-stairs"]],
+ "gf-living":[[.71,.62,"gf-stairs"],[.615,.6,"gf-lobby"]],
+ "gf-stairs":[[.29,.62,"gf-living"],[.15,.61,"gf-dining"],[.405,.61,"gf-lobby"],[.75,.63,"ff-lobby"]],
+ "gf-lobby":[[.03,.66,"gf-stairs"],[.25,.68,"gf-kitchen"],[.54,.66,"gf-laundry"],[.755,.65,"gf-women-wash"],[.745,.585,"gf-women-bath"],[.955,.62,"gf-stairs"]],
+ "gf-kitchen":[[.815,.64,"gf-lobby"]],
+ "gf-laundry":[[.03,.65,"gf-lobby"],[.012,.58,"gf-stairs"],[.745,.645,"gf-maid-room"]],
+ "gf-women-wash":[[.27,.68,"gf-women-bath"],[.75,.65,"gf-lobby"],[.735,.595,"gf-kitchen"]],
+ "gf-women-bath":[[.75,.64,"gf-women-wash"],[.757,.6,"gf-lobby"],[.765,.575,"gf-kitchen"]],
+ "gf-maid-room":[[.53,.67,"gf-maid-bath"],[.715,.66,"gf-laundry"]],
+ "gf-maid-bath":[[.9,.67,"gf-maid-room"]],
+ "gf-driver-room":[[.775,.67,"gf-driver-bath"]],
+ "gf-driver-bath":[[.23,.69,"gf-driver-room"]],
+ "ff-lobby":[[.2,.79,"gf-stairs"],[.49,.69,"!mb01"],[.38,.72,"2nd-floor-lobby"],[.67,.71,"ff-bed-2"],[.74,.7,"ff-bed-3"],[.012,.6,"ff-bed-4-dressing"]],
+ "ff-bed-4":[[.27,.63,"ff-bed-4-dressing"]],
+ "ff-bed-4-dressing":[[.73,.67,"ff-bed-4"],[.225,.62,"ff-lobby"]],
+ "ff-bed-3":[[.235,.61,"ff-lobby"]],
+ "ff-bed-2":[[.54,.64,"ff-lobby"]],
+ "ff-bath-1":[[.22,.68,"ff-bed-4"]],
+ "ff-bath-2":[[.80,.68,"ff-bed-3"]],
+ "ff-bath-3":[[.06,.66,"ff-lobby"]],
+ "ff-bath-4":[[.23,.69,"ff-lobby"]],
+ "2nd-floor-lobby":[[.31,.69,"ff-lobby"],[.615,.66,"2nd-floor-sitting-area"]],
+ "2nd-floor-sitting-area":[[.22,.64,"2nd-floor-lobby"],[.11,.63,"2nd-floor-pantry"]],
+ "2nd-floor-pantry":[[.6,.68,"2nd-floor-wash"],[.83,.68,"2nd-floor-bedroom"],[.515,.6,"2nd-floor-sitting-area"]],
+ "2nd-floor-bedroom":[[.21,.63,"2nd-floor-pantry"]],
+ "2nd-floor-wash":[[.26,.67,"2nd-floor-bath"],[.7,.63,"2nd-floor-pantry"],[.82,.645,"2nd-floor-lobby"]],
+ "2nd-floor-bath":[[.73,.68,"2nd-floor-wash"]]
+};
+const EYE=1.6;   // camera height above floor, metres — used by the measure tool
+
+/* ======================= STATE ======================= */
+const P=PTS.map(r=>({id:r[0],en:r[1],ar:r[2],floor:r[3],x:r[4],y:r[5],h:r[6],code:r[7],dims:r[8]}));
+const byId=Object.fromEntries(P.map(p=>[p.id,p]));
+const D2R=Math.PI/180,R2D=180/Math.PI,norm=a=>((a%360)+540)%360-180;
+let lang="en";try{lang=localStorage.getItem("tourLang")||((navigator.language||"").startsWith("ar")?"ar":"en")}catch(e){}
+const t=k=>T[lang][k];const nm=p=>{const n=p[lang],same=P.filter(q=>q.floor===p.floor&&q[lang]===n);return same.length>1?n+" "+new Intl.NumberFormat(lang==="ar"?"ar-SA":"en").format(same.indexOf(p)+1):n};
+const $=id=>document.getElementById(id);
+const reduceMotion=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ======================= RENDERER ======================= */
+const stage=$("stage");let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true})}catch(e){document.body.insertAdjacentHTML("beforeend",'<div class="err"><div><h2>This browser can\'t show 3D content</h2><p>Turn on hardware acceleration, or open the tour in Chrome, Safari or Edge.</p></div></div>');throw e}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=THREE.sRGBEncoding;stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(75,1,.1,2000),R=500,spheres=[];
+for(let i=0;i<2;i++){const g=new THREE.SphereGeometry(R,96,64);g.scale(-1,1,1);const s=new THREE.Mesh(g,new THREE.MeshBasicMaterial({transparent:true,opacity:i?0:1,depthWrite:false,depthTest:false}));scene.add(s);spheres.push(s)}
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+addEventListener("resize",resize);resize();
+const maxAniso=renderer.capabilities.getMaxAnisotropy(),loader=new THREE.TextureLoader(),cache={};
+/* Opened straight from disk (file://), browsers refuse image files as 3D textures, so the offline package ships each image as a small script. */
+const OFFLINE=location.protocol==="file:";window.__A=window.__A||{};const assetQ={};
+function assetURL(u){if(!OFFLINE)return Promise.resolve(u);if(__A[u])return Promise.resolve(__A[u]);
+  return assetQ[u]||(assetQ[u]=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="assets/"+u.replace(/[\/.]/g,"_")+".js";sc.onload=()=>__A[u]?res(__A[u]):rej(new Error("missing "+u));sc.onerror=()=>{delete assetQ[u];rej(new Error("missing "+u))};document.head.appendChild(sc)}))}
+function tex(u){return cache[u]||(cache[u]=assetURL(u).then(src=>new Promise((res,rej)=>loader.load(src,x=>{x.encoding=THREE.sRGBEncoding;x.anisotropy=maxAniso;x.generateMipmaps=false;x.minFilter=THREE.LinearFilter;renderer.initTexture&&renderer.initTexture(x);res(x)},undefined,e=>{delete cache[u];rej(e)}))).catch(e=>{delete cache[u];throw e}))}
+const bar=$("loader");const setBar=p=>{bar.style.opacity=p<1?1:0;bar.style.width=p*100+"%"};
+const wait=ms=>new Promise(r=>setTimeout(r,ms)),ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+
+/* view: lon/lat are PLAN directions (east=0, south=90). A panorama pixel column u sits at plan angle 360u − h. */
+const FOV0=80,FMIN=30,FMAX=105,EYE_LAT=-6;let lon=0,lat=EYE_LAT,targetFov=FOV0,autoRotate=true,lastInteract=0,front=0,cur=null,busy=false,anim=null,token=0;
+const panoToPlan=(p,u)=>360*u-p.h;
+function dirVec(lo,la){const ph=(90-la)*D2R,th=lo*D2R;return new THREE.Vector3(Math.sin(ph)*Math.cos(th),Math.cos(ph),Math.sin(ph)*Math.sin(th))}
+
+async function setTex(s,p){let x=null;try{x=await Promise.race([tex("pano_"+p.id+".jpg"),wait(1800).then(()=>null)])}catch(e){}
+  if(!x){try{x=await tex("thumb_"+p.id+".jpg")}catch(e){}tex("pano_"+p.id+".jpg").then(hi=>{if(s.userData.id===p.id){s.material.map=hi;s.material.needsUpdate=true}}).catch(()=>{})}
+  s.userData.id=p.id;s.material.map=x;s.material.needsUpdate=true}
+
+async function go(id,o={}){
+  const p=byId[id];if(!p||(p===cur&&!o.first))return;
+  const my=++token;busy=true;setBar(.3);clearMeasure();closePops();
+  const back=spheres[1-front],fr=spheres[front];
+  back.rotation.y=p.h*D2R;back.material.opacity=0;back.position.set(0,0,0);
+  await setTex(back,p);if(my!==token)return;
+  const from=cur;cur=p;setBar(.85);ui();roomCard(true);if(from&&from.floor!==p.floor&&!tourOn&&!o.cut)floorIntro(p.floor);try{history.replaceState(null,"","#"+p.id)}catch(e){}
+  if(o.first||o.cut){back.material.opacity=1;fr.material.opacity=0;front=1-front;if(o.first)lon=o.lon??(180-p.h);if(o.lat!=null)lat=o.lat;else if(!tourOn)lat=EYE_LAT;busy=false;setBar(1);buildSpots();preload(p);return}
+  const reduce=reduceMotion();
+  let brg=o.brg;
+  if(brg==null&&from&&from.floor===p.floor){const f=FLOORS[p.floor];brg=Math.atan2((p.y-from.y)*f.h,(p.x-from.x)*f.w)*R2D}
+  if(brg!=null&&!reduce){const l0=lon,dl=norm(brg-lon),la0=lat,ms=Math.min(700,Math.abs(dl)*5.5);if(ms>60)await tween(ms,k=>{const e=ease(k);lon=l0+dl*e;lat=la0+(EYE_LAT-la0)*e})}
+  if(my!==token)return;
+  /* glide forward while the next room dissolves in */
+  const dir=dirVec(brg??lon,0),push=R*.42;spheres.forEach(s=>s.renderOrder=0);back.renderOrder=1;const f0=targetFov;
+  await tween(reduce?1:1100,k=>{const e=ease(k);fr.position.copy(dir).multiplyScalar(-push*e);back.position.copy(dir).multiplyScalar(push*(1-e));
+    back.material.opacity=Math.min(1,Math.pow(e,.8)*1.25);fr.material.opacity=1-Math.max(0,(e-.25)/.75);camera.fov=f0-10*Math.sin(Math.PI*e)});
+  camera.fov=f0;fr.material.opacity=0;fr.position.set(0,0,0);back.position.set(0,0,0);front=1-front;busy=false;setBar(1);buildSpots();preload(p);
+}
+function tween(ms,fn){return new Promise(r=>{anim={t0:performance.now(),ms,fn,r}})}
+
+/* ======================= PRELOAD — neighbours first, then the rest of the floor, then the tour route ======================= */
+let preQ=[],preBusy=false;
+function preload(p){const want=[];(SPOTS[p.id]||[]).forEach(s=>want.push(s[2]));
+  if(tourOn){want.unshift(ROUTE[(tourIdx+1)%ROUTE.length].id,ROUTE[(tourIdx+2)%ROUTE.length].id)}
+  P.filter(q=>q.floor===p.floor).forEach(q=>want.push(q.id));ROUTE.forEach(r=>want.push(r.id));
+  want.forEach(id=>tex("thumb_"+id+".jpg").catch(()=>{}));
+  preQ=[...new Set(want)].filter(id=>id!==p.id);pump()}
+async function pump(){if(preBusy)return;preBusy=true;while(preQ.length){const id=preQ.shift();try{await tex("pano_"+id+".jpg")}catch(e){}await wait(120)}preBusy=false}
+
+/* ======================= DOORWAYS (invisible) + STAIR ARROWS ======================= */
+let spots=[],hoverSpot=null;const tmp=new THREE.Vector3();
+function spotLabel(target){if(target[0]==="!")return t("soonName")[target.slice(1)]+" · "+t("soon");const a=cur,b=byId[target];if(b.floor!==a.floor)return (b.floor>a.floor?t("up"):t("down"))+" "+t("floors")[b.floor];return nm(b)}
+const arrowsEl=$("arrows");let arrows=[];
+const ARR_UP='<svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg>',ARR_DN='<svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>';
+function buildSpots(){spots=[];arrows=[];arrowsEl.innerHTML="";hoverSpot=null;if(!cur)return;
+  (SPOTS[cur.id]||[]).forEach(([u,v,to])=>{const lo=panoToPlan(cur,u),la=(.5-v)*180;spots.push({lo,la,to,v:dirVec(lo,la)});
+    const b=byId[to];if(!b||b.floor===cur.floor)return;const upw=b.floor>cur.floor;
+    const el=document.createElement("button");el.className="stairbtn";el.setAttribute("aria-label",spotLabel(to));
+    el.innerHTML='<span class="arr glass">'+(upw?ARR_UP:ARR_DN)+'</span><span class="lbl glass">'+t("floors")[b.floor]+'</span>';
+    el.onclick=e=>{e.stopPropagation();if(!busy&&!measuring){stopTour();go(to,{brg:lo})}};arrowsEl.appendChild(el);
+    const la2=(.5-(v-(upw?.07:.04)))*180;arrows.push({el,v:dirVec(lo,la2)})});buildTags()}
+/* Rooms you can see through an open doorway (ground floor wall trace), so clicking that room's floor goes there, not to the nearer doorway */
+let LOSG=null;function losGrid(){if(LOSG)return LOSG;const g=WALLS.ground;const m=new Uint8Array(g.cols*g.rows);g.runs.forEach(([r,a,b])=>{for(let c=a;c<b;c++)m[r*g.cols+c]=1});return LOSG={...g,m}}
+function addSeeThrough(){if(!cur||cur.floor!==0)return;const g=losGrid(),Wm=DOLL[0].w,Hm=Wm*FLOORS[0].h/FLOORS[0].w,x0=cur.x/100*Wm,y0=cur.y/100*Hm;
+  const brg=q=>Math.atan2(q.y/100*Hm-y0,q.x/100*Wm-x0)*R2D;let sx=0,sy=0,n=0;
+  spots.forEach(sp=>{const q=byId[sp.to];if(q.floor!==0)return;const e=norm(sp.lo-brg(q))*D2R;sx+=Math.cos(e);sy+=Math.sin(e);n++});if(!n)return;const off=Math.atan2(sy,sx)*R2D;
+  P.filter(q=>q.floor===0&&q.id!==cur.id&&q[lang]!==cur[lang]&&!spots.some(sp=>sp.to===q.id||byId[sp.to][lang]===q[lang])).forEach(q=>{const x1=q.x/100*Wm,y1=q.y/100*Hm,L=Math.hypot(x1-x0,y1-y0);
+    for(let s=.35;s<L-.35;s+=.04){const x=x0+(x1-x0)*s/L,y=y0+(y1-y0)*s/L;if(g.m[Math.floor(y/g.c)*g.cols+Math.floor(x/g.c)])return}
+    const lo=brg(q)+off,la=-Math.atan(EYE/Math.max(.5,L))*R2D;spots.push({lo,la,to:q.id,v:dirVec(lo,la),far:true})})}
+const tagsEl=$("tags");let tags=[];
+function buildTags(){tags=[];tagsEl.innerHTML="";if(!cur)return;(TAGS[cur.id]||[]).forEach(([u,v,c])=>{const [h,d,w]=c[lang],ey=nm(cur)+(cur.dims?' · ≈ '+fmt(cur.dims[0]*cur.dims[1],1)+' '+t("m2"):'');
+  const el=document.createElement("button");el.className="ftag";el.setAttribute("aria-label",h);
+  el.innerHTML='<span class="dot"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></span><span class="ftc glass card"><i class="ey">'+ey+'</i><b>'+h+'</b><span>'+d+'</span>'+(w?'<em><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'+w+'</em>':'')+'</span>';
+  el.onclick=e=>{e.stopPropagation();const o=el.classList.contains("open");tags.forEach(t=>t.el.classList.remove("open"));if(!o)el.classList.add("open")};
+  tagsEl.appendChild(el);tags.push({el,v:dirVec(panoToPlan(cur,u),(.5-v)*180)})})}
+function placeTags(){const show=showInfo&&!busy&&!measuring&&!tourOn;tags.forEach(a=>{tmp.copy(a.v).multiplyScalar(100).project(camera);const vis=show&&tmp.z<1&&Math.abs(tmp.x)<.95&&Math.abs(tmp.y)<.9;
+  a.el.classList.toggle("on",vis);if(!vis)a.el.classList.remove("open");else a.el.style.transform=`translate(${((tmp.x+1)/2*innerWidth).toFixed(1)}px,${((1-tmp.y)/2*innerHeight).toFixed(1)}px)`})}
+const hov=$("hov");
+function placeSpots(){if(busy||measuring){hov.classList.remove("on");stage.classList.remove("go")}
+  arrows.forEach(a=>{tmp.copy(a.v).multiplyScalar(100).project(camera);const vis=!busy&&!measuring&&!tourOn&&tmp.z<1&&Math.abs(tmp.x)<1.05&&Math.abs(tmp.y)<1.05;
+    a.el.classList.toggle("on",vis);if(vis)a.el.style.transform=`translate(${((tmp.x+1)/2*innerWidth).toFixed(1)}px,${((1-tmp.y)/2*innerHeight).toFixed(1)}px)`})}
+function screenDir(cx,cy){return new THREE.Vector3(cx/innerWidth*2-1,-(cy/innerHeight)*2+1,.5).unproject(camera).normalize()}
+function pickFloor(cx,cy){const d=screenDir(cx,cy);if(d.y>.06)return null;const az=Math.atan2(d.z,d.x)*R2D;
+  const el=Math.asin(Math.min(1,Math.max(1e-3,-d.y))),de=Math.min(20,Math.max(.3,EYE/Math.tan(el)));
+  pickFloor.near=false;let best=null,bs=1e9;spots.forEach(s=>{const da=Math.abs(norm(s.lo-az));if(da>32)return;const ds=EYE/Math.tan(Math.max(.02,-s.la*D2R));
+    if(d.y<-.02&&de<ds*.45){pickFloor.near=true;return}const sc=(da/14)**2+(d.y<-.02?(Math.log(de/ds)/.5)**2:0);if(sc<bs){bs=sc;best=s}});return best}
+function hoverAt(cx,cy){hoverSpot=busy||measuring||tourOn?null:pickFloor(cx,cy);
+  stage.classList.toggle("go",!!hoverSpot);hov.classList.toggle("on",!!hoverSpot);
+  if(hoverSpot){hov.textContent=spotLabel(hoverSpot.to);hov.style.transform=`translate(${cx+16}px,${cy+18}px)`}}
+
+/* ======================= MEASURE (floor plane) ======================= */
+let measuring=false,mPts=[];const mSvg=$("mlayer").querySelector("svg");
+function floorPoint(cx,cy){const d=screenDir(cx,cy);if(d.y>-.03)return null;const k=EYE/-d.y;return new THREE.Vector3(d.x*k,-EYE,d.z*k)}
+function proj(v){tmp.copy(v).normalize();if(tmp.dot(dirVec(lon,lat))<.05)return null;tmp.project(camera);return [(tmp.x+1)/2*innerWidth,(1-tmp.y)/2*innerHeight]}
+function drawMeasure(){if(!mPts.length){mSvg.innerHTML="";document.querySelectorAll(".mlbl").forEach(e=>e.remove());return}
+  let h="";const ps=mPts.map(proj);
+  if(mPts.length===2&&ps[0]&&ps[1]){let d="";for(let i=0;i<=24;i++){const q=proj(mPts[0].clone().lerp(mPts[1],i/24));if(q)d+=(d?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)}
+    h+=`<path d="${d}" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/><path d="${d}" stroke="#3f4727" stroke-width="2.5" fill="none" stroke-dasharray="7 5"/>`}
+  ps.forEach(q=>{if(q)h+=`<circle cx="${q[0]}" cy="${q[1]}" r="7" fill="#3f4727" stroke="#fff" stroke-width="2.5"/>`});mSvg.innerHTML=h;
+  let lbl=document.querySelector(".mlbl");
+  if(mPts.length===2){const mid=proj(mPts[0].clone().lerp(mPts[1],.5));if(!lbl){lbl=document.createElement("div");lbl.className="mlbl glass";$("mlayer").appendChild(lbl)}
+    lbl.style.display=mid?"block":"none";if(mid){lbl.style.left=mid[0]+"px";lbl.style.top=(mid[1]-26)+"px"}lbl.textContent=fmt(mPts[0].distanceTo(mPts[1]))+" "+t("m")}else if(lbl)lbl.remove()}
+const fmt=(n,d=2)=>new Intl.NumberFormat(lang==="ar"?"ar-SA":"en",{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+function setMeasure(on){if(on)stopTour();measuring=on;document.body.classList.toggle("measuring",on);$("bMeasure").setAttribute("aria-pressed",on);$("mbar").hidden=!on;if(!on)clearMeasure();mText()}
+function clearMeasure(){mPts=[];drawMeasure();mText()}
+function mText(){$("mText").textContent=mPts.length===2?t("mDoneT")+": "+fmt(mPts[0].distanceTo(mPts[1]))+" "+t("m"):mPts.length?t("mNext"):t("mStart")}
+function measureClick(cx,cy){const p=floorPoint(cx,cy);if(!p){toast(t("mFloorOnly"));return}if(mPts.length>=2)mPts=[];mPts.push(p);drawMeasure();mText()}
+
+/* ======================= LOOP ======================= */
+const $intro=document.getElementById("intro");
+let tourPan=0;
+function frame(ts){requestAnimationFrame(frame);
+  if(anim){const k=Math.min(1,(ts-anim.t0)/anim.ms);anim.fn(k);if(k>=1){const r=anim.r;anim=null;r()}}
+  if(dollOn){dollFrame(ts);return}
+  if(!$intro.hidden&&!$intro.classList.contains('out')&&!busy){lon+=.018;lat+=(-3-lat)*.01;targetFov=68}
+  else if(tourOn&&!tourPaused&&!busy){lon+=tourPan;lat+=(-6-lat)*.01}
+  else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>1500){lon+=.035;lat+=(EYE_LAT-lat)*.015}
+  lat=Math.max(-85,Math.min(85,lat));if(!busy)camera.fov+=(targetFov-camera.fov)*.085;
+  camera.updateProjectionMatrix();camera.lookAt(dirVec(lon,lat).multiplyScalar(100));renderer.render(scene,camera);
+  placeSpots();placeTags();if(mPts.length)drawMeasure();cone()}
+requestAnimationFrame(frame);
+
+/* ======================= INPUT ======================= */
+const ptr=new Map();let sx,sy,sLon,sLat,moved=0,pinch0,fov0;
+stage.addEventListener("pointerdown",e=>{stage.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptr.size===1){sx=e.clientX;sy=e.clientY;sLon=lon;sLat=lat;moved=0}if(ptr.size===2){const[a,b]=[...ptr.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);fov0=targetFov;moved=99}
+  stage.classList.add("drag");lastInteract=performance.now();$("toast").style.opacity=0;closePops()});
+stage.addEventListener("pointermove",e=>{
+  if(!ptr.has(e.pointerId)){if(e.pointerType==="mouse"&&!busy)hoverAt(e.clientX,e.clientY);return}
+  ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptr.size===1){moved=Math.max(moved,Math.hypot(e.clientX-sx,e.clientY-sy));if(moved>6&&tourOn&&!tourPaused)pauseTour(true);const k=camera.fov/innerHeight;lon=sLon-(e.clientX-sx)*k;lat=sLat+(e.clientY-sy)*k;hov.classList.remove("on")}
+  else if(ptr.size===2){const[a,b]=[...ptr.values()];targetFov=Math.max(FMIN,Math.min(FMAX,fov0*pinch0/Math.hypot(a.x-b.x,a.y-b.y)))}lastInteract=performance.now()});
+function up(e){const had=ptr.has(e.pointerId);ptr.delete(e.pointerId);if(!ptr.size)stage.classList.remove("drag");
+  if(had&&!ptr.size&&moved<6&&!busy&&e.type==="pointerup"){if(measuring){measureClick(e.clientX,e.clientY);return}if(tourOn)return;const n=pickFloor(e.clientX,e.clientY);if(n&&n.to[0]==="!"){toast(spotLabel(n.to))}else if(n){hov.classList.remove("on");go(n.to,{brg:n.lo})}else if(!pickFloor.near&&screenDir(e.clientX,e.clientY).y<-.02)toast(t("noView"))}}
+stage.addEventListener("pointerup",up);stage.addEventListener("pointercancel",up);stage.addEventListener("pointerleave",()=>{hoverSpot=null;hov.classList.remove("on");stage.classList.remove("go")});
+stage.addEventListener("wheel",e=>{e.preventDefault();const dy=e.deltaMode===1?e.deltaY*16:e.deltaY;targetFov=Math.max(FMIN,Math.min(FMAX,targetFov*Math.exp(Math.max(-60,Math.min(60,dy))*.0016)));lastInteract=performance.now()},{passive:false});
+addEventListener("keydown",e=>{if(!$("big").hidden){if(e.key==="Escape")closeBig();return}if(dollOn){if(e.key==="Escape")closeDoll();return}
+  if(e.key==="Escape"){if(measuring)setMeasure(false);else if(tourOn)stopTour();closePops();return}
+  if(e.key===" "&&tourOn){e.preventDefault();pauseTour(!tourPaused);return}
+  if(e.key==="ArrowLeft")lon-=8;else if(e.key==="ArrowRight")lon+=8;else if(e.key==="ArrowDown")lat-=6;
+  else if(e.key==="ArrowUp"){const f=spots.filter(s=>Math.abs(norm(s.lo-lon))<35).sort((a,b)=>Math.abs(norm(a.lo-lon))-Math.abs(norm(b.lo-lon)))[0];if(f&&!busy&&!tourOn)go(f.to,{brg:f.lo});else lat+=6}
+  else if(e.key==="+"||e.key==="=")targetFov=Math.max(FMIN,targetFov-8);else if(e.key==="-")targetFov=Math.min(FMAX,targetFov+8);else return;lastInteract=performance.now()});
+
+/* ======================= MAPS ======================= */
+function makeMap(root,labels,onPick){const img=root.querySelector("img"),pins=root.querySelector(".pins");let fi=-1,cn=null;
+  function render(f){fi=f;img.src=FLOORS[f].plan;img.width=FLOORS[f].w;img.height=FLOORS[f].h;pins.innerHTML="";
+    P.filter(p=>p.floor===f).forEach(p=>{const b=document.createElement("button");b.className="pin";b.dataset.id=p.id;b.style.left=p.x+"%";b.style.top=p.y+"%";b.title=nm(p);b.setAttribute("aria-label",nm(p));
+      b.onclick=e=>{e.stopPropagation();if(root.dataset.dragged==="1")return;onPick&&onPick();stopTour();go(p.id)};pins.appendChild(b);
+      if(labels){const l=document.createElement("span");l.className="plbl";l.style.left=p.x+"%";l.style.top=p.y+"%";l.innerHTML=nm(p)+(p.dims?"<small>≈ "+fmt(p.dims[0]*p.dims[1],1)+" "+t("m2")+"</small>":"");pins.appendChild(l)}});
+    cn=document.createElementNS("http://www.w3.org/2000/svg","svg");cn.setAttribute("viewBox","-55 -55 110 110");cn.classList.add("cone");
+    cn.innerHTML='<defs><radialGradient id="g'+root.id+'"><stop offset="0" stop-color="#3f4727" stop-opacity=".8"/><stop offset="1" stop-color="#3f4727" stop-opacity="0"/></radialGradient></defs><path d="M0 0L48-28A56 56 0 0 1 48 28Z" fill="url(#g'+root.id+')"/>';
+    pins.appendChild(cn);mark()}
+  function mark(){pins.querySelectorAll(".pin").forEach(b=>b.setAttribute("aria-current",!!cur&&b.dataset.id===cur.id));if(cn){const on=cur&&cur.floor===fi;cn.style.display=on?"block":"none";if(on){cn.style.left=cur.x+"%";cn.style.top=cur.y+"%"}}}
+  root.addEventListener("click",e=>{if(e.target.closest(".pin")||root.dataset.dragged==="1")return;e.stopPropagation();const b=img.getBoundingClientRect(),f=FLOORS[fi];
+    const x=(e.clientX-b.left)/b.width*100,y=(e.clientY-b.top)/b.height*100;let best=null,bd=1e9;
+    P.filter(p=>p.floor===fi).forEach(p=>{const d=Math.hypot((p.x-x)*f.w,(p.y-y)*f.h);if(d<bd){bd=d;best=p}});
+    if(best&&bd<f.w*.16){onPick&&onPick();stopTour();go(best.id)}});
+  return{render,mark,get floor(){return fi},set rot(a){if(cn)cn.style.transform="rotate("+a+"deg)"}}}
+const mini=makeMap($("miniMap"),true),big=makeMap($("bigMap"),true,()=>closeBig());
+function cone(){mini.rot=lon;big.rot=lon}
+let Z=1,TX=0,TY=0,baseW=0,baseH=0;const bv=$("bigView"),bm=$("bigMap");
+function openBig(){closePops();$("big").hidden=false;big.render(cur.floor);bigFloors();requestAnimationFrame(()=>fitPlan(false))}
+function closeBig(){$("big").hidden=true}
+function fitPlan(focus){const f=FLOORS[big.floor],vw=bv.clientWidth,vh=bv.clientHeight;const k=Math.min(vw/f.w,vh/f.h);baseW=f.w*k;baseH=f.h*k;bm.style.width=baseW+"px";
+  Z=1;TX=(vw-baseW)/2;TY=(vh-baseH)/2;
+  if(focus&&cur&&cur.floor===big.floor){zoomAt(vw/2,vh/2,1.6,true);const px=cur.x/100*baseW*Z,py=cur.y/100*baseH*Z;TX=vw/2-px;TY=vh/2-py}
+  applyZ(false)}
+function clampT(){const vw=bv.clientWidth,vh=bv.clientHeight,w=baseW*Z,h=baseH*Z;
+  TX=w<=vw?(vw-w)/2:Math.min(0,Math.max(vw-w,TX));TY=h<=vh?(vh-h)/2:Math.min(0,Math.max(vh-h,TY))}
+function applyZ(a){clampT();bm.style.transition=a?"transform .35s cubic-bezier(.22,1,.36,1)":"none";bm.style.transform=`translate(${TX}px,${TY}px) scale(${Z})`;bm.style.setProperty("--z",Z)}
+function zoomAt(cx,cy,nz,silent){nz=Math.max(1,Math.min(6,nz));const k=nz/Z;TX=cx-(cx-TX)*k;TY=cy-(cy-TY)*k;Z=nz;if(!silent)applyZ(true)}
+function vpPt(e){const r=bv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+bv.addEventListener("wheel",e=>{e.preventDefault();const[x,y]=vpPt(e);const nz=Math.max(1,Math.min(6,Z*Math.exp(-e.deltaY*.0022)));const k=nz/Z;TX=x-(x-TX)*k;TY=y-(y-TY)*k;Z=nz;applyZ(false)},{passive:false});
+bv.addEventListener("dblclick",e=>{const[x,y]=vpPt(e);zoomAt(x,y,Z<5?Z*2:1)});
+const bp=new Map();let pan0=null,pinchD=0,pinchZ=1,dragMoved=0;
+bv.addEventListener("pointerdown",e=>{bp.set(e.pointerId,vpPt(e));dragMoved=0;bm.dataset.dragged="0";
+  if(bp.size===1)pan0={x:vpPt(e)[0],y:vpPt(e)[1],tx:TX,ty:TY};
+  if(bp.size===2){const[a,b]=[...bp.values()];pinchD=Math.hypot(a[0]-b[0],a[1]-b[1]);pinchZ=Z}});
+bv.addEventListener("pointermove",e=>{if(!bp.has(e.pointerId))return;bp.set(e.pointerId,vpPt(e));
+  if(bp.size===1&&pan0){const[x,y]=vpPt(e);dragMoved=Math.max(dragMoved,Math.hypot(x-pan0.x,y-pan0.y));
+    if(dragMoved>5){if(!bv.hasPointerCapture(e.pointerId))bv.setPointerCapture(e.pointerId);bv.classList.add("drag");bm.dataset.dragged="1";TX=pan0.tx+x-pan0.x;TY=pan0.ty+y-pan0.y;applyZ(false)}}
+  else if(bp.size===2){const[a,b]=[...bp.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2;
+    const nz=Math.max(1,Math.min(6,pinchZ*d/pinchD)),k=nz/Z;TX=cx-(cx-TX)*k;TY=cy-(cy-TY)*k;Z=nz;bm.dataset.dragged="1";applyZ(false)}});
+function bpUp(e){bp.delete(e.pointerId);bv.classList.remove("drag");if(bp.size===1){const p=[...bp.values()][0];pan0={x:p[0],y:p[1],tx:TX,ty:TY}}else if(!bp.size)pan0=null;
+  if(bm.dataset.dragged==="1")setTimeout(()=>bm.dataset.dragged="0",50)}
+bv.addEventListener("pointerup",bpUp);bv.addEventListener("pointercancel",bpUp);
+function setZoom(dir){const r=bv.getBoundingClientRect();zoomAt(r.width/2,r.height/2,Z*(dir>0?1.6:1/1.6))}
+function bigFloors(){const g=$("bigFloors");g.innerHTML="";t("floors").forEach((n,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=n;b.setAttribute("aria-selected",i===big.floor);b.onclick=()=>{big.render(i);bigFloors();fitPlan(false)};g.appendChild(b)})}
+$("miniOpen").onclick=openBig;
+function placeMini(){const m=$("mini"),tl=document.querySelector(".tools");if(!m||!tl)return;m.style.insetInlineEnd="";m.style.insetInlineStart="";
+  requestAnimationFrame(()=>{const a=m.getBoundingClientRect(),b=tl.getBoundingClientRect();if(!a.width||!b.width)return;
+    if(a.top<b.bottom+10&&a.bottom>b.top-10&&a.right>b.left-10&&a.left<b.right+10){const rtl=document.dir==="rtl";
+      m.style.insetInlineStart="auto";m.style.insetInlineEnd=(rtl?b.right+12:innerWidth-b.left+12)+"px"}})}
+addEventListener("resize",()=>{clearTimeout(placeMini.t);placeMini.t=setTimeout(placeMini,120)});
+function miniSize(m){$("mini").classList.toggle("mid",m);placeMini();setTimeout(placeMini,500);$("miniS").setAttribute("aria-pressed",!m);$("miniM").setAttribute("aria-pressed",m);try{localStorage.setItem("anaraMini",m?"m":"s")}catch(e){}}
+$("miniS").onclick=e=>{e.stopPropagation();miniSize(false)};$("miniM").onclick=e=>{e.stopPropagation();miniSize(true)};
+try{if(localStorage.getItem("anaraMini")==="m")miniSize(true)}catch(e){}
+setTimeout(placeMini,400);$("bigClose").onclick=closeBig;
+$("big").addEventListener("click",e=>{if(e.target.id==="big")closeBig()});$("bzIn").onclick=()=>setZoom(1);$("bzOut").onclick=()=>setZoom(-1);
+addEventListener("resize",()=>{if(!$("big").hidden)fitPlan(false)});
+
+/* ======================= ROOM CARD ======================= */
+let showInfo=true;
+function roomCard(anim){if(!cur)return;const p=cur,f=FLOORS[p.floor];const fin=FINISHES[p.id]&&FINISHES[p.id][lang];
+  let h='<div class="'+(anim?"swap":"")+'"><div class="eyebrow"><span>'+t("floors")[p.floor]+'</span></div><h1>'+nm(p)+'</h1>';
+  if(p.dims){const[w,l]=p.dims;h+='<div class="meta"><div><b>'+fmt(w,1)+' × '+fmt(l,1)+' '+t("m")+'</b><span>'+t("size")+'</span></div><div><b>≈ '+fmt(w*l,1)+' '+t("m2")+'</b><span>'+t("area")+'</span></div></div>'}
+  else h+='<div class="meta"><div><b>—</b><span>'+t("open")+'</span></div></div>';
+  if(fin&&fin.length)h+='<ul class="fin">'+fin.map(x=>"<li>"+x+"</li>").join("")+'</ul>';
+  h+='<div class="note">'+t("dimsNote")+'</div></div>';
+  $("roomIn").innerHTML=h;$("room").classList.toggle("collapsed",!showInfo)}
+
+/* ======================= UI ======================= */
+function ui(){if(!cur)return;const f=cur.floor;
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";setTimeout(()=>typeof placeMini==="function"&&placeMini(),60);
+  
+  const fl=$("floors");fl.innerHTML="";t("floors").forEach((n,i)=>{const b=document.createElement("button");b.className="chip";b.role="tab";b.setAttribute("aria-selected",i===f);
+    b.textContent=n;b.onclick=()=>{if(i!==cur.floor){stopTour();go(P.find(p=>p.floor===i).id)}};fl.appendChild(b)});
+  const rs=$("rooms");rs.innerHTML="";P.filter(p=>p.floor===f).forEach(p=>{const b=document.createElement("button");b.className="chip";b.textContent=nm(p);b.setAttribute("aria-current",p===cur);b.onclick=()=>{stopTour();go(p.id)};rs.appendChild(b)});
+  const a=rs.querySelector('[aria-current="true"]');if(a)a.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
+  $("miniFloor").textContent=t("floors")[f];$("miniS").title=$("miniS").ariaLabel=t("mapS");$("miniM").title=$("miniM").ariaLabel=t("mapM");$("miniOpen").title=$("miniOpen").ariaLabel=t("mapL");$("bigFoot").textContent=t("tapPin");
+  $("bTourTxt").textContent=t("tour");$("bFactsTxt").textContent=t("facts");$("bRegTxt").textContent=t("reg");
+  $("iFacts").innerHTML=t("iFacts").map(([a,b])=>"<li><b>"+a+"</b><span>"+b+"</span></li>").join("");$("iByFloor").textContent=t("byFloor");
+  $("iFloors").innerHTML=[["gf-majlis",0],["ff-bed-4",1],["2nd-floor-sitting-area",2]].map(([id,f])=>'<button class="fcard" data-id="'+id+'"><b>'+t("floors")[f]+'</b><em>'+fmt(FLOOR_AREA[f],1)+' '+t("m2")+'</em><small>'+t("fcShort")[f]+'</small></button>').join("");
+  $("iFloors").querySelectorAll(".fcard").forEach(b=>b.onclick=()=>enterHome(()=>{if(b.dataset.id!==cur.id)go(b.dataset.id);else toast(t("hint"))}));$("bootTxt").textContent=t("boot");
+  if(!$("factsPop").hidden)renderFacts();if(!$("regPop").hidden)renderReg();
+  [["zIn","zin"],["zOut","zout"],["bDoll","doll"],["bMeasure","measure"],["bInfo","info"],["bRotate","rotate"],["bSound","sound"],["bShare","share"],["bFull","full"],["bigClose","close"],["bzIn","zin"],["bzOut","zout"]].forEach(([id,k])=>{$(id).dataset.tip=t(k);$(id).setAttribute("aria-label",t(k))});
+  $("bigClose").removeAttribute("data-tip");$("bzIn").removeAttribute("data-tip");$("bzOut").removeAttribute("data-tip");
+  $("iEyebrow").textContent=t("iEyebrow");$("iTitle").textContent=t("proj");$("iSub").textContent=t("iSub");$("enterTxt").textContent=t("enter");$("enterTourTxt").textContent=t("watch");
+  $("mClear").textContent=t("clear");$("mDone").textContent=t("done");mText();
+  $("shTitle").textContent=t("shTitle");$("shText").textContent=t("shText");$("shCopy").textContent=t("copy");$("shClose").textContent=t("close");
+  $("dBackTxt").textContent=t("dBack");$("dHint").textContent=t("dHint");$("tStop").textContent=t("stop");tourUI();
+  document.querySelectorAll(".lang .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===lang));
+  mini.render(f);if(!$("big").hidden){big.render(big.floor);bigFloors()}
+  if(dollOn)dollUI();
+  buildSpots();}
+document.querySelectorAll(".lang .chip").forEach(b=>b.onclick=()=>{lang=b.dataset.l;try{localStorage.setItem("tourLang",lang)}catch(e){}ui();roomCard(false)});
+$("zIn").onclick=()=>{if(dollOn){dDistT=Math.max(10,dDistT*.8);dTouched=true}else targetFov=Math.max(FMIN,targetFov-10)};$("zOut").onclick=()=>{if(dollOn){dDistT=Math.min(80,dDistT*1.25);dTouched=true}else targetFov=Math.min(FMAX,targetFov+10)};
+$("bMeasure").onclick=()=>setMeasure(!measuring);$("mClear").onclick=clearMeasure;$("mDone").onclick=()=>setMeasure(false);
+$("bInfo").onclick=()=>{showInfo=!showInfo;$("bInfo").setAttribute("aria-pressed",showInfo);$("room").classList.toggle("collapsed",!showInfo)};
+$("bRotate").onclick=()=>{autoRotate=!autoRotate;$("bRotate").setAttribute("aria-pressed",autoRotate)};
+$("bFull").onclick=()=>{try{const d=document;(d.fullscreenElement?d.exitFullscreen():d.documentElement.requestFullscreen()).catch(()=>{})}catch(e){}};
+let toastT;function toast(s){const el=$("toast");el.textContent=s;el.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>el.style.opacity=0,2600)}
+
+/* ======================= FLOOR INTRO ======================= */
+let fcT=null,fcLeft=0,fcAt=0;const FC_MS=7500;
+function fcHide(){const el=$("floorCard");clearTimeout(fcT);el.classList.add("out");setTimeout(()=>{if(el.classList.contains("out"))el.hidden=true},600)}
+function fcRun(ms){const i=$("fcProg").firstChild;fcLeft=ms;fcAt=performance.now();i.style.transition="none";i.style.transform="scaleX("+(1-ms/FC_MS)+")";i.offsetWidth;
+  i.style.transition="transform "+ms+"ms linear";i.style.transform="scaleX(1)";clearTimeout(fcT);fcT=setTimeout(fcHide,ms)}
+function floorIntro(f){const el=$("floorCard"),c=t("fc")[f];$("fcEyebrow").textContent=t("floorEyebrow");$("fcTitle").textContent=t("floors")[f];$("fcText").textContent=c.line;
+  $("fcStats").innerHTML=[[fmt(FLOOR_AREA[f],1)+" "+t("m2"),t("fcArea")]].concat(c.stats).map(([v,l])=>'<div><b>'+v+'</b><small>'+l+'</small></div>').join("");
+  $("fcRooms").innerHTML=t("floorText")[f].split(" · ").map(x=>'<span>'+x+'</span>').join("");
+  el.hidden=false;el.offsetWidth;el.classList.remove("out");fcRun(FC_MS)}
+$("floorCard").onclick=fcHide;
+$("floorCard").onmouseenter=()=>{if($("floorCard").hidden)return;clearTimeout(fcT);fcLeft=Math.max(0,fcLeft-(performance.now()-fcAt));const i=$("fcProg").firstChild;i.style.transition="none";i.style.transform="scaleX("+(1-fcLeft/FC_MS)+")"};
+$("floorCard").onmouseleave=()=>{if(!$("floorCard").hidden&&!$("floorCard").classList.contains("out"))fcRun(Math.max(1500,fcLeft))};
+
+/* ======================= KEY FACTS + REGISTER INTEREST ======================= */
+function renderFacts(){const F=t("kf"),A=FLOOR_AREA,tot=A.reduce((x,y)=>x+y,0),mx=Math.max(...A);
+  $("kfEy").textContent=t("kfEy");$("kfTitle").textContent=t("kfTitle");$("kfNote").textContent=t("kfNote");$("kfClose").setAttribute("aria-label",t("close"));
+  const bar=(n,v,m)=>'<div class="bar2"><span class="n">'+n+'</span><span class="tr"><i style="width:'+(v/m*100).toFixed(1)+'%"></i></span><span class="v">'+fmt(v,1)+' '+t("m2")+'</span></div>';
+  const seen={},rooms=P.filter(p=>p.dims&&!/lobby/.test(p.id)&&!seen[p.code]&&(seen[p.code]=1)).map(p=>[p[lang],p.dims[0]*p.dims[1]]).sort((x,y)=>y[1]-x[1]).slice(0,7);
+  $("kfBody").innerHTML='<div class="kfhero">'+F.hero.map(([v,l])=>'<div><b>'+v+'</b><span>'+l+'</span></div>').join("")+'</div>'
+   +'<div class="kfcols"><div class="kfbox"><h4>'+F.byFloor+'<em>'+fmt(tot,1)+' '+t("m2")+'</em></h4><div class="bars big">'+A.map((v,i)=>bar(t("floors")[i],v,mx)).join("")+'</div><div class="split">'+A.map((v,i)=>'<i style="flex:'+v+'"></i>').join("")+'</div><div class="legend">'+A.map((v,i)=>'<span><i class="c'+i+'"></i>'+t("floors")[i]+' <b>'+fmt(v/tot*100,0)+'%</b></span>').join("")+'</div><p class="kfp">'+F.splitNote+'</p></div>'
+   +'<div class="kfbox"><h4>'+F.largest+'<em>'+F.approx+'</em></h4><div class="bars">'+rooms.map(r=>bar(r[0],r[1],rooms[0][1])).join("")+'</div></div></div>'
+   +'<div class="kfbox"><h4>'+F.flTitle+'</h4><div class="kffl">'+F.fl.map((l,i)=>'<div><h4>'+t("floors")[i]+'</h4><ul>'+l.map(x=>'<li>'+x+'</li>').join("")+'</ul></div>').join("")+'</div></div>'
+   +'<div class="kfbox"><h4>'+F.hlTitle+'</h4><div class="kfchips">'+F.hl.map(x=>'<span>'+x+'</span>').join("")+'</div></div>'}
+$("kfClose").onclick=closePops;$("factsPop").addEventListener("click",e=>e.stopPropagation());
+$("bFacts").onclick=e=>{e.stopPropagation();const open=$("factsPop").hidden;closePops();if(open){renderFacts();$("factsPop").hidden=false}};
+let rgPref=0;
+function renderReg(){$("rgTitle").textContent=t("rgTitle");$("rgText").textContent=t("rgText");$("rgNameL").textContent=t("rgName");$("rgPhoneL").textContent=t("rgPhone");
+  $("rgSubmit").textContent=t("rgSubmit");$("rgWa").textContent=t("rgWa");$("rgClose").textContent=t("close");
+  $("rgPref").innerHTML=t("rgPrefs").map((x,i)=>'<button type="button" class="chip" aria-pressed="'+(i===rgPref)+'" data-i="'+i+'">'+x+'</button>').join("");
+  $("rgPref").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{rgPref=+b.dataset.i;renderReg()})}
+$("bReg").onclick=e=>{e.stopPropagation();const open=$("regPop").hidden;closePops();if(open){stopTour();renderReg();$("rgWa").hidden=true;$("rgSubmit").hidden=false;$("rgErr").hidden=true;$("regPop").hidden=false;setTimeout(()=>$("rgName").focus(),50)}};
+$("rgClose").onclick=closePops;
+$("regPop").addEventListener("submit",e=>{e.preventDefault();const n=$("rgName").value.trim(),ph=$("rgPhone").value.replace(/[^\d+]/g,"");
+  if(!n||ph.replace(/\D/g,"").length<9){$("rgErr").textContent=t("rgErr");$("rgErr").hidden=false;return}
+  $("rgErr").hidden=true;
+  const msg=t("rgMsg")+"\n"+t("rgName")+": "+n+"\n"+t("rgPhone")+": "+ph+"\n"+t("rgPrefs")[rgPref]+"\n"+shareURL();
+  $("rgWa").href="https://wa.me/"+(SALES_WHATSAPP||"")+"?text="+encodeURIComponent(msg);$("rgSubmit").hidden=true;$("rgWa").hidden=false;$("rgWa").focus()});
+
+/* ======================= SHARE + ENQUIRE ======================= */
+function viewHash(){return cur.id+"--"+Math.round(((lon%360)+360)%360)+"-"+(lat<0?"n":"")+Math.round(Math.abs(lat))}
+function shareURL(){return (SHARE_BASE||location.href.split("#")[0])+"#"+viewHash()}
+function closePops(){$("sharePop").hidden=true;$("factsPop").hidden=true;$("regPop").hidden=true}
+$("bShare").onclick=e=>{e.stopPropagation();const open=$("sharePop").hidden;closePops();if(!open)return;$("shLink").textContent=shareURL();$("shWa").href="https://wa.me/?text="+encodeURIComponent(t("shareMsg")+" "+shareURL());$("sharePop").hidden=false};
+$("shCopy").onclick=()=>{const u=shareURL();$("shLink").textContent=u;
+  const ok=()=>{toast(t("copied"));closePops()},fail=()=>{const r=document.createRange();r.selectNodeContents($("shLink"));const s=getSelection();s.removeAllRanges();s.addRange(r)};
+  try{navigator.clipboard.writeText(u).then(ok,fail)}catch(err){fail()}};
+$("shClose").onclick=closePops;
+
+
+/* ======================= MUSIC — plays a licensed track file (set MUSIC_SRC); the button stays hidden until one is set ======================= */
+let soundOn=false,aud=null,fadeT=null;
+function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SRC);aud.loop=true;aud.volume=0}
+  clearInterval(fadeT);const p=aud.play();if(p&&p.catch)p.catch(()=>{});fadeT=setInterval(()=>{aud.volume=Math.min(.4,aud.volume+.02);if(aud.volume>=.4)clearInterval(fadeT)},80);return true}
+function stopSound(){if(!aud)return;clearInterval(fadeT);fadeT=setInterval(()=>{aud.volume=Math.max(0,aud.volume-.04);if(aud.volume<=0){clearInterval(fadeT);aud.pause()}},60)}
+if(!MUSIC_SRC)$("bSound").hidden=true;
+let soundUserOff=false;function autoMusic(){if(!soundOn&&!soundUserOff&&startSound()){soundOn=true;$("bSound").setAttribute("aria-pressed",true)}}
+$("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!startSound())soundOn=false}else stopSound();$("bSound").setAttribute("aria-pressed",soundOn)};
+
+/* ======================= GUIDED TOUR ======================= */
+let tourOn=false,tourPaused=false,tourIdx=0,tourTok=0,capNow="",summaryT=null;
+const chapterAt=i=>{for(let j=i;j>=0;j--)if(ROUTE[j].ch!=null)return ROUTE[j].ch;return 0};
+function setCap(txt,head,step,ms){capNow=txt||"";$("cap").hidden=!capNow||!tourOn;if(!capNow)return;
+  $("capCh").textContent=CHAPTERS[chapterAt(tourIdx)][lang];$("capStep").textContent=step||"";$("capHead").hidden=!head;$("capHead").textContent=head||"";$("capTxt").textContent=capNow;
+  const c=$("cap");c.classList.remove("in");void c.offsetWidth;c.classList.add("in");
+  const pr=$("capProg");pr.classList.remove("run");pr.parentNode.hidden=!ms;if(ms){pr.style.setProperty("--d",ms+"ms");void pr.offsetWidth;pr.classList.add("run")}}
+function tourUI(){document.body.classList.toggle("tourpaused",tourOn&&tourPaused);$("tourbar").hidden=!tourOn;document.body.classList.toggle("presenting",tourOn&&!tourPaused);document.body.classList.toggle("touring",tourOn);
+  $("tPlay").innerHTML=tourPaused?'<svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>':'<svg class="i" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>';
+  $("tPlay").setAttribute("aria-label",tourPaused?t("play"):t("pause"));
+  const ch=chapterAt(tourIdx);$("tText").textContent=tourOn?(tourPaused?t("paused")+" · ":"")+CHAPTERS[ch][lang]:"";
+  $("tDots").innerHTML=CHAPTERS.map((_,i)=>'<i class="'+(i===ch?"on":i<ch?"done":"")+'"></i>').join("");
+  if(!tourOn)$("cap").hidden=true;$("bTour").setAttribute("aria-pressed",tourOn)}
+const readMs=s=>Math.max(2800,Math.min(7500,1600+(s||"").length*50));
+function chapterShow(i){const el=$("chap");$("chapNo").textContent=t("chapter").replace("{n}",i+1).replace("{m}",CHAPTERS.length);$("chapTitle").textContent=CHAPTERS[i][lang];
+  el.hidden=false;el.classList.remove("out");void el.offsetWidth}
+function chapterHide(){const el=$("chap");el.classList.add("out");setTimeout(()=>{if(el.classList.contains("out"))el.hidden=true},650)}
+async function hold(ms,ok){let left=ms;while(left>0){await wait(120);if(!ok())return false;if(!tourPaused)left-=120}return ok()}
+async function beat(ms,dLon,la,fov,ok){while(tourPaused){await wait(150);if(!ok())return false}if(!ok())return false;
+  const l0=lon,la0=lat,f0=targetFov;await tween(ms,k=>{const e=ease(k);lon=l0+dLon*e;lat=la0+(la-la0)*e;targetFov=f0+(fov-f0)*e});return ok()}
+
+/* Fly: lift out of the panorama into the 3D model, glide over the plan (and up through the floors) to the next room, then drop back into its 360. */
+async function flyTo(id,chapter,ok){const a=cur,b=byId[id];dollInit();
+  const wa=dollWorld(a),wb=dollWorld(b),brg=Math.atan2(wb.z-wa.z,wb.x-wa.x)*R2D;
+  dCine=true;dollOn=true;dFloor=a.floor;$("doll").classList.add("on","cine");document.body.classList.add("doll");
+  dT.x=wa.x;dT.y=wa.y;dT.z=wa.z;dAz=(lon+180)*D2R;dEl=1.25;dDist=3.2;
+  setCap("");
+  /* rise */
+  const az0=dAz,az1=(brg+180+(b.floor!==a.floor?-35:0))*D2R,daz=Math.atan2(Math.sin(az1-az0),Math.cos(az1-az0));
+  await tween(1500,k=>{const e=ease(k);dDist=3.2+(19-3.2)*e;dEl=1.25-.25*e;dAz=az0+daz*.35*e});if(!ok())return false;
+  if(chapter!=null)chapterShow(chapter);
+  setCap(t("next")+" "+nm(b));
+  const load=go(id,{cut:true});
+  /* glide */
+  const azm=dAz,x0=dT.x,y0=dT.y,z0=dT.z;
+  await tween(b.floor!==a.floor?3400:2600,k=>{const e=ease(k);dT.x=x0+(wb.x-x0)*e;dT.y=y0+(wb.y-y0)*e;dT.z=z0+(wb.z-z0)*e;
+    dDist=19+Math.sin(Math.PI*e)*(b.floor!==a.floor?9:5);dAz=azm+daz*.65*e;if(e>.45)dFloor=b.floor});
+  if(!ok())return false;await load;if(chapter!=null)chapterHide();
+  /* dive back in */
+  const d0=dDist,el0=dEl;
+  await tween(1300,k=>{const e=ease(k);dDist=d0+(2.6-d0)*e;dEl=el0+(.35-el0)*e});
+  lon=dAz*R2D-180;lat=-4;targetFov=FOV0;camera.fov=FOV0;
+  dollOn=false;dCine=false;$("doll").classList.remove("on");document.body.classList.remove("doll");setTimeout(()=>$("doll").classList.remove("cine"),700);
+  return ok()}
+
+async function startTour(from){closePops();closeSummary();if(measuring)setMeasure(false);if(dollOn)closeDoll();
+  tourOn=true;tourPaused=false;const my=++tourTok;tourIdx=from??0;autoRotate=false;$("bRotate").setAttribute("aria-pressed",false);
+  const ok=()=>my===tourTok&&tourOn;
+  while(ok()){const st=ROUTE[tourIdx],id=st.id;tourUI();
+    if(cur.id!==id){
+      const link=spots.find(s=>s.to===id);
+      if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(2300,ok))return;chapterHide()}
+      setCap(link?"":t("next")+" "+nm(byId[id]));await go(id,link?{brg:link.lo}:{});
+      if(!ok())return}
+    else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(2300,ok))return;chapterHide()}
+    tourUI();
+    for(const [bi,[u,la,fov,c]] of st.b.entries()){const [head,txt]=c[lang];const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1800,Math.min(3200,1000+Math.abs(dl0)*13)),rd=readMs(head+" "+txt)+300;setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+      if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1800,Math.min(3200,1000+Math.abs(dl)*13)),dl,la,fov,ok))return}
+      if(!await hold(rd,ok))return}
+    if(!ok())return;
+    if(!reduceMotion()&&!await beat(1400,0,-4,75,ok))return;
+    if(tourIdx===ROUTE.length-1){endTour();return}
+    tourIdx++}}
+function pauseTour(p){if(!tourOn)return;tourPaused=p;if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
+function stopTour(){if(!tourOn)return;tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
+  if(dCine){dCine=false;dollOn=false;anim=null;busy=false;$("doll").classList.remove("on","cine");document.body.classList.remove("doll")}tourUI()}
+/* end of tour: the key selling points; replays by itself after a while (for screens in the sales centre) */
+function endTour(){stopTour();const S=SUMMARY[lang];$("sumTitle").textContent=S.title;$("sumList").innerHTML=S.items.map(x=>"<li>"+x+"</li>").join("");
+  $("sumReplay").textContent=S.replay;$("sumExplore").textContent=S.explore;$("sumLead").textContent=S.lead;$("sumCta").textContent=S.cta;$("sumCta").href=ANARA_URL.replace("/en/","/"+lang+"/");$("summary").hidden=false;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);
+  clearTimeout(summaryT);summaryT=setTimeout(()=>{if(!$("summary").hidden)startTour(0)},20000)}
+function closeSummary(){clearTimeout(summaryT);$("summary").hidden=true}
+$("sumReplay").onclick=()=>startTour(0);$("sumExplore").onclick=closeSummary;
+$("bTour").onclick=()=>tourOn?stopTour():startTour(Math.max(0,ROUTE.findIndex(r=>r.id===cur.id)));
+$("tPlay").onclick=()=>pauseTour(!tourPaused);$("tStop").onclick=stopTour;
+document.addEventListener("pointermove",()=>{if(tourOn&&!tourPaused){document.body.classList.remove("presenting");clearTimeout(window._pt);window._pt=setTimeout(()=>{if(tourOn&&!tourPaused)document.body.classList.add("presenting")},2500)}});
+
+/* ======================= 3D DOLLHOUSE — the three floor plans stacked in space ======================= */
+/* Each plan's real width in metres and the stair-void position (%), used to stack the floors on top of each other. */
+const DOLL=[{w:16.1,vx:86,vy:36,y:0},{w:11.5,vx:81,vy:35,y:6.2},{w:13.3,vx:82,vy:33,y:12.4}];
+/* Walls traced from the architectural plans (C_AR_Plans), on a grid of c metres: runs = [row, col start, col end) */
+const WALLS={"ground":{"c":0.08,"cols":201,"rows":207,"runs":[[0,56,98],[0,109,131],[0,142,195],[1,56,99],[1,108,132],[1,141,196],[2,56,100],[2,107,133],[2,140,197],[3,56,59],[3,169,171],[4,56,59],[4,169,171],[5,56,59],[5,102,103],[5,104,105],[5,135,136],[5,137,138],[5,169,171],[5,199,200],[6,56,59],[6,102,105],[6,135,138],[6,169,171],[6,199,201],[7,56,59],[7,102,105],[7,135,138],[7,169,171],[7,199,201],[8,56,59],[8,102,105],[8,135,138],[8,169,171],[8,199,201],[9,56,59],[9,102,105],[9,135,138],[9,169,171],[9,199,201],[10,56,59],[10,102,105],[10,135,138],[10,169,171],[10,199,201],[11,56,59],[11,102,105],[11,135,138],[11,169,171],[11,199,201],[12,56,59],[12,102,105],[12,135,138],[12,169,171],[12,199,201],[13,56,59],[13,102,105],[13,135,138],[13,169,171],[13,199,201],[14,56,59],[14,102,105],[14,199,201],[15,56,59],[15,102,105],[15,199,201],[16,56,59],[16,102,105],[16,199,201],[17,102,105],[17,199,201],[18,102,105],[18,199,201],[19,102,105],[19,199,201],[20,102,105],[20,199,201],[21,102,105],[21,199,201],[22,102,105],[22,199,201],[23,102,105],[23,199,201],[24,102,105],[24,135,138],[24,169,171],[24,199,201],[25,102,111],[25,121,171],[25,199,201],[26,102,111],[26,121,171],[26,199,201],[27,102,111],[27,121,171],[27,199,201],[28,147,150],[28,169,171],[28,199,201],[29,169,173],[29,182,201],[30,169,171],[30,199,201],[31,169,171],[31,199,201],[32,56,59],[32,169,171],[32,199,201],[33,56,59],[33,169,171],[33,199,201],[34,56,59],[34,169,171],[34,199,201],[35,56,59],[35,169,171],[35,199,201],[36,56,59],[36,169,171],[36,199,201],[37,56,59],[37,169,171],[37,199,201],[38,56,59],[38,169,171],[38,199,201],[39,56,59],[39,102,105],[39,123,125],[39,147,150],[39,169,171],[39,199,201],[40,56,59],[40,102,105],[40,123,125],[40,147,150],[40,169,171],[40,199,201],[41,56,59],[41,102,105],[41,123,125],[41,147,150],[41,169,171],[41,199,201],[42,56,59],[42,102,105],[42,123,125],[42,147,150],[42,169,171],[42,199,201],[43,56,59],[43,102,105],[43,123,125],[43,147,150],[43,169,171],[43,199,201],[44,56,59],[44,102,105],[44,123,125],[44,147,150],[44,169,171],[44,199,201],[45,56,59],[45,102,105],[45,123,125],[45,147,150],[45,169,171],[45,199,201],[46,56,107],[46,121,201],[47,56,107],[47,121,201],[48,56,107],[48,121,201],[49,56,59],[49,199,201],[50,56,59],[50,199,201],[51,56,59],[51,199,201],[52,56,59],[52,199,201],[53,56,59],[53,199,201],[54,56,59],[54,199,201],[55,56,59],[55,199,201],[56,56,59],[56,199,201],[57,56,59],[57,199,201],[58,56,59],[58,199,201],[59,199,201],[60,199,201],[61,199,201],[62,199,201],[63,199,201],[64,199,201],[65,199,201],[66,199,201],[67,199,201],[68,199,201],[69,199,201],[70,199,201],[71,199,201],[72,199,201],[73,199,201],[74,199,201],[75,199,201],[76,199,201],[77,199,201],[78,199,201],[79,199,201],[80,199,201],[81,199,201],[82,199,201],[83,56,59],[83,199,201],[84,56,59],[84,199,201],[85,56,59],[85,199,201],[86,56,59],[86,199,201],[87,56,59],[87,199,201],[88,56,59],[88,199,201],[89,56,59],[89,199,201],[90,56,59],[90,199,201],[91,56,59],[91,199,201],[92,56,59],[92,199,201],[93,56,97],[93,199,201],[94,56,97],[94,199,201],[95,56,96],[95,199,201],[96,81,84],[96,199,201],[97,199,201],[98,199,201],[99,199,201],[100,199,201],[101,199,201],[102,199,201],[103,121,201],[104,121,201],[105,121,201],[106,121,124],[106,140,143],[106,199,201],[107,121,124],[107,140,143],[107,199,201],[108,121,124],[108,140,143],[108,199,201],[109,81,84],[109,121,124],[109,140,143],[109,199,201],[110,81,95],[110,110,124],[110,140,143],[110,199,201],[111,81,95],[111,110,124],[111,140,143],[111,199,201],[112,69,84],[112,121,124],[112,140,143],[112,199,201],[113,69,95],[113,110,124],[113,140,143],[113,199,201],[114,69,72],[114,121,124],[114,140,143],[114,199,201],[115,69,72],[115,121,124],[115,140,143],[115,199,201],[116,69,72],[116,121,124],[116,140,143],[116,199,201],[117,69,72],[117,121,124],[117,140,143],[117,199,201],[118,69,72],[118,121,124],[118,140,143],[118,199,201],[119,69,72],[119,121,124],[119,140,143],[119,199,201],[120,69,72],[120,121,124],[120,140,143],[120,199,201],[121,69,72],[121,121,124],[121,140,143],[121,199,201],[122,69,72],[122,121,124],[122,140,143],[122,199,201],[123,69,72],[123,121,124],[123,140,143],[123,199,201],[124,69,72],[124,121,124],[124,140,143],[124,199,201],[125,69,72],[125,121,124],[125,140,143],[125,199,201],[126,69,72],[126,121,124],[126,140,143],[126,199,201],[127,69,72],[127,121,129],[127,139,143],[127,199,201],[128,69,72],[128,121,129],[128,139,143],[128,199,201],[129,69,72],[129,121,124],[129,140,143],[129,199,201],[130,69,72],[130,121,124],[130,140,143],[130,199,201],[131,69,72],[131,121,124],[131,199,201],[132,69,72],[132,121,124],[132,199,201],[133,69,72],[133,121,124],[133,199,201],[134,69,72],[134,199,201],[135,69,72],[135,199,201],[136,69,72],[136,199,201],[137,69,72],[137,199,201],[138,69,72],[138,199,201],[139,69,72],[139,199,201],[140,69,72],[140,199,201],[141,69,72],[141,199,201],[142,69,72],[142,199,201],[143,69,72],[143,121,124],[143,140,143],[143,199,201],[144,69,72],[144,121,124],[144,140,143],[144,199,201],[145,69,72],[145,121,124],[145,140,143],[145,199,201],[146,69,72],[146,121,124],[146,140,143],[146,199,201],[147,69,72],[147,121,124],[147,140,143],[147,199,201],[148,69,72],[148,121,124],[148,140,143],[148,199,201],[149,69,72],[149,121,124],[149,140,143],[149,199,201],[150,69,72],[150,121,124],[150,140,143],[150,199,201],[151,69,72],[151,121,124],[151,140,143],[151,199,201],[152,69,84],[152,109,128],[152,136,144],[152,156,165],[152,190,201],[153,69,84],[153,109,128],[153,136,144],[153,156,165],[153,190,201],[174,139,201],[175,139,201],[176,139,201],[177,139,141],[177,162,165],[177,199,201],[178,139,141],[178,162,165],[178,199,201],[179,139,141],[179,162,165],[179,199,201],[180,139,141],[180,162,165],[180,199,201],[181,139,141],[181,199,201],[182,139,141],[182,199,201],[183,139,141],[183,199,201],[184,139,141],[184,199,201],[185,139,141],[185,199,201],[186,139,141],[186,199,201],[187,139,141],[187,199,201],[188,139,141],[188,199,201],[189,139,141],[189,162,165],[189,199,201],[190,139,141],[190,162,165],[190,199,201],[191,139,141],[191,162,165],[191,199,201],[192,139,141],[192,162,165],[192,199,201],[193,139,141],[193,162,165],[193,199,201],[194,139,141],[194,162,165],[194,199,201],[195,139,141],[195,162,165],[195,199,201],[196,139,141],[196,162,165],[196,199,201],[197,139,141],[197,162,165],[197,199,201],[198,139,165],[198,199,201],[199,139,165],[199,199,201],[200,139,165],[200,199,201],[201,139,141],[201,162,165],[201,199,201],[202,139,141],[202,162,165],[202,199,201],[203,139,141],[203,162,165],[203,199,201],[204,139,141],[204,162,165],[204,198,201],[205,139,141],[205,162,174],[205,198,201],[206,139,141],[206,162,174],[206,184,201]]},"first":{"c":0.08,"cols":143,"rows":144,"runs":[[0,6,143],[1,5,143],[2,107,110],[2,142,143],[3,107,110],[3,142,143],[4,2,3],[4,107,110],[4,142,143],[5,1,3],[5,107,110],[5,142,143],[6,0,3],[6,107,110],[6,142,143],[7,0,3],[7,107,110],[7,142,143],[8,0,3],[8,107,110],[8,142,143],[9,0,3],[9,107,110],[9,142,143],[10,0,3],[10,142,143],[11,0,3],[11,142,143],[12,0,3],[12,142,143],[13,0,3],[13,142,143],[14,0,3],[14,142,143],[15,0,3],[15,142,143],[16,0,3],[16,142,143],[17,0,3],[17,142,143],[18,0,3],[18,142,143],[19,0,3],[19,142,143],[20,107,110],[20,142,143],[21,86,94],[21,105,143],[22,86,94],[22,105,143],[23,86,94],[23,105,143],[24,86,89],[24,142,143],[25,53,89],[25,142,143],[26,53,89],[26,142,143],[27,53,56],[27,86,89],[27,142,143],[28,53,56],[28,86,89],[28,142,143],[29,53,56],[29,86,89],[29,142,143],[30,53,56],[30,86,89],[30,142,143],[31,53,56],[31,86,89],[31,142,143],[32,53,56],[32,86,89],[32,142,143],[33,53,56],[33,86,89],[33,142,143],[34,53,56],[34,86,89],[34,142,143],[35,53,56],[35,86,89],[35,142,143],[36,53,56],[36,86,89],[36,142,143],[37,0,3],[37,53,56],[37,86,89],[37,142,143],[38,0,3],[38,53,56],[38,86,89],[38,142,143],[39,0,3],[39,53,56],[39,86,89],[39,142,143],[40,0,3],[40,53,56],[40,86,89],[40,142,143],[41,0,3],[41,53,56],[41,86,89],[41,142,143],[42,1,3],[42,53,56],[42,86,89],[42,142,143],[43,2,3],[43,53,56],[43,86,89],[43,142,143],[44,53,56],[44,86,89],[44,142,143],[45,53,56],[45,86,89],[45,142,143],[46,5,57],[46,67,89],[46,142,143],[47,6,57],[47,67,89],[47,142,143],[48,5,57],[48,67,89],[48,142,143],[49,70,72],[49,142,143],[50,70,72],[50,142,143],[51,2,3],[51,70,72],[51,142,143],[52,1,3],[52,70,72],[52,142,143],[53,0,3],[53,70,72],[53,142,143],[54,0,3],[54,142,143],[55,0,3],[55,142,143],[56,0,3],[56,142,143],[57,0,3],[57,142,143],[58,142,143],[59,142,143],[60,142,143],[61,142,143],[62,142,143],[63,142,143],[64,142,143],[65,70,72],[65,142,143],[66,43,74],[66,85,89],[66,142,143],[67,43,74],[67,85,89],[67,142,143],[68,43,74],[68,85,89],[68,142,143],[69,43,46],[69,63,66],[69,86,89],[69,142,143],[70,43,46],[70,63,66],[70,86,89],[70,142,143],[71,43,46],[71,63,66],[71,86,89],[71,142,143],[72,43,46],[72,63,66],[72,86,89],[72,142,143],[73,43,46],[73,63,66],[73,86,89],[73,142,143],[74,43,46],[74,63,66],[74,86,89],[74,142,143],[75,0,3],[75,43,46],[75,63,66],[75,86,89],[75,142,143],[76,0,3],[76,43,46],[76,63,66],[76,86,89],[76,142,143],[77,0,3],[77,43,46],[77,63,66],[77,86,89],[77,142,143],[78,0,3],[78,43,46],[78,63,66],[78,86,90],[78,101,143],[79,0,3],[79,43,46],[79,63,66],[79,86,90],[79,101,143],[80,0,3],[80,43,46],[80,63,66],[80,86,89],[80,109,112],[80,142,143],[81,0,3],[81,43,46],[81,63,66],[81,86,89],[81,110,112],[81,142,143],[82,0,3],[82,43,46],[82,63,66],[82,86,89],[82,110,112],[82,142,143],[83,0,3],[83,43,46],[83,63,66],[83,86,89],[83,110,112],[83,142,143],[84,0,3],[84,43,46],[84,63,66],[84,86,89],[84,110,112],[84,142,143],[85,0,3],[85,43,46],[85,63,66],[85,86,89],[85,110,112],[85,142,143],[86,0,3],[86,43,46],[86,63,66],[86,86,89],[86,110,112],[86,142,143],[87,0,3],[87,43,46],[87,63,66],[87,86,89],[87,110,112],[87,142,143],[88,0,3],[88,43,46],[88,86,89],[88,142,143],[89,0,3],[89,43,46],[89,86,89],[89,142,143],[90,0,3],[90,43,46],[90,86,89],[90,142,143],[91,0,3],[91,43,46],[91,86,89],[91,142,143],[92,0,3],[92,43,46],[92,86,89],[92,142,143],[93,0,3],[93,43,46],[93,86,89],[93,142,143],[94,0,3],[94,43,46],[94,86,89],[94,142,143],[95,0,3],[95,43,46],[95,86,89],[95,142,143],[96,0,3],[96,43,46],[96,86,89],[96,142,143],[97,0,3],[97,43,46],[97,86,89],[97,142,143],[98,0,3],[98,43,46],[98,63,66],[98,86,89],[98,110,112],[98,142,143],[99,0,66],[99,86,89],[99,110,143],[100,0,66],[100,86,89],[100,110,143],[101,0,66],[101,86,89],[101,110,143],[102,27,30],[102,86,89],[102,142,143],[103,27,30],[103,86,89],[103,142,143],[104,27,30],[104,86,89],[104,142,143],[105,27,30],[105,86,89],[105,142,143],[106,27,30],[106,86,89],[106,142,143],[107,27,30],[107,86,89],[107,142,143],[108,27,30],[108,86,89],[108,142,143],[109,27,30],[109,86,89],[109,142,143],[110,27,30],[110,86,89],[110,142,143],[111,86,89],[111,142,143],[112,86,89],[112,142,143],[113,86,89],[113,142,143],[114,86,89],[114,142,143],[115,86,89],[115,142,143],[116,86,89],[116,142,143],[117,86,89],[117,142,143],[118,86,89],[118,142,143],[119,86,89],[119,142,143],[120,86,89],[120,142,143],[121,86,89],[121,142,143],[122,86,89],[122,142,143],[123,86,89],[123,142,143],[124,86,89],[124,142,143],[125,86,89],[125,142,143],[126,86,89],[126,142,143],[127,86,89],[127,142,143],[128,86,89],[128,142,143],[129,86,89],[129,142,143],[130,86,89],[130,142,143],[131,27,30],[131,86,89],[131,142,143],[132,27,30],[132,86,89],[132,142,143],[133,27,30],[133,86,89],[133,142,143],[134,27,30],[134,86,89],[134,142,143],[135,27,30],[135,86,89],[135,142,143],[136,27,30],[136,86,89],[136,142,143],[137,27,30],[137,86,89],[137,142,143],[138,27,30],[138,86,89],[138,142,143],[139,27,30],[139,86,89],[139,142,143],[140,27,60],[140,77,89],[140,142,143],[141,27,60],[141,77,89],[141,142,143],[142,27,60],[142,77,89],[142,142,143],[143,86,89],[143,142,143]]},"second":{"c":0.08,"cols":166,"rows":152,"runs":[[22,105,111],[22,122,162],[23,105,111],[23,122,161],[24,105,111],[24,122,160],[25,105,108],[26,105,108],[27,105,108],[28,105,108],[29,105,108],[30,105,108],[31,105,108],[32,105,108],[33,105,108],[34,105,108],[35,105,108],[36,105,108],[37,105,108],[38,105,108],[39,43,108],[40,43,108],[41,43,46],[41,85,87],[41,105,108],[42,43,46],[42,85,87],[42,105,108],[43,43,46],[43,85,87],[43,105,108],[44,43,46],[44,85,87],[44,105,108],[45,43,46],[45,85,87],[45,105,108],[46,43,46],[46,85,87],[46,105,108],[47,43,46],[47,85,88],[47,105,108],[48,43,46],[48,85,87],[48,105,108],[49,43,46],[49,85,87],[49,105,108],[50,85,87],[50,105,108],[51,85,87],[51,105,108],[52,85,87],[52,105,108],[53,105,108],[54,105,108],[55,105,108],[56,105,108],[57,105,108],[58,105,108],[59,105,108],[60,105,108],[61,105,108],[62,105,108],[63,105,111],[63,122,159],[64,105,111],[64,122,158],[65,85,88],[65,105,111],[65,122,159],[66,85,88],[67,85,88],[68,43,46],[68,85,88],[69,43,46],[69,85,88],[70,43,46],[70,85,88],[71,43,46],[71,85,88],[72,43,46],[72,85,88],[73,43,46],[73,85,88],[74,43,46],[74,85,88],[75,43,46],[75,85,88],[76,43,46],[76,85,88],[77,43,46],[77,85,88],[78,43,46],[78,85,88],[79,43,46],[79,85,88],[80,43,46],[80,85,88],[81,43,46],[81,85,88],[82,43,46],[82,85,88],[83,43,46],[83,85,88],[83,105,108],[84,43,46],[84,85,88],[84,105,108],[85,43,46],[85,85,88],[85,105,108],[86,43,46],[86,85,88],[86,105,108],[87,43,46],[87,85,88],[87,105,108],[88,43,46],[88,85,88],[88,105,108],[89,43,46],[89,85,88],[89,105,108],[90,43,46],[90,85,88],[90,105,108],[91,43,46],[91,85,94],[91,104,108],[92,43,46],[92,85,94],[92,104,108],[93,43,46],[93,85,94],[93,104,108],[94,43,46],[94,85,88],[94,105,108],[95,43,46],[95,85,88],[95,105,108],[96,43,46],[96,85,88],[96,105,108],[97,43,46],[97,85,88],[97,105,108],[98,43,46],[98,85,88],[98,105,108],[99,43,46],[99,85,88],[99,105,108],[100,43,46],[100,85,88],[100,105,108],[101,43,56],[101,76,88],[101,105,108],[102,43,56],[102,76,88],[102,105,108],[103,43,56],[103,76,88],[103,105,108],[104,85,88],[104,105,108],[105,85,88],[105,105,108],[106,85,87],[106,105,108],[107,85,88],[107,105,108],[108,85,88],[108,105,108],[109,85,88],[109,105,108],[110,85,88],[110,105,108],[111,85,88],[111,105,108],[112,85,88],[112,105,108],[113,85,88],[113,105,108],[114,85,88],[114,105,108],[115,85,88],[115,105,108],[116,85,88],[116,105,108],[117,85,88],[117,105,108],[118,85,88],[118,105,108],[119,85,114],[119,134,160],[120,85,114],[120,134,161],[121,85,114],[121,134,162]]}};const WALL_H=.95;
+let dollOn=false,dCine=false,dr=null,dScene,dCam,dPlanes=[],dAz=-.7,dEl=.62,dDist=40,dAzT=-.7,dElT=.62,dDistT=40,dPan={x:0,z:0},dTouched=false,dT={x:0,y:6.2,z:0},dFloor=-1,dLast=0;
+function dollInit(){if(dr)return;const cv=document.createElement("canvas");$("doll").prepend(cv);
+  dr=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});dr.setPixelRatio(Math.min(devicePixelRatio,2));dr.outputEncoding=THREE.sRGBEncoding;
+  dScene=new THREE.Scene();dCam=new THREE.PerspectiveCamera(36,1,.1,500);
+  dScene.add(new THREE.HemisphereLight(0xffffff,0xb9ad9b,.85));
+  const sun=new THREE.DirectionalLight(0xfff6e8,.75);sun.position.set(-14,26,10);dScene.add(sun);
+  const box=new THREE.BoxGeometry(1,1,1),m4=new THREE.Matrix4();
+  FLOORS.forEach((f,i)=>{const d=DOLL[i],w=d.w,h=w*f.h/f.w,g=new THREE.Group();
+    const lt=new THREE.Texture();assetURL(f.plan).then(src=>new THREE.TextureLoader().load(src,x=>{lt.image=x.image;lt.encoding=THREE.sRGBEncoding;lt.anisotropy=dr.capabilities.getMaxAnisotropy();lt.needsUpdate=true}));
+    const plane=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:lt,transparent:true,alphaTest:.04}));plane.rotation.x=-Math.PI/2;plane.position.y=.01;
+    /* walls: one instanced box per traced run */
+    const W=WALLS[["ground","first","second"][i]],kx=w/(W.cols*W.c),kz=h/(W.rows*W.c);
+    const wm=new THREE.MeshStandardMaterial({color:0xece6d8,roughness:.85,metalness:0,transparent:true});
+    const inst=new THREE.InstancedMesh(box,wm,W.runs.length);
+    W.runs.forEach(([r,c0,c1],j)=>{const len=(c1-c0)*W.c*kx,dep=W.c*kz*1.02;
+      m4.makeScale(len,WALL_H,dep);m4.setPosition((c0+c1)/2*W.c*kx-w/2,WALL_H/2,(r+.5)*W.c*kz-h/2);inst.setMatrixAt(j,m4)});
+    /* thin slab under the floor so each level reads as a solid plate */
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(w,.28,h),new THREE.MeshStandardMaterial({color:0xe4dfd0,roughness:1,transparent:true}));slab.position.y=-.15;
+    g.add(slab);g.add(plane);g.add(inst);g.position.set(-(d.vx/100*w-w/2),d.y,-(d.vy/100*h-h/2));dScene.add(g);
+    dPlanes.push({g,plane,inst,slab,w,h,f:i,op:1})});
+  const cv2=cv,pts=new Map();let g0=null;
+  const gest=()=>{const a=[...pts.values()];if(a.length===1)return{x:a[0].x,y:a[0].y,d:0};const [p,q]=a;return{x:(p.x+q.x)/2,y:(p.y+q.y)/2,d:Math.hypot(p.x-q.x,p.y-q.y)}};
+  const begin=()=>{g0={...gest(),az:dAzT,el:dElT,dist:dDistT,px:dPan.x,pz:dPan.z,n:pts.size}};
+  cv2.addEventListener("contextmenu",e=>e.preventDefault());
+  cv2.addEventListener("pointerdown",e=>{cv2.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===2||e.shiftKey});begin();cv2.classList.add("drag");dTouched=true;dLast=performance.now()});
+  cv2.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;const o=pts.get(e.pointerId);o.x=e.clientX;o.y=e.clientY;const g=gest(),dx=g.x-g0.x,dy=g.y-g0.y;
+    const pan=g0.n>1||o.pan;
+    if(pan){const k=g0.dist*.0016,ca=Math.cos(dAz),sa=Math.sin(dAz);dPan.x=g0.px+(dx*sa-dy*ca)*k;dPan.z=g0.pz+(-dx*ca-dy*sa)*k;
+      if(g0.n>1&&g0.d>0&&g.d>0)dDistT=Math.max(10,Math.min(80,g0.dist*g0.d/g.d))}
+    else{dAzT=g0.az-dx*.007;dElT=Math.max(.18,Math.min(1.45,g0.el+dy*.006))}
+    dLast=performance.now()});
+  const end=e=>{pts.delete(e.pointerId);if(pts.size)begin();else cv2.classList.remove("drag")};cv2.addEventListener("pointerup",end);cv2.addEventListener("pointercancel",end);
+  cv2.addEventListener("wheel",e=>{e.preventDefault();const dy=e.deltaMode===1?e.deltaY*16:e.deltaY;dDistT=Math.max(10,Math.min(80,dDistT*Math.exp(Math.max(-80,Math.min(80,dy))*.0018)));dTouched=true;dLast=performance.now()},{passive:false});
+  cv2.addEventListener("dblclick",()=>{dPan.x=0;dPan.z=0;dDistT=40;dElT=.9});
+  $("dBack").onclick=closeDoll}
+function dollWorld(p){const d=DOLL[p.floor],pl=dPlanes[p.floor];return new THREE.Vector3(pl.g.position.x+(p.x/100*pl.w-pl.w/2),d.y+.15,pl.g.position.z+(p.y/100*pl.h-pl.h/2))}
+function dollUI(){const hd=$("dFloors");hd.innerHTML="";[t("all"),...t("floors")].forEach((n,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=n;b.setAttribute("aria-selected",dFloor===i-1);
+    b.onclick=()=>{dFloor=i-1;dollUI();dLast=performance.now()};hd.appendChild(b)});
+  const pe=$("dpins");pe.innerHTML="";P.forEach(p=>{const el=document.createElement("button");el.className="dpin"+(p===cur?" cur":"");el.dataset.id=p.id;el.innerHTML="<i></i><b>"+nm(p)+"</b>";el.setAttribute("aria-label",nm(p));
+    el.onclick=()=>{closeDoll(p.id)};pe.appendChild(el)})}
+function openDoll(){closePops();stopTour();if(measuring)setMeasure(false);dollInit();dollOn=true;dFloor=cur?cur.floor:-1;dollUI();
+  $("doll").classList.add("on");$("doll").setAttribute("aria-hidden","false");document.body.classList.add("doll");$("bDoll").setAttribute("aria-pressed",true);
+  dAz=dAzT=-(lon+90)*D2R;dEl=dElT=.9;dDist=dDistT=40;dPan.x=dPan.z=0;dTouched=false;dLast=0}
+function closeDoll(id){dollOn=false;$("doll").classList.remove("on");$("doll").setAttribute("aria-hidden","true");document.body.classList.remove("doll");$("bDoll").setAttribute("aria-pressed",false);
+  if(typeof id==="string"&&cur&&id!==cur.id)go(id)}
+$("bDoll").onclick=()=>dollOn?closeDoll():openDoll();
+function dollFrame(ts){if(!dr)return;const w=innerWidth,h=innerHeight;if(dr.domElement.width!==Math.round(w*dr.getPixelRatio())){dr.setSize(w,h,false)}dCam.aspect=w/h;dCam.updateProjectionMatrix();
+  let dist=dDist;
+  if(!dCine){if(!dTouched&&ts-dLast>2500)dAzT+=.0014;dAz+=(dAzT-dAz)*.16;dEl+=(dElT-dEl)*.16;dDist+=(dDistT-dDist)*.14;const ty=dFloor<0?DOLL[1].y:DOLL[dFloor].y;dT.y+=(ty-dT.y)*.08;dT.x+=(dPan.x-dT.x)*.16;dT.z+=(dPan.z-dT.z)*.16;dist=dFloor<0?dDist:dDist*.58}
+  dCam.position.set(dT.x+Math.cos(dAz)*Math.cos(dEl)*dist,dT.y+Math.sin(dEl)*dist,dT.z+Math.sin(dAz)*Math.cos(dEl)*dist);dCam.lookAt(dT.x,dT.y,dT.z);
+  dPlanes.forEach(pl=>{const above=dFloor>=0&&pl.f>dFloor,below=dFloor>=0&&pl.f<dFloor;const op=above?0:(below?.12:1);pl.op+=(op-pl.op)*.12;
+    const vis=pl.op>.02;pl.g.visible=vis;pl.plane.material.opacity=pl.op;pl.inst.material.opacity=pl.op;pl.slab.material.opacity=pl.op;
+    pl.inst.material.depthWrite=pl.op>.9;pl.slab.material.depthWrite=pl.op>.9});
+  dr.render(dScene,dCam);
+  document.querySelectorAll(".dpin").forEach(el=>{const p=byId[el.dataset.id],v=dollWorld(p).project(dCam);const show=(dFloor<0||p.floor===dFloor)&&v.z<1;
+    el.classList.toggle("dim",!show);if(show)el.style.transform=`translate(${((v.x+1)/2*w).toFixed(1)}px,${((1-v.y)/2*h).toFixed(1)}px)`})}
+
+/* ======================= START ======================= */
+addEventListener("hashchange",()=>{const m=location.hash.slice(1).match(/^(.+?)(?:--.*)?$/);const id=m&&m[1];if(byId[id]&&cur&&id!==cur.id)go(id)});
+const hm=location.hash.slice(1).match(/^(.+?)(?:--(\d+)-(n?)(\d+))?$/);
+const hashId=hm&&byId[hm[1]]?hm[1]:null;const hLon=hm&&hm[2]!=null?+hm[2]:undefined,hLat=hm&&hm[4]!=null?(hm[3]?-1:1)*+hm[4]:undefined;
+const start=hashId||"gf-majlis";
+/* branded loading screen until the first view (and its neighbours) are ready */
+let bootP=.08;const bootTick=setInterval(()=>{bootP=Math.min(.9,bootP+.04);$("bootFill").style.width=bootP*100+"%"},180);
+function bootDone(){clearInterval(bootTick);$("bootFill").style.width="100%";setTimeout(()=>{$("boot").classList.add("out");setTimeout(()=>$("boot").hidden=true,800)},350)}
+setTimeout(bootDone,9000);
+go(start,{first:true,lon:hLon??(start==="gf-majlis"?-36:undefined),lat:hLat}).then(()=>Promise.race([Promise.all((SPOTS[start]||[]).slice(0,2).map(x=>tex("pano_"+x[2]+".jpg").catch(()=>{}))),wait(2500)])).then(()=>{bootDone();if(hashId){$("intro").hidden=true;toast(t("hint"))}});
+function enterHome(then){autoMusic();const it=$("intro");it.classList.add("out");setTimeout(()=>it.hidden=true,900);targetFov=FOV0;
+  const s=spheres[front],dir=dirVec(lon,0);busy=true;s.position.copy(dir).multiplyScalar(R*.5);camera.fov=58;
+  return tween(reduceMotion()?1:1800,k=>{const e=1-Math.pow(1-k,3);s.position.copy(dir).multiplyScalar(R*.5*(1-e));camera.fov=58+(targetFov-58)*e}).then(()=>{s.position.set(0,0,0);busy=false;then&&then()})}
+$("enter").onclick=()=>enterHome(()=>toast(t("hint")));
+/* logo: back to the start — the majlis entrance and the welcome card */
+$("home").onclick=()=>{stopTour();closeSummary();if(dollOn)closeDoll();closeBig();closePops();if(measuring)setMeasure(false);
+  const show=()=>{lon=-36;lat=-5;targetFov=68;const it=$("intro");it.hidden=false;it.classList.remove("out");const inn=it.querySelector(".in");inn.style.animation="none";void inn.offsetWidth;inn.style.animation=""};
+  if(cur&&cur.id==="gf-majlis")show();else go("gf-majlis").then(show)};
+$("enterTour").onclick=()=>enterHome(()=>startTour(0));
+document.addEventListener("click",e=>{if(!e.target.closest(".pop,#bShare,#bFacts,#bReg"))closePops()});
+</script>
