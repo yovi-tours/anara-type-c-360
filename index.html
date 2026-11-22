@@ -816,12 +816,12 @@ function measureClick(cx,cy){const p=floorPoint(cx,cy);if(!p){toast(t("mFloorOnl
 /* ======================= LOOP ======================= */
 const $intro=document.getElementById("intro");
 let tourPan=0;
-function frame(ts){requestAnimationFrame(frame);const dtF=Math.min(80,ts-(frame.lt||ts));frame.lt=ts;
+function frame(ts){requestAnimationFrame(frame);const dtF=Math.min(80,ts-(frame.lt||ts));frame.lt=ts;if(!autoRotate||busy||ts-lastInteract<=2200)frame.rs=0;
   if(anim){const k=Math.min(1,(ts-anim.t0)/anim.ms);anim.fn(k);if(k>=1){const r=anim.r;anim=null;r()}}
   if(dollOn){dollFrame(ts);return}
   if(!$intro.hidden&&!$intro.classList.contains('out')&&!busy){lon+=.018;lat+=(-3-lat)*.01;targetFov=68}
   else if(tourOn&&!tourPaused&&!busy){lon+=tourPan;lat+=(-6-lat)*.01}
-  else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>1500){lon+=dtF*.0042;lat+=(EYE_LAT-lat)*.015}
+  else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>2200){frame.rs=Math.min(1,(frame.rs||0)+dtF/3200);const r=frame.rs*frame.rs*(3-2*frame.rs);lon+=dtF*.0024*r;lat+=(EYE_LAT-lat)*.015}
   lat=Math.max(-85,Math.min(85,lat));if(!busy)camera.fov+=(targetFov-camera.fov)*.085;
   camera.updateProjectionMatrix();camera.lookAt(dirVec(lon,lat).multiplyScalar(100));renderer.render(scene,camera);
   placeSpots();placeTags();if(mPts.length)drawMeasure();cone()}
