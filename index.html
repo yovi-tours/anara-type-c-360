@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#262b16">
 <title>Anara Villa Type C Tour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -384,6 +388,39 @@ body.touring #tags{display:none}
   #sharePop{top:auto;bottom:calc(var(--bot) + 62px);transform:none}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+
+/* ---------- phones ---------- */
+.m-only{display:none}
+@media (max-width:640px){
+  :root{--top:max(10px,env(safe-area-inset-top));--bot:max(12px,env(safe-area-inset-bottom));--gl:12px;--gr:12px}
+  .m-only{display:grid}
+  .brand .logo,.logo{width:66px}
+  .floors{top:calc(var(--top) + 4px);left:auto;inset-inline-end:var(--gr);transform:none;padding:3px}
+  .floors .chip{height:28px;padding:0 10px;font-size:11.5px}
+  .dock{display:block;top:calc(var(--top) + 52px);left:var(--gl);right:var(--gr);transform:none;max-width:none;padding:3px}
+  .rooms{padding:3px}
+  .dock .chip{height:28px;padding:0 11px;font-size:11.5px}
+  .tools{top:calc(var(--top) + 98px);bottom:auto;padding:4px;gap:0}
+  .tools .ibtn{width:38px;height:38px}
+  #zIn,#zOut,#bMeasure,#bFull,.tools hr{display:none}
+  .room{bottom:calc(var(--bot) + 64px);width:auto;max-width:calc(100vw - 24px);padding:10px 14px 10px}
+  .room .note,.room .meta small,.room .meta span:not(:first-child) small{display:none}
+  .room h1{font-size:19px;line-height:1.2}
+  .room .meta{margin-top:6px;padding-top:6px;gap:14px}
+  .room .meta b{font-size:14px}.room .meta div small,.room .meta div span{font-size:10.5px}
+  #floorCard{top:calc(var(--top) + 96px);transform:translate(-50%,0);width:calc(100vw - 24px);padding:14px 16px 0}
+  #floorCard.out{transform:translate(-50%,-8px)}
+  #floorCard>b{font-size:21px}#floorCard>p{font-size:13px}
+  #fcStats div{padding:9px 6px}#fcStats b{font-size:16px}#fcStats small{font-size:10.5px}
+  #fcRooms{display:none}#fcProg{margin:12px -16px 0}
+  #cap{left:var(--gl)!important;right:var(--gr);width:auto;bottom:calc(var(--bot) + 64px);padding:14px 16px 12px}
+  #cap .head{font-size:18px}#cap p{font-size:13.5px}
+  #factsPop{top:calc(var(--top) + 52px);bottom:calc(var(--bot) + 62px);width:calc(100vw - 24px);padding:16px 14px 12px}
+  #factsPop h3{font-size:18px}.kfhero b,.kfhero div:first-child b{font-size:22px}
+  .ftag .ftc{max-width:min(260px,70vw)}
+  #hov{display:none}
+}
+@media (max-width:640px) and (max-height:560px){.dock{display:none}.tools{top:calc(var(--top) + 52px)}}
 </style>
 
 <div id="stage"></div>
@@ -400,6 +437,7 @@ body.touring #tags{display:none}
 <nav class="floors glass chrome" id="floors" role="tablist"></nav>
 
 <div class="tools glass ink-light chrome" role="toolbar">
+  <button class="ibtn m-only" id="bMap" aria-label="Floor plan"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Z"/><path d="M9 4v13M15 6.5v13"/></svg></button>
   <button class="ibtn" id="zIn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button class="ibtn" id="zOut"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
   <hr>
@@ -778,12 +816,12 @@ function measureClick(cx,cy){const p=floorPoint(cx,cy);if(!p){toast(t("mFloorOnl
 /* ======================= LOOP ======================= */
 const $intro=document.getElementById("intro");
 let tourPan=0;
-function frame(ts){requestAnimationFrame(frame);
+function frame(ts){requestAnimationFrame(frame);const dtF=Math.min(80,ts-(frame.lt||ts));frame.lt=ts;
   if(anim){const k=Math.min(1,(ts-anim.t0)/anim.ms);anim.fn(k);if(k>=1){const r=anim.r;anim=null;r()}}
   if(dollOn){dollFrame(ts);return}
   if(!$intro.hidden&&!$intro.classList.contains('out')&&!busy){lon+=.018;lat+=(-3-lat)*.01;targetFov=68}
   else if(tourOn&&!tourPaused&&!busy){lon+=tourPan;lat+=(-6-lat)*.01}
-  else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>1500){lon+=.035;lat+=(EYE_LAT-lat)*.015}
+  else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>1500){lon+=dtF*.0042;lat+=(EYE_LAT-lat)*.015}
   lat=Math.max(-85,Math.min(85,lat));if(!busy)camera.fov+=(targetFov-camera.fov)*.085;
   camera.updateProjectionMatrix();camera.lookAt(dirVec(lon,lat).multiplyScalar(100));renderer.render(scene,camera);
   placeSpots();placeTags();if(mPts.length)drawMeasure();cone()}
@@ -855,7 +893,7 @@ function bpUp(e){bp.delete(e.pointerId);bv.classList.remove("drag");if(bp.size==
 bv.addEventListener("pointerup",bpUp);bv.addEventListener("pointercancel",bpUp);
 function setZoom(dir){const r=bv.getBoundingClientRect();zoomAt(r.width/2,r.height/2,Z*(dir>0?1.6:1/1.6))}
 function bigFloors(){const g=$("bigFloors");g.innerHTML="";t("floors").forEach((n,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=n;b.setAttribute("aria-selected",i===big.floor);b.onclick=()=>{big.render(i);bigFloors();fitPlan(false)};g.appendChild(b)})}
-$("miniOpen").onclick=openBig;
+$("miniOpen").onclick=openBig;$("bMap").onclick=openBig;
 function placeMini(){const m=$("mini"),tl=document.querySelector(".tools");if(!m||!tl)return;m.style.insetInlineEnd="";m.style.insetInlineStart="";
   requestAnimationFrame(()=>{const a=m.getBoundingClientRect(),b=tl.getBoundingClientRect();if(!a.width||!b.width)return;
     if(a.top<b.bottom+10&&a.bottom>b.top-10&&a.right>b.left-10&&a.left<b.right+10){const rtl=document.dir==="rtl";
