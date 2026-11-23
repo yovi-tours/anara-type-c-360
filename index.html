@@ -487,6 +487,29 @@ body.touring #tags{display:none}
   body.touring #factsPop{top:calc(var(--top) + 62px);bottom:calc(var(--bot) + var(--caph,150px) + 20px)}
   body.touring #regPop{top:calc(var(--top) + 62px)}
 }
+#capTxt[hidden]{display:none!important}#cap.quiet .prog,#cap.quiet #capStep{display:none}#cap.quiet #capHead{margin-bottom:0}
+
+/* ---------- phones: tour controls ---------- one dark glass strip at the bottom, joined to the caption card, in reach of the thumb; the top of the picture stays clear */
+@media (max-width:640px){
+  #tourbar{top:auto;bottom:calc(var(--bot) + 6px);height:48px;border-radius:24px;padding:4px 6px;gap:2px;--tint:linear-gradient(180deg,rgba(44,48,28,.86),rgba(22,25,13,.93));box-shadow:0 14px 36px -14px #000c;color:#f4f1e8}
+  #tourbar::after{box-shadow:inset 1px 1px 1px #ffffff2e,inset -1px -1px 1px #ffffff14}
+  [dir="rtl"] #tourbar{padding:4px 6px}
+  #tourbar .ibtn,#tStop{background:transparent;border:0;box-shadow:none;color:#f4f1e8;width:40px;height:40px}
+  #tourbar .ibtn .i{stroke:currentColor}
+  #tourbar .ibtn[aria-pressed="true"]{background:#ffffff24;color:#fff}
+  #tourbar .ibtn[aria-pressed="false"]{color:#ffffff73}
+  #tourbar #tPlay{background:var(--gold-300,#cdbb8a);color:#1d2110}
+  #tStop{display:flex;align-items:center;justify-content:center;line-height:1}#tStop::before{color:#ffffffb3;display:block;line-height:1}
+  #tourbar .dots{gap:5px;padding:0 6px}
+  #tourbar .dots i{flex:1;max-width:44px;height:3px;border-radius:2px;background:#ffffff38;width:auto}
+  #tourbar .dots i.on{width:auto;flex:1.6;background:var(--gold-300,#cdbb8a);border-radius:2px}
+  #tourbar .dots i.done{background:#ffffffa6}
+  body.presenting #tourbar{opacity:1}
+  body.touring #cap{bottom:calc(var(--bot) + 60px)}
+  body.touring #floorCard{top:calc(var(--top) + 10px)}
+  body.touring #factsPop{top:calc(var(--top) + 10px);bottom:calc(var(--bot) + var(--caph,90px) + 74px)}
+  body.touring #regPop{top:calc(var(--top) + 10px)}
+}
 </style>
 
 <div id="stage"></div>
@@ -574,10 +597,10 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const AV="?v=65";/* bump when a sound file changes, so browsers fetch the new one */
+const AV="?v=66";/* bump when a sound file changes, so browsers fetch the new one */
 const MUSIC_SRC="music_anara-ambient-3.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
-const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,11.06],[13.56,6.88],[21.94,5.64],[29.08,6.14],[36.72,5.04],[43.26,3.66],[48.42,4.9],[54.82,6.1],[62.42,4.02],[67.94,5.22],[74.66,6.66],[82.82,3.88],[88.2,3.86],[93.56,7.24],[102.3,4.36],[108.16,6.93],[116.59,5.16],[123.25,4.11],[128.86,2.68],[133.04,2.64],[137.18,5.58],[144.26,4.2],[149.96,7.94],[159.4,5.46]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,10.27],[12.77,7.25],[21.52,5.02],[28.04,5.6],[35.14,2.9],[39.54,3.58],[44.62,4.62],[50.74,7.52],[59.76,4.25],[65.51,5.04],[72.05,6.42],[79.97,3.36],[84.83,4.06],[90.39,6.57],[98.46,3.74],[103.7,6.19],[111.39,6.22],[119.11,4.97],[125.58,3.0],[130.08,2.48],[134.06,5.8],[141.36,3.94],[146.8,8.36],[156.66,5.36]]}};
+const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,11.06],[13.56,6.88],[21.94,5.64],[29.08,6.14],[36.72,5.04],[43.26,3.66],[48.42,4.9],[54.82,6.1],[62.42,4.02],[67.94,5.22],[74.66,6.66],[82.82,3.88],[88.2,8.58],[98.28,7.24],[107.02,4.36],[112.88,6.93],[121.31,5.16],[127.97,4.11],[133.58,2.68],[137.76,2.64],[141.9,5.58],[148.98,4.2],[154.68,7.94],[164.12,5.46]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,10.27],[12.77,7.25],[21.52,5.02],[28.04,5.6],[35.14,2.9],[39.54,3.58],[44.62,4.62],[50.74,7.52],[59.76,4.25],[65.51,5.04],[72.05,6.42],[79.97,3.36],[84.83,7.52],[93.85,6.57],[101.92,3.74],[107.16,6.19],[114.85,6.22],[122.57,4.97],[129.04,3.0],[133.54,2.48],[137.52,5.8],[144.82,3.94],[150.26,8.36],[160.12,5.36]]}};
 /* line spoken when a visitor walks into a room by themselves (index into seg) */
 const ROOM_VO={"gf-majlis":3,"gf-men-wash":5,"gf-dining":6,"gf-living":7,"gf-stairs":9,"gf-kitchen":10,"gf-maid-room":12,"ff-lobby":13,"ff-bed-4":15,"ff-bed-3":17,"ff-bed-2":18,"2nd-floor-sitting-area":21,"2nd-floor-bedroom":22,"gf-men-bath":24,"gf-lobby":25,"gf-laundry":26,"gf-women-wash":27,"gf-women-bath":28,"gf-maid-bath":29,"gf-driver-room":30,"gf-driver-bath":31,"ff-bed-4-dressing":32,"ff-bath-1":33,"ff-bath-2":33,"ff-bath-3":33,"ff-bath-4":33,"2nd-floor-lobby":34,"2nd-floor-pantry":35,"2nd-floor-wash":36,"2nd-floor-bath":37};
 /* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
@@ -623,7 +646,7 @@ const ROUTE=[
   B(0.22,24,104,0.3,"Closed kitchen · 3.5 × 3.5 m","The kitchen is closed, with worktops on three sides, a window, and, look up, a skylight.","مطبخ مغلق · ٣٫٥ × ٣٫٥ م","المطبخ مغلق. أسطح العمل على ثلاث جهات، وشباك، وفوقه فتحة سماوية تنوّر المكان."),
   B(0.78,6,102,0.1,"Laundry next door","Through this door is the service side, with the laundry right next to it.","غرفة الغسيل جنبه","ومن هذا الباب جهة الخدمات، وغرفة الغسيل جنبه.")]},
  {id:"gf-maid-room",b:[
-  B(0.3,-12,102,0.34,"Maid's room & driver's room","And here, the maid's room and the driver's room, each with its own bathroom.","غرفة الخادمة وغرفة السائق","وهنا غرفة الخادمة وغرفة السائق، وكل غرفة بدورة مياهها.")]},
+  B(0.3,-12,102,0.34,"Maid's room · driver's room outside","And here, the maid's room, with its own bathroom. The driver's room is separate, outside in the setback, with a bathroom of its own.","غرفة الخادمة · غرفة السائق خارجية","وهنا غرفة الخادمة بدورة مياهها. وغرفة السائق مستقلة برّا في الارتداد، ولها دورة مياهها.")]},
  {id:"ff-lobby",ch:2,b:[
   B(0.12,-3,102,0.2,"First floor · 118.9 m²","Now, upstairs. This floor is just for the family. Four master bedrooms, four bathrooms.","الدور الأول · ١١٨٫٩ م²","نطلع للدور الأول. هذا للعائلة وبس. أربع غرف نوم رئيسية، وأربع دورات مياه.","floor"),
   B(0.4,-3,100,0.22,"A central lobby · 4.3 × 4.3 m","Every bedroom opens off this one bright lobby, beside the courtyard.","صالة مركزية · ٤٫٣ × ٤٫٣ م","كل الغرف تفتح على هذي الصالة المنوّرة، جنب الفناء.")]},
@@ -1164,8 +1187,10 @@ $("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!
 let tourOn=false,tourPaused=false,tourIdx=0,tourTok=0,capNow="",summaryT=null;
 const VOI=[];{let n=0;for(const r of ROUTE){VOI.push(n);n+=r.b.length}}
 const chapterAt=i=>{for(let j=i;j>=0;j--)if(ROUTE[j].ch!=null)return ROUTE[j].ch;return 0};
+/* while the narrator is speaking a stop, the card shows only where you are (chapter and room title): the sentence and the timing bar would repeat the voice. Mute the narrator and the full caption comes back. */
+function capQuiet(){const q=!!$("capHead").textContent&&voiceOn&&!!VOICE[lang];$("capTxt").hidden=q;$("cap").classList.toggle("quiet",q)}
 function setCap(txt,head,step,ms){capNow=txt||"";$("cap").hidden=!capNow||!tourOn;if(!capNow)return;
-  $("capCh").textContent=CHAPTERS[chapterAt(tourIdx)][lang];$("capStep").textContent=step||"";$("capHead").hidden=!head;$("capHead").textContent=head||"";$("capTxt").textContent=capNow;
+  $("capCh").textContent=CHAPTERS[chapterAt(tourIdx)][lang];$("capStep").textContent=step||"";$("capHead").hidden=!head;$("capHead").textContent=head||"";$("capTxt").textContent=capNow;capQuiet();
   const c=$("cap");c.classList.remove("in");void c.offsetWidth;c.classList.add("in");document.documentElement.style.setProperty("--capw",c.offsetWidth+"px");document.documentElement.style.setProperty("--caph",c.offsetHeight+"px");
   const pr=$("capProg");pr.classList.remove("run");pr.parentNode.hidden=!ms;if(ms){pr.style.setProperty("--d",ms+"ms");void pr.offsetWidth;pr.classList.add("run")}}
 function tourUI(){document.body.classList.toggle("tourpaused",tourOn&&tourPaused);$("tourbar").hidden=!tourOn;document.body.classList.toggle("presenting",tourOn&&!tourPaused);document.body.classList.toggle("touring",tourOn);
@@ -1238,7 +1263,7 @@ function endTour(){stopTour();const S=SUMMARY[lang];$("sumTitle").textContent=S.
 function closeSummary(){clearTimeout(summaryT);$("summary").hidden=true}
 $("sumReplay").onclick=()=>startTour(0);$("sumExplore").onclick=closeSummary;
 $("bTour").onclick=()=>tourOn?stopTour():startTour(Math.max(0,ROUTE.findIndex(r=>r.id===cur.id)));
-$("tVoice").onclick=()=>{voiceOn=!voiceOn;$("tVoice").setAttribute("aria-pressed",voiceOn);if(!voiceOn)voStop();else if(VOICE[lang])voPrep()};
+$("tVoice").onclick=()=>{voiceOn=!voiceOn;$("tVoice").setAttribute("aria-pressed",voiceOn);if(!voiceOn)voStop();else if(VOICE[lang])voPrep();if(tourOn&&!$("cap").hidden){capQuiet();document.documentElement.style.setProperty("--caph",$("cap").offsetHeight+"px")}};
 $("tPlay").onclick=()=>pauseTour(!tourPaused);$("tStop").onclick=stopTour;
 function jumpTour(i){if(!tourOn)return;if(i>=ROUTE.length){endTour();return}tourTok++;startTour(i)}
 $("tNext").onclick=()=>jumpTour(tourIdx+1);
