@@ -581,7 +581,7 @@ const B=(u,la,f,eh,et,ah,at,act)=>[u,la,f,{en:[eh,et],ar:[ah,at]},act];
 const ROUTE=[
  {id:"gf-majlis",ch:0,b:[
   B(.45,-4,74,"Welcome to Villa Type C","A duplex family home of about 346 m² net saleable area, on three floors. Let me show you around.","أهلاً بك في فيلا C","فيلا دوبلكس عائلية بمساحة بيعية صافية تقارب ٣٤٦ م² على ثلاثة أدوار. دعني أرافقك في جولة.","facts"),
-  B(.3,-4,72,"Everything a family needs","5 bedrooms, 9 bathrooms & WCs, two separate entrances, staff rooms and a private roof terrace.","كل ما تحتاجه العائلة","٥ غرف نوم، ٩ دورات مياه، مدخلان مستقلان، غرف للعمالة، وتراس خاص على السطح.","facts")]},
+  B(.3,-4,72,"Everything a family needs","5 bedrooms, 9 bathrooms & WCs, two separate entrances, staff rooms and a private roof terrace.","كل ما تحتاجه العائلة","٥ غرف نوم، ٩ دورات مياه، مدخلان مستقلان، غرف للعمالة، وتراس خاص على السطح.")]},
  {id:"gf-majlis",ch:1,b:[
   B(.5,-2,70,"Ground floor · 166.6 m²","Almost half the home is here, where guests are hosted and the family spends the day.","الدور الأرضي · ١٦٦٫٦ م²","قرابة نصف مساحة البيت هنا، حيث استقبال الضيوف ويوم العائلة.","floor"),
   B(.45,-4,70,"Men's majlis · 4.5 × 3.7 m","About 16.7 m² with its own entrance, so guests come straight in without crossing the family side.","مجلس الرجال · ٤٫٥ × ٣٫٧ م","نحو ١٦٫٧ م² بمدخل مستقل؛ يصل الضيف مباشرة دون المرور بجهة العائلة."),
@@ -1188,7 +1188,7 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
       if(!ok())return}
     else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(1500,ok))return;chapterHide()}
     tourUI();
-    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+450-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+450-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
       if(!await hold(rd,ok))return}
     if(!ok())return;
