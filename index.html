@@ -611,7 +611,7 @@ const SUMMARY={en:{title:"Villa Type C at a glance",items:["Separate majlis and 
 const T={
  en:{proj:"Villa Type C",floors:["Ground Floor","First Floor","Second Floor"],plan:"Floor plan",enlarge:"Enlarge",mapS:"Small map",mapM:"Medium map",mapL:"Full plan",szS:"S",szM:"M",szL:"L",tapPin:"Tap a space to go there · Scroll or pinch to zoom · Drag to move",
   nextStop:"Next stop",measure:"Measure",info:"Room info",doll:"3D view",rotate:"Auto-rotate",sound:"Ambient music",share:"Share this view",full:"Full screen",zin:"Zoom in",zout:"Zoom out",close:"Close",
-  mStart:"Click a point on the floor",mNext:"Click a second point on the floor",mDoneT:"Floor distance",mFloorOnly:"Pick a point on the floor",clear:"Clear",done:"Done",
+  mStart:"Click a point on the floor",mNext:"Click a second point · on the floor, or straight up for a height",mDoneT:"Distance",mHeight:"Height",mFloorOnly:"Start from a point on the floor",clear:"Clear",done:"Done",
   size:"Clear size",area:"Area",open:"Open-plan circulation",dimsNote:"Approximate sizes, scaled from the architectural plans",
   hint:"Drag to look around · Click the floor to walk",noView:"No 360° view that way yet · use the floor plan",soon:"360° view coming soon",soonName:{mb01:"Master Bedroom 01"},enter:"Enter the home",tour:"Guided tour",watch:"Watch the guided tour",iEyebrow:"Anara · Riyadh",byFloor:"Explore by floor",fcShort:["Majlis · living · kitchen","4 master bedrooms","Sitting area · roof terrace"],iSub:"A family home on three floors, designed around privacy and generous hospitality.",
   up:"Up to",down:"Down to",m:"m",m2:"m²",stop:"Stop tour",guide:"Your guide · Anara",facts:"Key facts",reg:"Register interest",boot:"Preparing your tour",
@@ -632,7 +632,7 @@ const T={
   dHint:"Drag to rotate · Right-drag or two fingers to move · Scroll or pinch to zoom · Double-click to reset · Click a point to step inside",dBack:"Back to 360°",all:"All floors"},
  ar:{proj:"فيلا النموذج C",floors:["الدور الأرضي","الدور الأول","الدور الثاني"],plan:"المخطط",enlarge:"تكبير",mapS:"خريطة صغيرة",mapM:"خريطة متوسطة",mapL:"المخطط كاملًا",szS:"ص",szM:"م",szL:"ك",tapPin:"اضغط على مساحة للانتقال · مرر أو قرّب بإصبعين للتكبير · اسحب للتحريك",
   nextStop:"المحطة التالية",measure:"القياس",info:"معلومات الغرفة",doll:"عرض ثلاثي الأبعاد",rotate:"دوران تلقائي",sound:"موسيقى هادئة",share:"مشاركة هذا المشهد",full:"ملء الشاشة",zin:"تكبير",zout:"تصغير",close:"إغلاق",
-  mStart:"اضغط على نقطة في الأرضية",mNext:"اضغط على نقطة ثانية في الأرضية",mDoneT:"المسافة على الأرضية",mFloorOnly:"اختر نقطة على الأرضية",clear:"مسح",done:"تم",
+  mStart:"اضغط على نقطة في الأرضية",mNext:"اضغط على نقطة ثانية · على الأرضية، أو للأعلى مباشرة لقياس الارتفاع",mDoneT:"المسافة",mHeight:"الارتفاع",mFloorOnly:"ابدأ من نقطة على الأرضية",clear:"مسح",done:"تم",
   size:"المقاس الصافي",area:"المساحة",open:"ممر مفتوح",dimsNote:"مقاسات تقريبية مأخوذة من المخططات المعمارية",
   hint:"اسحب للتجول · اضغط على الأرضية للتنقل",noView:"لا يوجد مشهد ٣٦٠° في هذا الاتجاه بعد · استخدم المخطط",soon:"مشهد ٣٦٠° قريبًا",soonName:{mb01:"غرفة النوم الرئيسية ٠١"},enter:"ادخل المنزل",tour:"جولة موجّهة",watch:"شاهد الجولة الموجّهة",iEyebrow:"أنارا · الرياض",byFloor:"تصفّح حسب الدور",fcShort:["المجلس · المعيشة · المطبخ","٤ غرف نوم رئيسية","الجلسة · تراس السطح"],iSub:"بيت عائلي على ثلاثة أدوار، صُمّم ليجمع بين خصوصية العائلة وكرم الضيافة.",
   up:"صعود إلى",down:"نزول إلى",m:"م",m2:"م²",stop:"إنهاء الجولة",guide:"مرشدك · أنارا",facts:"أبرز المواصفات",reg:"سجّل اهتمامك",boot:"جارٍ تجهيز جولتك",
@@ -760,7 +760,7 @@ async function setTex(s,p){let x=null;try{x=await Promise.race([tex("pano_"+p.id
 
 async function go(id,o={}){
   const p=byId[id];if(!p||(p===cur&&!o.first))return;
-  const my=++token;busy=true;setBar(.3);clearMeasure();closePops();
+  const my=++token;busy=true;setBar(.3);clearMeasure();closePops();if(!o.first&&!o.cut&&!tourOn)try{uiSnd("nav")}catch(e){}
   const back=spheres[1-front],fr=spheres[front];
   back.rotation.y=p.h*D2R;back.material.opacity=0;back.position.set(0,0,0);
   await setTex(back,p);if(my!==token)return;
@@ -844,8 +844,17 @@ function drawMeasure(){if(!mPts.length){mSvg.innerHTML="";document.querySelector
 const fmt=(n,d=2)=>new Intl.NumberFormat(lang==="ar"?"ar-SA":"en",{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
 function setMeasure(on){if(on)stopTour();measuring=on;document.body.classList.toggle("measuring",on);$("bMeasure").setAttribute("aria-pressed",on);$("mbar").hidden=!on;if(!on)clearMeasure();mText()}
 function clearMeasure(){mPts=[];drawMeasure();mText()}
-function mText(){$("mText").textContent=mPts.length===2?t("mDoneT")+": "+fmt(mPts[0].distanceTo(mPts[1]))+" "+t("m"):mPts.length?t("mNext"):t("mStart")}
-function measureClick(cx,cy){const p=floorPoint(cx,cy);if(!p){toast(t("mFloorOnly"));return}if(mPts.length>=2)mPts=[];mPts.push(p);drawMeasure();mText()}
+function mText(){$("mText").textContent=mPts.length===2?(Math.abs(mPts[1].y-mPts[0].y)>.05&&Math.hypot(mPts[1].x-mPts[0].x,mPts[1].z-mPts[0].z)<.25?t("mHeight"):t("mDoneT"))+": "+fmt(mPts[0].distanceTo(mPts[1]))+" "+t("m"):mPts.length?t("mNext"):t("mStart")}
+/* Second point may leave the floor: it is placed on the upright plane that stands on the first point and faces the camera, so door and ceiling heights (straight up from the first point) and spans along a wall seen head-on read correctly. */
+function wallPoint(cx,cy,base){const d=screenDir(cx,cy),D=Math.hypot(base.x,base.z);if(D<.05)return null;const nx=base.x/D,nz=base.z/D,nd=nx*d.x+nz*d.z;if(nd<.08)return null;const k=D/nd,p=new THREE.Vector3(d.x*k,d.y*k,d.z*k);
+  if(p.y<-EYE-.02||p.y>4.5-EYE)return null;return p}
+function measureClick(cx,cy){if(mPts.length>=2)mPts=[];let p=null;
+  if(!mPts.length){p=floorPoint(cx,cy);if(!p){toast(t("mFloorOnly"));return}}
+  else{const b=mPts[0],d=screenDir(cx,cy),fp=floorPoint(cx,cy),wp=wallPoint(cx,cy,b);
+    const dAz=Math.abs(norm((Math.atan2(d.z,d.x)-Math.atan2(b.z,b.x))*R2D)),bPitch=Math.atan2(b.y,Math.hypot(b.x,b.z)),cPitch=Math.asin(Math.max(-1,Math.min(1,d.y)));
+    const up=wp&&dAz<9&&cPitch>bPitch+.035;   /* clicked above the first point, in the same direction: a height */
+    p=up?wp:(fp||wp);if(!p){toast(t("mFloorOnly"));return}}
+  mPts.push(p);drawMeasure();mText()}
 
 /* ======================= LOOP ======================= */
 const $intro=document.getElementById("intro");
