@@ -896,7 +896,8 @@ function bigFloors(){const g=$("bigFloors");g.innerHTML="";t("floors").forEach((
 $("miniOpen").onclick=openBig;$("bMap").onclick=openBig;
 function placeMini(){const m=$("mini"),tl=document.querySelector(".tools");if(!m||!tl)return;m.style.insetInlineEnd="";m.style.insetInlineStart="";
   requestAnimationFrame(()=>{const a=m.getBoundingClientRect(),b=tl.getBoundingClientRect();if(!a.width||!b.width)return;
-    if(a.top<b.bottom+10&&a.bottom>b.top-10&&a.right>b.left-10&&a.left<b.right+10){const rtl=document.dir==="rtl";
+    const midW=Math.min(440,innerWidth*.36,(innerHeight-250)*.95),k=Math.max(1,midW/a.width),top=a.bottom-a.height*k,left=a.right-a.width*k;
+    if(top<b.bottom+10&&a.bottom>b.top-10&&a.right>b.left-10&&left<b.right+10){const rtl=document.dir==="rtl";
       m.style.insetInlineStart="auto";m.style.insetInlineEnd=(rtl?b.right+12:innerWidth-b.left+12)+"px"}})}
 addEventListener("resize",()=>{clearTimeout(placeMini.t);placeMini.t=setTimeout(placeMini,120)});
 function miniSize(m){$("mini").classList.toggle("mid",m);placeMini();setTimeout(placeMini,500);$("miniS").setAttribute("aria-pressed",!m);$("miniM").setAttribute("aria-pressed",m);try{localStorage.setItem("anaraMini",m?"m":"s")}catch(e){}}
