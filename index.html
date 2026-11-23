@@ -551,10 +551,10 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const AV="?v=57";/* bump when a sound file changes, so browsers fetch the new one */
+const AV="?v=58";/* bump when a sound file changes, so browsers fetch the new one */
 const MUSIC_SRC="music_anara-ambient-3.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
-const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,7.514],[9.214,5.094],[15.008,4.224],[19.932,5.269],[25.901,2.844],[29.445,2.475],[32.619,5.312],[38.632,4.949],[44.281,2.64],[47.621,5.227],[53.548,3.704],[57.952,4.022],[62.673,2.466],[65.839,5.575],[72.114,2.907],[75.721,3.479],[79.9,4.384],[84.984,3.173],[88.857,2.923],[92.48,2.811],[95.991,2.463],[99.154,4.608],[104.462,4.958],[110.12,5.263],[116.083,3.429],[120.213,3.541],[124.454,2.925],[128.079,1.825],[130.604,2.925],[134.228,1.698],[136.626,3.124],[140.45,1.846],[142.996,2.876],[146.573,2.225],[149.498,1.694],[151.892,4.864],[157.455,1.952],[160.107,1.498]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,13.003],[14.703,9.058],[24.462,6.074],[31.236,6.701],[38.637,3.543],[42.88,4.51],[48.091,6.827],[55.618,7.57],[63.888,5.072],[69.66,7.406],[77.766,6.864],[85.33,5.683],[91.713,5.409],[97.822,8.307],[106.829,4.835],[112.364,6.211],[119.274,8.695],[128.669,4.595],[133.964,3.788],[138.452,3.896],[143.047,3.938],[147.686,6.127],[154.513,8.869],[164.082,8.209]]}};
+const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,7.514],[10.014,5.094],[16.608,4.224],[22.332,5.269],[29.101,2.844],[33.445,2.475],[37.42,5.312],[44.232,4.949],[50.681,2.64],[54.821,5.227],[61.548,3.704],[66.752,4.022],[72.274,2.466],[76.24,5.575],[83.315,2.907],[87.722,3.479],[92.701,4.384],[98.585,3.173],[103.258,2.923],[107.681,2.811],[111.992,2.463],[115.955,4.608],[122.063,4.958],[128.521,5.263],[135.284,3.429],[140.213,3.541],[145.254,2.925],[149.679,1.825],[153.004,2.925],[157.429,1.698],[160.627,3.124],[165.251,1.846],[168.597,2.876],[172.973,2.225],[176.698,1.694],[179.892,4.864],[186.256,1.952],[189.708,1.498]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,11.795],[14.295,7.721],[23.515,5.281],[30.297,7.956],[39.753,2.988],[44.241,4.743],[50.484,6.438],[58.422,8.244],[68.166,4.88],[74.546,6.758],[82.805,6.185],[90.49,4.732],[96.722,4.046],[102.269,7.141],[110.91,3.887],[116.297,5.116],[122.913,7.863],[132.276,5.759],[139.535,3.449],[144.484,3.356],[149.34,3.349],[154.188,5.592],[161.281,7.376],[170.157,6.633]]}};
 /* line spoken when a visitor walks into a room by themselves (index into seg) */
 const ROOM_VO={"gf-majlis":3,"gf-men-wash":5,"gf-dining":6,"gf-living":7,"gf-stairs":9,"gf-kitchen":10,"gf-maid-room":12,"ff-lobby":13,"ff-bed-4":15,"ff-bed-3":17,"ff-bed-2":18,"2nd-floor-sitting-area":21,"2nd-floor-bedroom":22,"gf-men-bath":24,"gf-lobby":25,"gf-laundry":26,"gf-women-wash":27,"gf-women-bath":28,"gf-maid-bath":29,"gf-driver-room":30,"gf-driver-bath":31,"ff-bed-4-dressing":32,"ff-bath-1":33,"ff-bath-2":33,"ff-bath-3":33,"ff-bath-4":33,"2nd-floor-lobby":34,"2nd-floor-pantry":35,"2nd-floor-wash":36,"2nd-floor-bath":37};
 /* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
@@ -1112,14 +1112,14 @@ function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SR
 let voiceOn=true,vo=null,voT=null,voEnd=0,voPend=null,voSaid=new Set(),voHello=false,voRT=null;
 let voBlocked=null;
 /* must run inside a tap: Safari and iPhones only let an audio element speak later if a tap started it once */
-function voUnlock(){if(vo)return;vo=new Audio(SIL);vo._l="";vo.ontimeupdate=()=>{if(voEnd&&vo.currentTime>=voEnd+.12)voStop()};const p=vo.play();if(p&&p.catch)p.catch(()=>{})}
+function voUnlock(){if(vo)return;vo=new Audio(SIL);vo._l="";vo.ontimeupdate=()=>{if(voEnd&&vo.currentTime>=voEnd+.3)voStop()};const p=vo.play();if(p&&p.catch)p.catch(()=>{})}
 function voPrep(){const v=VOICE[lang];if(!v)return null;
   voUnlock();
   if(vo._l!==lang){const l=lang,a=vo;a._l=l;a._ok=false;fetch(v.src+AV).then(r=>r.blob()).then(bl=>{if(a._l!==l)return;a.pause();a.src=URL.createObjectURL(bl);a.preload="auto";a.load();a._ok=true;if(voPend!=null){const i=voPend;voPend=null;voSay(i)}}).catch(()=>{a._l=""})}
   return vo}
 function voStop(){clearTimeout(voT);voEnd=0;voPend=null;if(!tourOn&&ducked)duck(false);if(vo)try{vo.pause()}catch(e){}}
 function voSay(i){voStop();voBlocked=null;const v=VOICE[lang];if(!voiceOn||!v||!v.seg[i])return 0;const a=voPrep();if(!a)return 0;const [o,d]=v.seg[i];if(!a._ok){voPend=i;return d*1000}duck(true);voEnd=o+d;
-  const run=()=>{if(voEnd!==o+d)return;try{a.currentTime=o;const p=a.play();if(p&&p.catch)p.catch(()=>{voBlocked=i})}catch(e){}clearTimeout(voT);voT=setTimeout(voStop,d*1000+250)};
+  const run=()=>{if(voEnd!==o+d)return;try{a.currentTime=o;const p=a.play();if(p&&p.catch)p.catch(()=>{voBlocked=i})}catch(e){}clearTimeout(voT);voT=setTimeout(voStop,d*1000+1300)};
   if(a.readyState<1)a.addEventListener("loadedmetadata",run,{once:true});else run();return d*1000}
 /* walking around by yourself: a welcome first, then one short line the first time you enter each room */
 function roomVoice(){clearTimeout(voRT);if(!soundOn||tourOn||!cur||!VOICE[lang])return;voRT=setTimeout(()=>{if(!soundOn||tourOn||!cur)return;
@@ -1129,7 +1129,7 @@ function roomVoice(){clearTimeout(voRT);if(!soundOn||tourOn||!cur||!VOICE[lang])
 function voTouch(){if(!voiceOn||!VOICE[lang])return;if(!vo){voUnlock();return}
   if(voBlocked!=null&&tourOn){const i=voBlocked;voSay(i);return}          /* a line the browser refused: say it now that there is a tap */
   if(voEnd||voPend!=null)return;try{if(vo._ok)vo.currentTime=.02;const p=vo.play();if(p&&p.then)p.then(()=>setTimeout(()=>{if(!voEnd&&voPend==null)vo.pause()},150)).catch(()=>{})}catch(e){}}
-function voPause(p){if(!vo||!voEnd)return;clearTimeout(voT);if(p)vo.pause();else{const left=voEnd-vo.currentTime;if(left>.05){const q=vo.play();if(q&&q.catch)q.catch(()=>{});voT=setTimeout(voStop,left*1000+250)}else voStop()}}
+function voPause(p){if(!vo||!voEnd)return;clearTimeout(voT);if(p)vo.pause();else{const left=voEnd-vo.currentTime;if(left>.05){const q=vo.play();if(q&&q.catch)q.catch(()=>{});voT=setTimeout(voStop,left*1000+1300)}else voStop()}}
 function stopSound(){if(!aud)return;clearInterval(fadeT);fadeT=setInterval(()=>{aud.volume=Math.max(0,aud.volume-.04);if(aud.volume<=0){clearInterval(fadeT);aud.pause()}},60)}
 if(!MUSIC_SRC)$("bSound").hidden=true;
 let soundUserOff=false;function autoMusic(){if(!soundOn&&!soundUserOff&&startSound()){soundOn=true;$("bSound").setAttribute("aria-pressed",true)}}
@@ -1193,7 +1193,7 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
       if(!ok())return}
     else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(1500,ok))return;chapterHide()}
     tourUI();
-    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+450-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+1100-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
       if(!await hold(rd,ok))return}
     if(!ok())return;
