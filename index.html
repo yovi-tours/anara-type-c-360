@@ -542,7 +542,8 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const MUSIC_SRC="music_anara-home-ambience.mp3";
+const AV="?v=49";/* bump when a sound file changes, so browsers fetch the new one */
+const MUSIC_SRC="music_anara-home-ambience.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
 const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,7.514],[9.214,5.094],[15.008,4.224],[19.932,5.269],[25.901,2.844],[29.445,2.475],[32.619,5.312],[38.632,4.949],[44.281,2.64],[47.621,5.227],[53.548,3.704],[57.952,4.022],[62.673,2.466],[65.839,5.575],[72.114,2.907],[75.721,3.479],[79.9,4.384],[84.984,3.173],[88.857,2.923],[92.48,2.811],[95.991,2.463],[99.154,4.608],[104.462,4.958],[110.12,5.263],[116.083,3.429],[120.213,3.541],[124.454,2.925],[128.079,1.825],[130.604,2.925],[134.228,1.698],[136.626,3.124],[140.45,1.846],[142.996,2.876],[146.573,2.225],[149.498,1.694],[151.892,4.864],[157.455,1.952],[160.107,1.498]]}};
 /* line spoken when a visitor walks into a room by themselves (index into seg) */
@@ -768,7 +769,7 @@ async function go(id,o={}){
   const back=spheres[1-front],fr=spheres[front];
   back.rotation.y=p.h*D2R;back.material.opacity=0;back.position.set(0,0,0);
   await setTex(back,p);if(my!==token)return;
-  const from=cur;cur=p;roomSound();if(!o.first)roomVoice();setBar(.85);ui();roomCard(true);if(from&&from.floor!==p.floor&&!tourOn&&!o.cut)floorIntro(p.floor);try{history.replaceState(null,"","#"+p.id)}catch(e){}
+  const from=cur;cur=p;roomSound();setBar(.85);ui();roomCard(true);if(from&&from.floor!==p.floor&&!tourOn&&!o.cut)floorIntro(p.floor);try{history.replaceState(null,"","#"+p.id)}catch(e){}
   if(o.first||o.cut){back.material.opacity=1;fr.material.opacity=0;front=1-front;if(o.first)lon=o.lon??(180-p.h);if(o.lat!=null)lat=o.lat;else if(!tourOn)lat=EYE_LAT;busy=false;setBar(1);buildSpots();preload(p);return}
   const reduce=reduceMotion();
   let brg=o.brg;
@@ -1075,16 +1076,16 @@ const ROOM_SND=[[/bath/,"bath"],[/wash/,"sink"],[/laundry/,"laundry"],[/majlis/,
 let rm=null,rmKind="",rmT=null;
 function roomSound(){const k=soundOn&&cur?((ROOM_SND.find(r=>r[0].test(cur.id))||[])[1]||""):"";if(aud&&soundOn)ambFade();if(k===rmKind||!rm)return;rmKind=k;
   clearInterval(rmT);let ph=0,n=0;rmT=setInterval(()=>{try{
-    if(ph===0){rm.volume=Math.max(0,rm.volume-.07);if(rm.volume<=.001||rm.paused||++n>12){ph=1;rm.pause();if(!rmKind){clearInterval(rmT);return}rm.volume=0;rm.loop=true;rm.src="music_room-"+rmKind+".mp3";const p=rm.play();if(p&&p.catch)p.catch(()=>{})}}
+    if(ph===0){rm.volume=Math.max(0,rm.volume-.07);if(rm.volume<=.001||rm.paused||++n>12){ph=1;rm.pause();if(!rmKind){clearInterval(rmT);return}rm.volume=0;rm.loop=true;rm.src="music_room-"+rmKind+".mp3"+AV;const p=rm.play();if(p&&p.catch)p.catch(()=>{})}}
     else{const T=ducked?.4:.9;rm.volume=Math.min(T,rm.volume+.04);if(rm.volume>=T)clearInterval(rmT)}}catch(e){clearInterval(rmT)}},50)}
 function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SRC);aud.loop=true;aud.volume=0}
   const p=aud.play();if(p&&p.catch)p.catch(()=>{});ambFade();voPrep();
-  if(!rm){rm=new Audio(SIL);rm.volume=0;const q=rm.play();if(q&&q.catch)q.catch(()=>{})}setTimeout(roomSound,60);setTimeout(roomVoice,900);return true}
+  if(!rm){rm=new Audio(SIL);rm.volume=0;const q=rm.play();if(q&&q.catch)q.catch(()=>{})}setTimeout(roomSound,60);return true}
 /* Narrator: follows the same button as the ambience (one switch for all sound except clicks). Plain audio element, so it also plays on iPhones in silent mode; first started inside a tap so later lines may play by themselves. */
 let vo=null,voT=null,voEnd=0,voPend=null,voSaid=new Set(),voHello=false,voRT=null;
 function voPrep(){const v=VOICE[lang];if(!v)return null;
   if(!vo){vo=new Audio(SIL);vo._l="";vo.ontimeupdate=()=>{if(voEnd&&vo.currentTime>=voEnd+.12)voStop()};const p=vo.play();if(p&&p.catch)p.catch(()=>{})}
-  if(vo._l!==lang){const l=lang,a=vo;a._l=l;a._ok=false;fetch(v.src).then(r=>r.blob()).then(bl=>{if(a._l!==l)return;a.pause();a.src=URL.createObjectURL(bl);a.preload="auto";a.load();a._ok=true;if(voPend!=null){const i=voPend;voPend=null;voSay(i)}}).catch(()=>{a._l=""})}
+  if(vo._l!==lang){const l=lang,a=vo;a._l=l;a._ok=false;fetch(v.src+AV).then(r=>r.blob()).then(bl=>{if(a._l!==l)return;a.pause();a.src=URL.createObjectURL(bl);a.preload="auto";a.load();a._ok=true;if(voPend!=null){const i=voPend;voPend=null;voSay(i)}}).catch(()=>{a._l=""})}
   return vo}
 function voStop(){clearTimeout(voT);voEnd=0;voPend=null;if(!tourOn&&ducked)duck(false);if(vo)try{vo.pause()}catch(e){}}
 function voSay(i){voStop();const v=VOICE[lang];if(!soundOn||!v||!v.seg[i])return 0;const a=voPrep();if(!a)return 0;const [o,d]=v.seg[i];if(!a._ok){voPend=i;return d*1000}duck(true);voEnd=o+d;
