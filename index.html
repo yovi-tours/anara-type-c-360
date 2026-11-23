@@ -542,7 +542,7 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const MUSIC_SRC="music_anara-ambient.mp3";
+const MUSIC_SRC="music_anara-ambient-2.mp3";
 /* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
 const TAGS={
  "gf-majlis":[[.5,.42,{en:["Courtyard garden","Daylight from a private planted courtyard.","A green outlook for every gathering."],ar:["حديقة الفناء","ضوء النهار من فناء خاص مزروع.","إطلالة خضراء ترافق كل جلسة."]}],[.695,.5,{en:["Guest wash area","The majlis has its own wash area and toilet.","Guests stay on their side; the family keeps its privacy."],ar:["مغسلة الضيوف","للمجلس مغسلته ودورة مياهه الخاصة.","يبقى الضيف في جهته، وتحتفظ العائلة بخصوصيتها."]}]],
@@ -1037,6 +1037,16 @@ $("shClose").onclick=closePops;
 
 
 /* ======================= MUSIC — plays a licensed track file (set MUSIC_SRC); the button stays hidden until one is set ======================= */
+/* UI sounds: tiny synthesised clicks (no files). Follow the music button: muted when the visitor turns sound off. */
+let actx=null,uiLast=0;
+function uiSnd(kind){if(soundUserOff)return;const now=performance.now();if(now-uiLast<45)return;uiLast=now;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const t0=actx.currentTime,g=actx.createGain(),o=actx.createOscillator(),f=actx.createBiquadFilter();
+    const P={tap:[1150,720,.05,.05,"sine"],nav:[520,880,.16,.05,"sine"],open:[420,640,.12,.045,"triangle"],close:[640,400,.1,.04,"triangle"],floor:[392,784,.28,.05,"sine"]}[kind]||[1000,700,.05,.04,"sine"];
+    o.type=P[4];o.frequency.setValueAtTime(P[0],t0);o.frequency.exponentialRampToValueAtTime(P[1],t0+P[2]);f.type="lowpass";f.frequency.value=3200;
+    g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(P[3],t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+P[2]+.06);
+    o.connect(f);f.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+P[2]+.1)}catch(e){}}
+document.addEventListener("click",e=>{const b=e.target.closest("button,a,.pin,.chip,[role=button]");if(!b)return;
+  uiSnd(b.closest(".floors")?"floor":b.classList.contains("pin")||b.closest("#rooms")||b.closest("#arrows")?"nav":/close|Close/.test(b.id||"")?"close":b.closest(".actions,.tools")?"open":"tap")},true);
 let soundOn=false,aud=null,fadeT=null;
 function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SRC);aud.loop=true;aud.volume=0}
   clearInterval(fadeT);const p=aud.play();if(p&&p.catch)p.catch(()=>{});fadeT=setInterval(()=>{aud.volume=Math.min(.4,aud.volume+.02);if(aud.volume>=.4)clearInterval(fadeT)},80);return true}
