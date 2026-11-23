@@ -574,7 +574,7 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const AV="?v=64";/* bump when a sound file changes, so browsers fetch the new one */
+const AV="?v=65";/* bump when a sound file changes, so browsers fetch the new one */
 const MUSIC_SRC="music_anara-ambient-3.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
 const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,11.06],[13.56,6.88],[21.94,5.64],[29.08,6.14],[36.72,5.04],[43.26,3.66],[48.42,4.9],[54.82,6.1],[62.42,4.02],[67.94,5.22],[74.66,6.66],[82.82,3.88],[88.2,3.86],[93.56,7.24],[102.3,4.36],[108.16,6.93],[116.59,5.16],[123.25,4.11],[128.86,2.68],[133.04,2.64],[137.18,5.58],[144.26,4.2],[149.96,7.94],[159.4,5.46]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,10.27],[12.77,7.25],[21.52,5.02],[28.04,5.6],[35.14,2.9],[39.54,3.58],[44.62,4.62],[50.74,7.52],[59.76,4.25],[65.51,5.04],[72.05,6.42],[79.97,3.36],[84.83,4.06],[90.39,6.57],[98.46,3.74],[103.7,6.19],[111.39,6.22],[119.11,4.97],[125.58,3.0],[130.08,2.48],[134.06,5.8],[141.36,3.94],[146.8,8.36],[156.66,5.36]]}};
@@ -1133,6 +1133,7 @@ function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SR
   const p=aud.play();if(p&&p.catch)p.catch(()=>{});ambFade();
   if(!rm){rm=new Audio(SIL);rm.volume=0;const q=rm.play();if(q&&q.catch)q.catch(()=>{})}setTimeout(roomSound,60);return true}
 /* Narrator: follows the same button as the ambience (one switch for all sound except clicks). Plain audio element, so it also plays on iPhones in silent mode; first started inside a tap so later lines may play by themselves. */
+let voBusy=false;/* true from the moment a line is asked for until it has really finished playing; the tour waits on it, so a slow download or a slow phone can never cut a line */
 let voiceOn=true,vo=null,voT=null,voEnd=0,voPend=null,voSaid=new Set(),voHello=false,voRT=null;
 let voBlocked=null;
 /* must run inside a tap: Safari and iPhones only let an audio element speak later if a tap started it once */
@@ -1141,9 +1142,9 @@ function voPrep(){const v=VOICE[lang];if(!v)return null;
   voUnlock();
   if(vo._l!==lang){const l=lang,a=vo;a._l=l;a._ok=false;fetch(v.src+AV).then(r=>r.blob()).then(bl=>{if(a._l!==l)return;a.pause();a.src=URL.createObjectURL(bl);a.preload="auto";a.load();a._ok=true;if(voPend!=null){const i=voPend;voPend=null;voSay(i)}}).catch(()=>{a._l=""})}
   return vo}
-function voStop(){clearTimeout(voT);voEnd=0;voPend=null;if(!tourOn&&ducked)duck(false);if(vo)try{vo.pause()}catch(e){}}
-function voSay(i){voStop();voBlocked=null;const v=VOICE[lang];if(!voiceOn||!v||!v.seg[i])return 0;const a=voPrep();if(!a)return 0;const [o,d]=v.seg[i];if(!a._ok){voPend=i;return d*1000}duck(true);voEnd=o+d;
-  const run=()=>{if(voEnd!==o+d)return;try{a.currentTime=o;const p=a.play();if(p&&p.catch)p.catch(()=>{voBlocked=i})}catch(e){}clearTimeout(voT);voT=setTimeout(voStop,d*1000+1300)};
+function voStop(){clearTimeout(voT);voEnd=0;voPend=null;voBusy=false;if(!tourOn&&ducked)duck(false);if(vo)try{vo.pause()}catch(e){}}
+function voSay(i){voStop();voBlocked=null;const v=VOICE[lang];if(!voiceOn||!v||!v.seg[i])return 0;const a=voPrep();if(!a)return 0;const [o,d]=v.seg[i];voBusy=true;if(!a._ok){voPend=i;return d*1000}duck(true);voEnd=o+d;
+  const run=()=>{if(voEnd!==o+d)return;try{a.currentTime=o;const p=a.play();if(p&&p.catch)p.catch(()=>{voBlocked=i;voBusy=false})}catch(e){voBusy=false}clearTimeout(voT);voT=setTimeout(voStop,d*1000+6000)};
   if(a.readyState<1)a.addEventListener("loadedmetadata",run,{once:true});else run();return d*1000}
 /* walking around by yourself: a welcome first, then one short line the first time you enter each room */
 function roomVoice(){clearTimeout(voRT);if(!soundOn||tourOn||!cur||!VOICE[lang])return;voRT=setTimeout(()=>{if(!soundOn||tourOn||!cur)return;
@@ -1219,7 +1220,7 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
     tourUI();
     for(const [bi,[u,la,fov,c,act,sw]] of st.b.entries()){tourPan=0;const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor"){floorIntro(cur.floor);planGlimpse()}const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+1100-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
-      tourLat=la;tourPan=reduceMotion()?0:(sw||0)*360/rd;const held=await hold(rd,ok);tourPan=0;if(!held)return}
+      tourLat=la;tourPan=reduceMotion()?0:(sw||0)*360/rd;let held=await hold(rd,ok);tourPan=0;if(held&&vd){let w=0;while(voBusy&&w<30000&&ok()){await wait(120);if(!tourPaused)w+=120}held=ok()&&await hold(350,ok)}if(!held)return}
     if(!ok())return;
     if(!reduceMotion()&&!await beat(900,0,-4,90,ok))return;
     if(!$("factsPop").hidden)$("factsPop").hidden=true;
