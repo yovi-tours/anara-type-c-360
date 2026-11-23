@@ -181,6 +181,7 @@ body.doll .pano-only{opacity:0;pointer-events:none}
 
 /* ---------- guided tour ---------- */
 #tourbar .dots{display:flex;gap:4px}
+body.touring #cap{z-index:30}
 #tourbar .dots i{cursor:pointer;width:6px;height:6px;border-radius:50%;background:#1d211033;transition:background .3s,width .3s}
 #tourbar .dots i.on{width:18px;border-radius:3px;background:var(--olive-900)}
 #tourbar .dots i.done{background:var(--olive-500)}
@@ -555,36 +556,48 @@ const FINISHES={};
 /* Guided tour route */
 /* Sales tour — five chapters. beats = [u (panorama column to point at), lat, fov, {en:[headline, line], ar:[headline, line]}].
    Arabic is written as Arabic marketing copy, not translated. Facts come only from the plans or what the renders show. */
-const CHAPTERS=[{en:"Arrival & hospitality",ar:"حفاوة الاستقبال"},{en:"Family living",ar:"دفء العائلة"},{en:"Kitchen & service",ar:"المطبخ والخدمات"},{en:"The bedroom floor",ar:"أجنحة النوم"},{en:"The roof retreat",ar:"ملحق السطح"}];
-const B=(u,la,f,eh,et,ah,at)=>[u,la,f,{en:[eh,et],ar:[ah,at]}];
+const CHAPTERS=[{en:"Welcome home",ar:"أهلاً بك"},{en:"Ground floor · hosting & living",ar:"الدور الأرضي · الضيافة والمعيشة"},{en:"First floor · the bedrooms",ar:"الدور الأول · أجنحة النوم"},{en:"Second floor · the retreat",ar:"الدور الثاني · ملحق السطح"},{en:"Make it yours",ar:"اجعلها لك"}];
+const B=(u,la,f,eh,et,ah,at,act)=>[u,la,f,{en:[eh,et],ar:[ah,at]},act];
 const ROUTE=[
  {id:"gf-majlis",ch:0,b:[
-  B(.45,-4,72,"Hosting, done properly","Guests arrive through their own majlis entrance, straight into the men's majlis.","مجلس يليق بضيوفك","مدخل مستقل يقود ضيوفك مباشرة إلى مجلس الرجال، دون المرور بمساحات العائلة."),
-  B(.5,4,58,"Calm, natural light","Daylight comes in from a private courtyard garden.","إطلالة على فناء أخضر","نور طبيعي ينساب إلى المجلس من فناء خاص مزروع."),
-  B(.69,-4,64,"Family privacy, protected","The majlis has its own wash area and toilet, so guests never cross into the family side.","خصوصية تامة للعائلة","مغسلة ودورة مياه خاصة بالمجلس؛ يبقى الضيف في جهته، وتبقى العائلة على راحتها.")]},
+  B(.45,-4,74,"Welcome to Villa Type C","A duplex family home of about 346 m² net saleable area, on three floors. Let me show you around.","أهلاً بك في فيلا C","فيلا دوبلكس عائلية بمساحة بيعية صافية تقارب ٣٤٦ م² على ثلاثة أدوار. دعني أرافقك في جولة.","facts"),
+  B(.3,-4,72,"Everything a family needs","5 bedrooms, 9 bathrooms & WCs, two separate entrances, staff rooms and a private roof terrace.","كل ما تحتاجه العائلة","٥ غرف نوم، ٩ دورات مياه، مدخلان مستقلان، غرف للعمالة، وتراس خاص على السطح.","facts")]},
+ {id:"gf-majlis",ch:1,b:[
+  B(.5,-2,70,"Ground floor · 166.6 m²","Almost half the home is here, where guests are hosted and the family spends the day.","الدور الأرضي · ١٦٦٫٦ م²","قرابة نصف مساحة البيت هنا، حيث استقبال الضيوف ويوم العائلة.","floor"),
+  B(.45,-4,70,"Men's majlis · 4.5 × 3.7 m","About 16.7 m² with its own entrance, so guests come straight in without crossing the family side.","مجلس الرجال · ٤٫٥ × ٣٫٧ م","نحو ١٦٫٧ م² بمدخل مستقل؛ يصل الضيف مباشرة دون المرور بجهة العائلة."),
+  B(.5,4,58,"A green outlook","Daylight from a private planted courtyard, for every gathering.","إطلالة خضراء","نور طبيعي من فناء خاص مزروع يرافق كل جلسة.")]},
+ {id:"gf-men-wash",b:[
+  B(.5,-6,66,"Guest wash area & toilet","The majlis has its own wash area and WC. Your family keeps its privacy.","مغسلة ودورة مياه للضيوف","للمجلس مغسلته ودورة مياهه الخاصة؛ وتبقى خصوصية العائلة محفوظة.")]},
  {id:"gf-dining",b:[
-  B(.5,4,66,"Serving made easy","The dining area links the majlis and the family side.","ضيافة بلا عناء","غرفة الطعام حلقة الوصل بين المجلس وجهة العائلة، فتُقدَّم الضيافة بسلاسة.")]},
- {id:"gf-stairs",ch:1,b:[
-  B(.7,10,64,"The heart of the home","An open family hall around a planted courtyard.","قلب البيت","صالة عائلية مفتوحة تلتف حول فناء مزروع يملأ المكان حياة.")]},
+  B(.5,4,66,"Dining · 4.0 × 3.0 m","About 12 m², linking the majlis and the family side, so serving guests is effortless.","غرفة الطعام · ٤٫٠ × ٣٫٠ م","نحو ١٢ م² تربط المجلس بجهة العائلة، فتصبح الضيافة بلا عناء.")]},
  {id:"gf-living",b:[
-  B(.42,-4,68,"Space to live together","With the hall, about 11 metres of open family space.","مساحة تجمع العائلة","مع الصالة الرئيسية، قرابة ١١ متراً من المساحات المفتوحة للجلسات اليومية."),
-  B(.3,2,60,"The garden, brought inside","Full-height glass opens the room to the garden.","الحديقة جزء من الصالة","واجهات زجاجية بكامل الارتفاع تفتح المعيشة على الخضرة.")]},
- {id:"gf-kitchen",ch:2,b:[
-  B(.48,-6,68,"A kitchen kept out of sight","A closed kitchen of about 3.5 × 3.5 m, on its own service side.","مطبخ بعيد عن الأنظار","مطبخ مغلق بمقاس يقارب ٣٫٥ × ٣٫٥ م، ضمن جهة خدمات مستقلة."),
-  B(.69,-2,62,"Ready for daily life","Tall built-in units with integrated appliances. The laundry and maid's quarters are next door.","جاهز ليومك","خزائن طويلة بأجهزة مدمجة، وغرفة الغسيل وسكن الخادمة على بُعد خطوات.")]},
- {id:"ff-bed-4",ch:3,b:[
-  B(.5,-6,68,"Four master bedrooms","Every bedroom upstairs is a master, with four bathrooms on the floor. This is Master Bedroom 04, about 4.1 × 3.5 m.","أربعة أجنحة رئيسية","جميع غرف الدور الأول رئيسية، ومعها أربع دورات مياه. هذا الجناح الرابع بنحو ٤٫١ × ٣٫٥ م."),
-  B(.29,-4,64,"A suite, not just a room","Its own dressing area with glass-fronted wardrobes, and a private bathroom.","جناح متكامل","غرفة ملابس بخزائن زجاجية، ودورة مياه خاصة.")]},
+  B(.42,-4,68,"Living area · about 48 m²","With the hall, about 11 metres of open family space, the largest room in the home.","صالة المعيشة · قرابة ٤٨ م²","مع الصالة، قرابة ١١ متراً من المساحة العائلية المفتوحة؛ أكبر مساحة في البيت."),
+  B(.3,2,60,"The garden, brought inside","Full-height glass opens the living area to the garden.","الحديقة داخل البيت","زجاج بكامل الارتفاع يفتح المعيشة على الحديقة.")]},
+ {id:"gf-stairs",b:[
+  B(.7,10,64,"A planted courtyard at the heart","The stair wraps around a courtyard tree, bringing daylight into the centre of the home.","فناء مزروع في القلب","يلتف الدرج حول شجرة الفناء، فيصل ضوء النهار إلى قلب البيت.")]},
+ {id:"gf-kitchen",b:[
+  B(.48,-6,68,"Closed kitchen · 3.5 × 3.5 m","About 12.3 m² on its own service side, with tall built-in units and a skylight.","مطبخ مغلق · ٣٫٥ × ٣٫٥ م","نحو ١٢٫٣ م² في جهة خدمات مستقلة، بخزائن مدمجة وفتحة سماوية."),
+  B(.2,-2,62,"Laundry next door","A 2.4 × 1.8 m laundry keeps the daily chores away from living spaces.","غرفة غسيل مجاورة","غرفة غسيل بمقاس ٢٫٤ × ١٫٨ م تُبعد أعمال اليوم عن مساحات المعيشة.")]},
+ {id:"gf-maid-room",b:[
+  B(.3,-14,70,"Staff rooms, each with a bathroom","A maid's room with its own bathroom, and a separate driver's room of 2.7 × 2.3 m with its own bathroom.","غرف العمالة بدورات مياه خاصة","غرفة خادمة بدورة مياه خاصة، وغرفة سائق مستقلة بمقاس ٢٫٧ × ٢٫٣ م بدورة مياهها.")]},
+ {id:"ff-lobby",ch:2,b:[
+  B(.25,-4,70,"First floor · 118.9 m²","The family's private floor, away from guests: four master bedrooms and four bathrooms.","الدور الأول · ١١٨٫٩ م²","دور العائلة الخاص بعيداً عن الضيوف: أربعة أجنحة رئيسية وأربع دورات مياه.","floor"),
+  B(.47,-4,66,"A central lobby · 4.3 × 4.3 m","Every bedroom opens off one bright lobby by the courtyard.","ردهة مركزية · ٤٫٣ × ٤٫٣ م","تنفتح جميع الغرف على ردهة واحدة مضيئة بجوار الفناء.")]},
+ {id:"ff-bed-4",b:[
+  B(.5,-6,68,"Master Bedroom 04 · 4.1 × 3.5 m","A full suite: its own 4.3 × 1.5 m dressing area and a private bathroom.","الجناح الرئيسي ٤ · ٤٫١ × ٣٫٥ م","جناح متكامل: غرفة ملابس بمقاس ٤٫٣ × ١٫٥ م ودورة مياه خاصة."),
+  B(.63,4,60,"Rest, undisturbed","Tall windows with layered curtains, for bright mornings or full darkness.","سكينة تامة","نوافذ طويلة بستائر متعددة الطبقات، لصباح مشرق أو عتمة كاملة.")]},
  {id:"ff-bed-3",b:[
-  B(.5,-6,68,"Generous for every family member","Master Bedroom 03, about 3.3 × 4.0 m.","رحابة لكل فرد","الجناح الثالث بنحو ٣٫٣ × ٤٫٠ م.")]},
+  B(.5,-6,68,"Master Bedroom 03 · 3.3 × 4.0 m","Screened windows soften the light, with a built-in wardrobe and its own bathroom.","الجناح الرئيسي ٣ · ٣٫٣ × ٤٫٠ م","نوافذ بمشربيات تُلطّف الضوء، مع خزانة مدمجة ودورة مياه خاصة.")]},
  {id:"ff-bed-2",b:[
-  B(.32,-6,68,"Your own outdoor corner","Master Bedroom 02, about 4.5 × 3.0 m, sits next to a private terrace.","ركنك الخارجي","الجناح الثاني بنحو ٤٫٥ × ٣٫٠ م، ويجاوره تراس خاص."),
-  B(.97,2,62,"Step outside","The private terrace is just beyond the window.","خطوة إلى الهواء الطلق","التراس الخاص خلف النافذة مباشرة.")]},
- {id:"2nd-floor-sitting-area",ch:4,b:[
-  B(.48,-6,68,"A second living space","The top floor is a retreat of its own, starting with a family sitting room.","صالة ثانية للعائلة","دور السطح عالم قائم بذاته، يبدأ بصالة جلوس عائلية."),
-  B(.72,2,60,"Evenings outdoors","It opens onto a large outdoor sitting area on the roof terrace.","سهرات في الهواء الطلق","تنفتح الصالة على جلسة خارجية واسعة في تراس السطح.")]},
+  B(.32,-6,68,"Master Bedroom 02 · 4.5 × 3.0 m","Its own wardrobe and vanity, right next to a private terrace.","الجناح الرئيسي ٢ · ٤٫٥ × ٣٫٠ م","خزانة ملابس وتسريحة خاصة، بجوار تراس خاص."),
+  B(.97,2,62,"Step outside","Fresh air without leaving the bedroom floor.","خطوة إلى الهواء الطلق","هواء طلق دون مغادرة دور النوم.")]},
+ {id:"2nd-floor-sitting-area",ch:3,b:[
+  B(.48,-6,68,"Second floor · 60.6 m²","A retreat of its own on the roof, starting with a 4.3 × 4.2 m family sitting area.","الدور الثاني · ٦٠٫٦ م²","ملحق مستقل على السطح، يبدأ بصالة جلوس عائلية بمقاس ٤٫٣ × ٤٫٢ م.","floor"),
+  B(.72,2,60,"Evenings on the roof terrace","The sitting area opens onto a large outdoor terrace, with a pantry close by.","سهرات على التراس","تنفتح الصالة على تراس خارجي واسع، ومطبخ تحضيري على بُعد خطوات.")]},
  {id:"2nd-floor-bedroom",b:[
-  B(.5,-6,68,"Flexible for your family","A further bedroom, about 3.1 × 4.7 m, with a bathroom next door.","مرونة تناسب عائلتك","غرفة نوم إضافية بنحو ٣٫١ × ٤٫٧ م، تجاورها دورة مياه.")]}
+  B(.5,-6,68,"A flexible bedroom · 3.1 × 4.7 m","With a bathroom and wash area next door: a guest suite, a teenager's room or a home office.","غرفة مرنة · ٣٫١ × ٤٫٧ م","تجاورها دورة مياه ومغسلة: جناح للضيوف، أو غرفة لأحد الأبناء، أو مكتب منزلي.")]},
+ {id:"2nd-floor-sitting-area",ch:4,b:[
+  B(.6,-4,74,"Make Villa Type C yours","Register your interest and the Anara sales team will arrange your private visit.","اجعل فيلا C لك","سجّل اهتمامك وسيتواصل معك فريق مبيعات أنارا لترتيب زيارتك الخاصة.","reg")]}
 ];
 const SUMMARY={en:{title:"Villa Type C at a glance",items:["Separate majlis and family entrances","Men's majlis with its own wash area and toilet","Open family hall and living area around a planted courtyard","Closed kitchen with a skylight and a separate service side","Four master bedrooms and four bathrooms","Roof floor with sitting room, outdoor terrace, pantry and bedroom","Maid's room and driver's room, each with a bathroom"],replay:"Replay",explore:"Explore on your own",lead:"See which Type C villas are still available on the Anara masterplan.",cta:"View available villas"},
  ar:{title:"فيلا C في سطور",items:["مدخلان مستقلان: للمجلس وللعائلة","مجلس رجال بمغسلته ودورة مياهه الخاصة","صالة عائلية مفتوحة حول فناء مزروع","مطبخ مغلق بفتحة سماوية، وجهة خدمات مستقلة","أربعة أجنحة رئيسية في الدور الأول","دور سطح بصالة وتراس خارجي ومطبخ تحضيري وغرفة نوم","غرفة للخادمة وأخرى للسائق، لكلٍّ منهما دورة مياه"],replay:"إعادة الجولة",explore:"تجوّل بنفسك",lead:"اكتشف فلل النموذج C المتاحة في المخطط العام لأنارا.",cta:"استعرض الفلل المتاحة"}};
@@ -1082,12 +1095,13 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
       if(!ok())return}
     else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(1500,ok))return;chapterHide()}
     tourUI();
-    for(const [bi,[u,la,fov,c]] of st.b.entries()){const [head,txt]=c[lang];const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),rd=readMs(head+" "+txt)+300;setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),rd=readMs(head+" "+txt)+300;setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
       if(!await hold(rd,ok))return}
     if(!ok())return;
     if(!reduceMotion()&&!await beat(900,0,-4,75,ok))return;
-    if(tourIdx===ROUTE.length-1){endTour();return}
+    if(!$("factsPop").hidden)$("factsPop").hidden=true;
+    if(tourIdx===ROUTE.length-1){const lb=st.b[st.b.length-1];if(lb[4]==="reg"){stopTour();renderReg();$("rgWa").hidden=true;$("rgSubmit").hidden=false;$("rgErr").hidden=true;$("regPop").hidden=false}else endTour();return}
     tourIdx++}}
 function pauseTour(p){if(!tourOn)return;tourPaused=p;if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
 function stopTour(){if(!tourOn)return;tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
