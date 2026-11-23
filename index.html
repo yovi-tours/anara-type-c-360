@@ -467,6 +467,26 @@ body.touring #tags{display:none}
 @media (min-width:641px) and (max-width:860px) and (max-height:820px){#fcRooms,#floorCard>p{display:none}#fcStats{margin-bottom:14px}#zIn,#zOut,.tools hr:first-of-type{display:none}}
 @media (min-width:641px) and (max-width:860px) and (max-height:600px){#floorCard{padding-top:12px}#floorCard>span{display:none}#floorCard>b{font-size:22px}#fcStats{margin-top:8px;margin-bottom:10px}#fcStats div{padding:6px 8px}#fcStats b{font-size:17px}.room{padding:10px 14px}.room h1{font-size:20px}}
 @media (min-width:641px) and (max-width:860px) and (max-height:640px){.tools{padding:4px}.tools .ibtn{width:36px;height:36px}#bFull{display:none}}
+
+/* ---------- phones: guided tour ---------- the tour owns the screen: one slim control bar at the top, the floor banner under it, the caption at the bottom, nothing stacked on anything else */
+#cap[hidden]{display:none!important}
+@media (max-width:640px){
+  body.touring .floors,body.touring .dock,body.touring .tools,body.touring .brand{display:none!important}
+  #tourbar{top:calc(var(--top) + 6px);left:var(--gl);right:var(--gr);transform:none;justify-content:space-between;gap:4px;padding:5px 6px}
+  [dir="rtl"] #tourbar{padding:5px 6px}
+  #tourbar #tText{display:none}
+  #tourbar .dots{flex:1;justify-content:center;gap:6px}
+  #tourbar .dots i{width:7px;height:7px}#tourbar .dots i.on{width:22px}
+  #tourbar .ibtn{width:38px;height:38px}
+  #tStop{font-size:0;width:38px;height:38px;padding:0;display:grid;place-items:center;border-radius:50%}
+  #tStop::before{content:"\2715";font-size:15px;line-height:1}
+  body.presenting #tourbar{opacity:.6}
+  #chap{top:42%;max-width:84vw;padding:14px 22px 16px}#chap b{font-size:22px}#chap span{font-size:12px}
+  body.touring #floorCard{top:calc(var(--top) + 62px);width:calc(100vw - 28px)}
+  body.touring #cap{bottom:calc(var(--bot) + 6px)}
+  body.touring #factsPop{top:calc(var(--top) + 62px);bottom:calc(var(--bot) + var(--caph,150px) + 20px)}
+  body.touring #regPop{top:calc(var(--top) + 62px)}
+}
 </style>
 
 <div id="stage"></div>
@@ -554,7 +574,7 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const AV="?v=62";/* bump when a sound file changes, so browsers fetch the new one */
+const AV="?v=63";/* bump when a sound file changes, so browsers fetch the new one */
 const MUSIC_SRC="music_anara-ambient-3.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
 const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,11.06],[13.56,6.88],[21.94,5.64],[29.08,6.14],[36.72,5.04],[43.26,3.66],[48.42,4.9],[54.82,6.1],[62.42,4.02],[67.94,5.22],[74.66,6.66],[82.82,3.88],[88.2,3.86],[93.56,7.24],[102.3,4.36],[108.16,6.3],[115.96,5.16],[122.62,3.74],[127.86,3.08],[132.44,2.64],[136.58,5.58],[143.66,4.2],[149.36,7.94],[158.8,5.46]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,10.27],[12.77,7.25],[21.52,5.02],[28.04,5.6],[35.14,2.9],[39.54,3.58],[44.62,4.62],[50.74,7.52],[59.76,4.25],[65.51,5.04],[72.05,6.42],[79.97,3.36],[84.83,4.06],[90.39,6.57],[98.46,3.74],[103.7,6.0],[111.2,6.22],[118.92,4.6],[125.02,2.66],[129.18,2.48],[133.16,5.8],[140.46,3.94],[145.9,8.36],[155.76,5.36]]}};
