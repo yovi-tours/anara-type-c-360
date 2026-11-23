@@ -446,6 +446,11 @@ body.touring #tags{display:none}
   #fcStats b{font-size:17px;white-space:nowrap}#fcStats small{font-size:11px;white-space:nowrap}
   #fcProg{position:absolute;left:0;right:0;bottom:0;margin:0}
 }
+@media (min-width:861px){
+  body.touring #floorCard{top:calc(var(--top) + 160px)}
+  body.touring #factsPop{left:auto;transform:none;inset-inline-start:calc(var(--gl) + min(600px,100vw - 32px) + 36px);inset-inline-end:var(--gr);width:auto;top:calc(var(--top) + 160px);bottom:var(--bot)}
+}
+@media (max-width:860px){body.touring #factsPop{bottom:calc(var(--bot) + 190px)}body.touring #floorCard{top:calc(var(--top) + 150px)}}
 @media (min-width:861px) and (max-height:820px){#zIn,#zOut,.tools hr:first-of-type{display:none}}
 @media (min-width:861px) and (max-height:700px){.tools{top:calc(var(--top) + 88px);padding:4px}.tools .ibtn{width:36px;height:36px}.tools .ibtn svg{width:18px;height:18px}}
 @media (min-width:861px){#mini{bottom:calc(var(--bot) + 56px)}}
