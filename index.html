@@ -544,7 +544,7 @@ const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
 const MUSIC_SRC="music_anara-home-ambience.mp3";
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
-const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[0.0,7.514],[8.214,5.094],[14.008,4.224],[18.932,5.269],[24.901,2.844],[28.445,2.475],[31.619,5.312],[37.632,4.949],[43.281,2.64],[46.621,5.227],[52.548,3.704],[56.952,4.022],[61.673,2.466],[64.839,5.575],[71.114,2.907],[74.721,3.479],[78.9,4.384],[83.984,3.173],[87.857,2.923],[91.48,2.811],[94.991,2.463],[98.154,4.608],[103.462,4.958],[109.12,5.263]]}};
+const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,7.514],[9.214,5.094],[15.008,4.224],[19.932,5.269],[25.901,2.844],[29.445,2.475],[32.619,5.312],[38.632,4.949],[44.281,2.64],[47.621,5.227],[53.548,3.704],[57.952,4.022],[62.673,2.466],[65.839,5.575],[72.114,2.907],[75.721,3.479],[79.9,4.384],[84.984,3.173],[88.857,2.923],[92.48,2.811],[95.991,2.463],[99.154,4.608],[104.462,4.958],[110.12,5.263]]}};
 /* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
 const TAGS={
  "gf-majlis":[[.5,.42,{en:["Courtyard garden","Daylight from a private planted courtyard.","A green outlook for every gathering."],ar:["حديقة الفناء","ضوء النهار من فناء خاص مزروع.","إطلالة خضراء ترافق كل جلسة."]}],[.695,.5,{en:["Guest wash area","The majlis has its own wash area and toilet.","Guests stay on their side; the family keeps its privacy."],ar:["مغسلة الضيوف","للمجلس مغسلته ودورة مياهه الخاصة.","يبقى الضيف في جهته، وتحتفظ العائلة بخصوصيتها."]}]],
@@ -766,7 +766,7 @@ async function go(id,o={}){
   const back=spheres[1-front],fr=spheres[front];
   back.rotation.y=p.h*D2R;back.material.opacity=0;back.position.set(0,0,0);
   await setTex(back,p);if(my!==token)return;
-  const from=cur;cur=p;setBar(.85);ui();roomCard(true);if(from&&from.floor!==p.floor&&!tourOn&&!o.cut)floorIntro(p.floor);try{history.replaceState(null,"","#"+p.id)}catch(e){}
+  const from=cur;cur=p;roomSound();setBar(.85);ui();roomCard(true);if(from&&from.floor!==p.floor&&!tourOn&&!o.cut)floorIntro(p.floor);try{history.replaceState(null,"","#"+p.id)}catch(e){}
   if(o.first||o.cut){back.material.opacity=1;fr.material.opacity=0;front=1-front;if(o.first)lon=o.lon??(180-p.h);if(o.lat!=null)lat=o.lat;else if(!tourOn)lat=EYE_LAT;busy=false;setBar(1);buildSpots();preload(p);return}
   const reduce=reduceMotion();
   let brg=o.brg;
@@ -1062,22 +1062,37 @@ function uiSnd(kind){const now=performance.now();if(now-uiLast<45)return;uiLast=
     if(kind==="nav")tone(P[2]*1.5,.1,.14,.07);if(kind==="floor"){tone(P[2]*1.5,.09,.22,.09);tone(P[2]*2,.07,.3,.18)}}catch(e){}}
 document.addEventListener("click",e=>{const b=e.target.closest("button,a,.pin,.chip,[role=button]");if(!b)return;
   uiSnd(b.closest(".floors")?"floor":b.classList.contains("pin")||b.closest("#rooms")||b.closest("#arrows")?"nav":/close|Close/.test(b.id||"")?"close":b.closest(".actions,.tools")?"open":"tap")},true);
-let soundOn=false,aud=null,fadeT=null,ambT=.5;
-function ambFade(){clearInterval(fadeT);fadeT=setInterval(()=>{const d=ambT-aud.volume;if(Math.abs(d)<=.02){aud.volume=ambT;clearInterval(fadeT)}else aud.volume=Math.max(0,Math.min(1,aud.volume+Math.sign(d)*.02))},70)}
-function duck(on){ambT=on?.2:.5;if(soundOn&&aud)ambFade()}
+let soundOn=false,aud=null,fadeT=null,ducked=false;
+const SIL="data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAGAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+/* the open roof terrace gets more of the outdoor bed; everything drops while the narrator speaks */
+const ambLvl=()=>Math.min(1,(ducked?.25:.55)*(cur&&/sitting-area/.test(cur.id)?1.7:1));
+function ambFade(){clearInterval(fadeT);fadeT=setInterval(()=>{const T=ambLvl(),d=T-aud.volume;if(Math.abs(d)<=.02){aud.volume=T;clearInterval(fadeT)}else aud.volume=Math.max(0,Math.min(1,aud.volume+Math.sign(d)*.02))},70)}
+function duck(on){ducked=on;if(soundOn&&aud)ambFade();if(soundOn&&rm&&rmKind)try{rm.volume=on?.4:.75}catch(e){}}
+/* Each kind of room has its own quiet sound on top of the home bed: files music/room-<kind>.mp3 */
+const ROOM_SND=[[/bath/,"bath"],[/wash/,"sink"],[/laundry/,"laundry"],[/majlis/,"majlis"],[/dining/,"dining"],[/living/,"living"],[/stairs/,"stairs"],[/kitchen|pantry/,"kitchen"],[/bed|dressing|maid-room|driver-room/,"bedroom"]];
+let rm=null,rmKind="",rmT=null;
+function roomSound(){const k=soundOn&&cur?((ROOM_SND.find(r=>r[0].test(cur.id))||[])[1]||""):"";if(aud&&soundOn)ambFade();if(k===rmKind||!rm)return;rmKind=k;
+  clearInterval(rmT);let ph=0,n=0;rmT=setInterval(()=>{try{
+    if(ph===0){rm.volume=Math.max(0,rm.volume-.07);if(rm.volume<=.001||rm.paused||++n>12){ph=1;rm.pause();if(!rmKind){clearInterval(rmT);return}rm.volume=0;rm.loop=true;rm.src="music_room-"+rmKind+".mp3";const p=rm.play();if(p&&p.catch)p.catch(()=>{})}}
+    else{const T=ducked?.4:.75;rm.volume=Math.min(T,rm.volume+.04);if(rm.volume>=T)clearInterval(rmT)}}catch(e){clearInterval(rmT)}},50)}
 function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SRC);aud.loop=true;aud.volume=0}
-  const p=aud.play();if(p&&p.catch)p.catch(()=>{});ambFade();voPrep();return true}
-/* Narrator: follows the same button as the ambience (one switch for all sound except clicks). */
-let voCtx=null,voBuf={},voLoad={},voSrc=null;
-function voPrep(){const v=VOICE[lang];if(!v)return null;try{voCtx=voCtx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}
-  const l=lang;if(!voLoad[l])voLoad[l]=fetch(v.src).then(r=>r.arrayBuffer()).then(a=>new Promise((ok,no)=>voCtx.decodeAudioData(a,ok,no))).then(b=>{voBuf[l]=b}).catch(()=>{});return voLoad[l]}
-function voStop(){if(voSrc){try{voSrc.onended=null;voSrc.stop()}catch(e){}voSrc=null}}
-function voSay(i){voStop();const v=VOICE[lang];if(!soundOn||!v||!voBuf[lang]||!v.seg[i])return 0;try{if(voCtx.state==="suspended")voCtx.resume();
-  const s=voCtx.createBufferSource();s.buffer=voBuf[lang];s.connect(voCtx.destination);s.start(0,v.seg[i][0],v.seg[i][1]);voSrc=s;s.onended=()=>{if(voSrc===s)voSrc=null};return v.seg[i][1]*1000}catch(e){return 0}}
+  const p=aud.play();if(p&&p.catch)p.catch(()=>{});ambFade();voPrep();
+  if(!rm){rm=new Audio(SIL);rm.volume=0;const q=rm.play();if(q&&q.catch)q.catch(()=>{})}setTimeout(roomSound,60);return true}
+/* Narrator: follows the same button as the ambience (one switch for all sound except clicks). Plain audio element, so it also plays on iPhones in silent mode; first started inside a tap so later lines may play by themselves. */
+let vo=null,voT=null,voEnd=0;
+function voPrep(){const v=VOICE[lang];if(!v)return null;
+  if(!vo){vo=new Audio(SIL);vo._l="";vo.ontimeupdate=()=>{if(voEnd&&vo.currentTime>=voEnd+.12)voStop()};const p=vo.play();if(p&&p.catch)p.catch(()=>{})}
+  if(vo._l!==lang){const l=lang,a=vo;a._l=l;a._ok=false;fetch(v.src).then(r=>r.blob()).then(bl=>{if(a._l!==l)return;a.pause();a.src=URL.createObjectURL(bl);a.preload="auto";a.load();a._ok=true}).catch(()=>{a._l=""})}
+  return vo}
+function voStop(){clearTimeout(voT);voEnd=0;if(vo)try{vo.pause()}catch(e){}}
+function voSay(i){voStop();const v=VOICE[lang];if(!soundOn||!v||!v.seg[i])return 0;const a=voPrep();if(!a||!a._ok)return 0;const [o,d]=v.seg[i];voEnd=o+d;
+  const run=()=>{if(voEnd!==o+d)return;try{a.currentTime=o;const p=a.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearTimeout(voT);voT=setTimeout(voStop,d*1000+250)};
+  if(a.readyState<1)a.addEventListener("loadedmetadata",run,{once:true});else run();return d*1000}
+function voPause(p){if(!vo||!voEnd)return;clearTimeout(voT);if(p)vo.pause();else{const left=voEnd-vo.currentTime;if(left>.05){const q=vo.play();if(q&&q.catch)q.catch(()=>{});voT=setTimeout(voStop,left*1000+250)}else voStop()}}
 function stopSound(){if(!aud)return;clearInterval(fadeT);fadeT=setInterval(()=>{aud.volume=Math.max(0,aud.volume-.04);if(aud.volume<=0){clearInterval(fadeT);aud.pause()}},60)}
 if(!MUSIC_SRC)$("bSound").hidden=true;
 let soundUserOff=false;function autoMusic(){if(!soundOn&&!soundUserOff&&startSound()){soundOn=true;$("bSound").setAttribute("aria-pressed",true)}}
-$("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!startSound())soundOn=false}else{stopSound();voStop()}$("bSound").setAttribute("aria-pressed",soundOn)};
+$("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!startSound())soundOn=false}else{stopSound();voStop();roomSound()}$("bSound").setAttribute("aria-pressed",soundOn)};
 
 /* ======================= GUIDED TOUR ======================= */
 let tourOn=false,tourPaused=false,tourIdx=0,tourTok=0,capNow="",summaryT=null;
@@ -1128,7 +1143,7 @@ async function flyTo(id,chapter,ok){const a=cur,b=byId[id];dollInit();
 async function startTour(from){closePops();closeSummary();if(measuring)setMeasure(false);if(dollOn)closeDoll();
   tourOn=true;tourPaused=false;const my=++tourTok;tourIdx=from??0;autoRotate=false;$("bRotate").setAttribute("aria-pressed",false);
   const ok=()=>my===tourTok&&tourOn;
-  voStop();if(soundOn&&VOICE[lang]){duck(true);const pr=voPrep();if(pr&&!voBuf[lang]){await Promise.race([pr,wait(3000)]);if(!ok())return}}
+  voStop();if(soundOn&&VOICE[lang]){duck(true);voPrep()}
   while(ok()){const st=ROUTE[tourIdx],id=st.id;tourUI();
     if(cur.id!==id){
       const link=spots.find(s=>s.to===id);
@@ -1145,8 +1160,8 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
     if(!$("factsPop").hidden)$("factsPop").hidden=true;
     if(tourIdx===ROUTE.length-1){const lb=st.b[st.b.length-1];if(lb[4]==="reg"){stopTour();renderReg();$("rgWa").hidden=true;$("rgSubmit").hidden=false;$("rgErr").hidden=true;$("regPop").hidden=false}else endTour();return}
     tourIdx++}}
-function pauseTour(p){if(!tourOn)return;tourPaused=p;try{if(voCtx)p?voCtx.suspend():voCtx.resume()}catch(e){}if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
-function stopTour(){if(!tourOn)return;voStop();try{if(voCtx)voCtx.resume()}catch(e){}duck(false);tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
+function pauseTour(p){if(!tourOn)return;tourPaused=p;voPause(p);if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
+function stopTour(){if(!tourOn)return;voStop();duck(false);tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
   if(dCine){dCine=false;dollOn=false;anim=null;busy=false;$("doll").classList.remove("on","cine");document.body.classList.remove("doll")}tourUI()}
 /* end of tour: the key selling points; replays by itself after a while (for screens in the sales centre) */
 function endTour(){stopTour();const S=SUMMARY[lang];$("sumTitle").textContent=S.title;$("sumList").innerHTML=S.items.map(x=>"<li>"+x+"</li>").join("");
