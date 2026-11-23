@@ -129,9 +129,10 @@ body.doll .pano-only{opacity:0;pointer-events:none}
 .pin[aria-current="true"]::before{content:"";position:absolute;inset:3.5px;border-radius:50%;background:var(--gold-300)}
 .pin[aria-current="true"]::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid #3f4727aa;animation:pinPulse 2.2s ease-out infinite;pointer-events:none}
 @keyframes pinPulse{from{transform:scale(1);opacity:.7}to{transform:scale(2.6);opacity:0}}
-.cone{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;filter:drop-shadow(0 0 1.5px #1e220e99);pointer-events:none;z-index:1;overflow:visible;scale:calc(1 / var(--z,1));transition:opacity .3s}
-#big .cone{width:170px;height:170px;margin:-85px 0 0 -85px}
-.cone .cw{fill:url(#cg)}.cone .ce{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.cone{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;filter:drop-shadow(0 0 .6px #fff) drop-shadow(0 1px 2px #0006);pointer-events:none;z-index:1;overflow:visible;scale:calc(1 / var(--z,1));transition:opacity .3s}
+#mini.mid .cone{width:58px;height:58px;margin:-29px 0 0 -29px}
+#big .cone{width:70px;height:70px;margin:-35px 0 0 -35px}
+.cone .cw{fill:url(#cg)}.cone .ce{display:none}
 .plbl{scale:calc(1 / var(--z,1));transform-origin:0 0;position:absolute;transform:translate(-50%,12px);font-size:11.5px;font-weight:500;line-height:1.2;white-space:nowrap;padding:3px 8px;border-radius:999px;background:#ffffffe0;color:var(--ink);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.15);text-align:center}
 .plbl small{display:block;font-size:10.5px;color:var(--olive-700);font-variant-numeric:tabular-nums}
 #mini .plbl{display:none}
@@ -637,13 +638,13 @@ const FLOORS=[{plan:"plan_ground.webp",w:1744,h:1800},{plan:"plan_first.webp",w:
 const FLOOR_AREA=[166.64,118.94,60.56];
 const PTS=[
  // id, en, ar, floor, x, y, heading, plan code, clear size [w,l] in metres (scaled from the architectural plans, ±0.1 m)
- ["gf-lobby","Lobby","الردهة",0,57,17,270,"GF-06",null],
- ["gf-living","Living Area","صالة المعيشة",0,38,31,259,"GF-05",[11.2,4.3]],
- ["gf-stairs","Living Area · Stairs","صالة المعيشة · الدرج",0,68,33,277,"GF-05",[11.2,4.3]],
- ["gf-dining","Dining Area","غرفة الطعام",0,48,62,90,"GF-04",[4.0,3.0]],
  ["gf-majlis","Men Majlis","مجلس الرجال",0,85,60,90,"GF-01",[4.5,3.7]],
  ["gf-men-wash","Majlis Wash Area","مغسلة المجلس",0,66,67,90,"GF-02",[1.3,1.8]],
  ["gf-men-bath","Majlis Toilet","دورة مياه المجلس",0,65,56,259,"GF-03",[1.3,1.7]],
+ ["gf-dining","Dining Area","غرفة الطعام",0,48,62,90,"GF-04",[4.0,3.0]],
+ ["gf-living","Living Area","صالة المعيشة",0,38,31,259,"GF-05",[11.2,4.3]],
+ ["gf-stairs","Living Area · Stairs","صالة المعيشة · الدرج",0,68,33,277,"GF-05",[11.2,4.3]],
+ ["gf-lobby","Lobby","الردهة",0,57,17,270,"GF-06",null],
  ["gf-kitchen","Kitchen","المطبخ",0,40,13,270,"GF-07",[3.5,3.5]],
  ["gf-laundry","Laundry","غرفة الغسيل",0,57,8,282,"GF-10",[2.4,1.8]],
  ["gf-women-wash","Family Wash Area","مغسلة العائلة",0,68,18,83,"GF-08",[1.8,1.5]],
@@ -668,7 +669,7 @@ const PTS=[
  ["2nd-floor-wash","Wash Area","المغسلة",2,58,52,0,"RF-03",[1.4,1.2]],
  ["2nd-floor-bath","Bathroom","دورة المياه",2,58,64,0,"RF-04",[1.4,2.0]]
 ];
-const GROUP_START=new Set(["gf-majlis", "gf-kitchen", "gf-women-wash", "gf-maid-room", "gf-driver-room", "ff-bed-4", "ff-bed-3", "ff-bed-2", "ff-bath-4", "2nd-floor-pantry", "2nd-floor-bedroom"]);
+const GROUP_START=new Set(["gf-dining", "gf-lobby", "gf-women-wash", "gf-maid-room", "gf-driver-room", "ff-bed-4", "ff-bed-3", "ff-bed-2", "ff-bath-4", "2nd-floor-pantry", "2nd-floor-bedroom"]);
 const SPOTS={
  "gf-majlis":[[.695,.65,"gf-men-wash"]],
  "gf-men-wash":[[.23,.66,"gf-majlis"],[.745,.69,"gf-dining"],[.015,.67,"gf-men-bath"]],
@@ -869,7 +870,7 @@ function makeMap(root,labels,onPick){const img=root.querySelector("img"),pins=ro
       b.onclick=e=>{e.stopPropagation();if(root.dataset.dragged==="1")return;onPick&&onPick();stopTour();go(p.id)};pins.appendChild(b);
       if(labels){const l=document.createElement("span");l.className="plbl";l.style.left=p.x+"%";l.style.top=p.y+"%";l.innerHTML=nm(p)+(p.dims?"<small>≈ "+fmt(p.dims[0]*p.dims[1],1)+" "+t("m2")+"</small>":"");pins.appendChild(l)}});
     cn=document.createElementNS("http://www.w3.org/2000/svg","svg");cn.setAttribute("viewBox","-55 -55 110 110");cn.classList.add("cone");
-    cn.innerHTML='<defs><radialGradient id="g'+root.id+'" cx="0" cy="0" r="56" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff6dc" stop-opacity=".95"/><stop offset=".55" stop-color="#f1e3b8" stop-opacity=".6"/><stop offset="1" stop-color="#f1e3b8" stop-opacity="0"/></radialGradient></defs><path class="cw" fill="url(#g'+root.id+')"/><path class="ce"/>';cn.querySelector(".cw").style.fill="url(#g"+root.id+")";lastA=-1;
+    cn.innerHTML='<defs><radialGradient id="g'+root.id+'" cx="0" cy="0" r="56" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2c3319" stop-opacity="1"/><stop offset=".7" stop-color="#3f4727" stop-opacity=".8"/><stop offset="1" stop-color="#3f4727" stop-opacity=".25"/></radialGradient></defs><path class="cw" fill="url(#g'+root.id+')"/><path class="ce"/>';cn.querySelector(".cw").style.fill="url(#g"+root.id+")";lastA=-1;
     pins.appendChild(cn);mark()}
   function mark(){pins.querySelectorAll(".pin").forEach(b=>b.setAttribute("aria-current",!!cur&&b.dataset.id===cur.id));if(cn){const on=cur&&cur.floor===fi;cn.style.display=on?"block":"none";if(on){cn.style.left=cur.x+"%";cn.style.top=cur.y+"%"}}}
   root.addEventListener("click",e=>{if(e.target.closest(".pin")||root.dataset.dragged==="1")return;e.stopPropagation();const b=img.getBoundingClientRect(),f=FLOORS[fi];
@@ -877,7 +878,7 @@ function makeMap(root,labels,onPick){const img=root.querySelector("img"),pins=ro
     P.filter(p=>p.floor===fi).forEach(p=>{const d=Math.hypot((p.x-x)*f.w,(p.y-y)*f.h);if(d<bd){bd=d;best=p}});
     if(best&&bd<f.w*.16){onPick&&onPick();stopTour();go(best.id)}});
   let lastA=-1;
-  function setFov(h){if(!cn)return;const a=Math.round(Math.max(18,Math.min(75,h/2)));if(a===lastA)return;lastA=a;const r=a*D2R,R=54,x=(R*Math.cos(r)).toFixed(2),y=(R*Math.sin(r)).toFixed(2),e=(30*Math.cos(r)).toFixed(2),f=(30*Math.sin(r)).toFixed(2);
+  function setFov(h){if(!cn)return;const a=Math.round(Math.max(16,Math.min(42,h/2.4)));if(a===lastA)return;lastA=a;const r=a*D2R,R=54,x=(R*Math.cos(r)).toFixed(2),y=(R*Math.sin(r)).toFixed(2),e=(30*Math.cos(r)).toFixed(2),f=(30*Math.sin(r)).toFixed(2);
     cn.querySelector(".cw").setAttribute("d","M0 0L"+x+" -"+y+"A"+R+" "+R+" 0 0 1 "+x+" "+y+"Z");cn.querySelector(".ce").setAttribute("d","M"+e+" -"+f+"L0 0L"+e+" "+f)}
   return{render,mark,get floor(){return fi},set rot(a){if(cn)cn.style.transform="rotate("+a+"deg)"},set fov(h){setFov(h)}}}
 const mini=makeMap($("miniMap"),true),big=makeMap($("bigMap"),true,()=>closeBig());
