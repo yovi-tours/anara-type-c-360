@@ -1039,12 +1039,16 @@ $("shClose").onclick=closePops;
 /* ======================= MUSIC — plays a licensed track file (set MUSIC_SRC); the button stays hidden until one is set ======================= */
 /* UI sounds: tiny synthesised clicks (no files). Follow the music button: muted when the visitor turns sound off. */
 let actx=null,uiLast=0;
-function uiSnd(kind){if(soundUserOff)return;const now=performance.now();if(now-uiLast<45)return;uiLast=now;
-  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const t0=actx.currentTime,g=actx.createGain(),o=actx.createOscillator(),f=actx.createBiquadFilter();
-    const P={tap:[1150,720,.05,.05,"sine"],nav:[520,880,.16,.05,"sine"],open:[420,640,.12,.045,"triangle"],close:[640,400,.1,.04,"triangle"],floor:[392,784,.28,.05,"sine"]}[kind]||[1000,700,.05,.04,"sine"];
-    o.type=P[4];o.frequency.setValueAtTime(P[0],t0);o.frequency.exponentialRampToValueAtTime(P[1],t0+P[2]);f.type="lowpass";f.frequency.value=3200;
-    g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(P[3],t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+P[2]+.06);
-    o.connect(f);f.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+P[2]+.1)}catch(e){}}
+function uiSnd(kind){const now=performance.now();if(now-uiLast<45)return;uiLast=now;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const t0=actx.currentTime,out=actx.createGain();out.gain.value=.5;out.connect(actx.destination);
+    /* a soft "tock": a short filtered-noise transient plus a quickly damped body tone, like tapping glass */
+    const P={tap:[1900,.022,620,.05,.5],nav:[1500,.03,440,.11,.6],open:[1700,.026,520,.08,.55],close:[1300,.026,360,.07,.5],floor:[1400,.03,392,.2,.6]}[kind]||[1900,.022,620,.05,.5];
+    const n=Math.floor(actx.sampleRate*.03),buf=actx.createBuffer(1,n,actx.sampleRate),d=buf.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);
+    const ns=actx.createBufferSource();ns.buffer=buf;const bp=actx.createBiquadFilter();bp.type="bandpass";bp.frequency.value=P[0];bp.Q.value=1.4;const ng=actx.createGain();ng.gain.setValueAtTime(.22,t0);ng.gain.exponentialRampToValueAtTime(.0001,t0+P[1]);
+    ns.connect(bp);bp.connect(ng);ng.connect(out);ns.start(t0);
+    const tone=(f,g,dur,dl=0)=>{const o=actx.createOscillator(),og=actx.createGain();o.type="sine";o.frequency.setValueAtTime(f*1.06,t0+dl);o.frequency.exponentialRampToValueAtTime(f,t0+dl+.02);og.gain.setValueAtTime(.0001,t0+dl);og.gain.exponentialRampToValueAtTime(g,t0+dl+.004);og.gain.exponentialRampToValueAtTime(.0001,t0+dl+dur);o.connect(og);og.connect(out);o.start(t0+dl);o.stop(t0+dl+dur+.02)};
+    tone(P[2],.16*P[4],P[3]);tone(P[2]*2.01,.05*P[4],P[3]*.6);
+    if(kind==="nav")tone(P[2]*1.5,.1,.14,.07);if(kind==="floor"){tone(P[2]*1.5,.09,.22,.09);tone(P[2]*2,.07,.3,.18)}}catch(e){}}
 document.addEventListener("click",e=>{const b=e.target.closest("button,a,.pin,.chip,[role=button]");if(!b)return;
   uiSnd(b.closest(".floors")?"floor":b.classList.contains("pin")||b.closest("#rooms")||b.closest("#arrows")?"nav":/close|Close/.test(b.id||"")?"close":b.closest(".actions,.tools")?"open":"tap")},true);
 let soundOn=false,aud=null,fadeT=null;
