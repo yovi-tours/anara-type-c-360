@@ -199,7 +199,10 @@ body.presenting #tourbar:hover{opacity:1}
 #summary li::before{content:"";position:absolute;inset-inline-start:2px;top:.5em;width:8px;height:8px;border-radius:50%;background:var(--olive-900)}
 #summary .row{display:flex;gap:8px;flex-wrap:wrap}
 #summary .sumlead{margin:0 0 14px;font-size:14px;color:var(--ink-muted);line-height:1.5}
-body.touring #mini,body.touring .actions,body.touring .room{opacity:0;pointer-events:none}
+body.touring .actions,body.touring .room{opacity:0;pointer-events:none}
+body.touring #mini{opacity:1;pointer-events:none}body.touring #mini header .sz,body.touring #mini #miniOpen{visibility:hidden}
+body.touring:has(#factsPop:not([hidden])) #mini,body.touring:has(#regPop:not([hidden])) #mini{opacity:0}
+#mini.glimpse{box-shadow:0 0 0 2px var(--gold-300),0 24px 60px -18px #000a}
 #cap{position:fixed;inset-inline-start:var(--gl);bottom:var(--bot);z-index:12;width:min(600px,calc(100vw - 32px));padding:20px 24px 18px;border-radius:24px;color:var(--gold-50)}
 #cap::after{background:linear-gradient(160deg,#12150ad1,#262b16c7)!important;box-shadow:inset 0 1px 0 #f5f4ee2e,inset 0 0 0 1px #f5f4ee14!important}
 #cap .meta{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12.5px;font-weight:500;color:var(--gold-300);margin-bottom:10px}
@@ -551,7 +554,7 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const AV="?v=59";/* bump when a sound file changes, so browsers fetch the new one */
+const AV="?v=60";/* bump when a sound file changes, so browsers fetch the new one */
 const MUSIC_SRC="music_anara-ambient-3.mp3"+AV;
 /* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
 const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[1.0,7.514],[10.014,5.094],[16.608,4.224],[22.332,5.269],[29.101,2.844],[33.445,2.475],[37.42,5.312],[44.232,4.949],[50.681,2.64],[54.821,5.227],[61.548,3.704],[66.752,4.022],[72.274,2.466],[76.24,5.575],[83.315,2.907],[87.722,3.479],[92.701,4.384],[98.585,3.173],[103.258,2.923],[107.681,2.811],[111.992,2.463],[115.955,4.608],[122.063,4.958],[128.521,5.263],[135.284,3.429],[140.213,3.541],[145.254,2.925],[149.679,1.825],[153.004,2.925],[157.429,1.698],[160.627,3.124],[165.251,1.846],[168.597,2.876],[172.973,2.225],[176.698,1.694],[179.892,4.864],[186.256,1.952],[189.708,1.498]]},ar:{src:"voice_anara-guide-ar.mp3",seg:[[1.0,8.88],[11.38,6.44],[19.32,3.4],[24.22,7.54],[33.26,2.06],[36.82,3.14],[41.46,5.28],[48.24,6.64],[56.38,3.66],[61.54,4.92],[67.96,4.56],[74.02,3.0],[78.52,2.82],[82.84,6.04],[90.38,2.76],[94.64,4.2],[100.34,6.16],[108.0,4.82],[114.32,2.46],[118.28,2.28],[122.06,1.98],[125.54,5.34],[132.38,7.58],[141.46,4.94]]}};
@@ -577,47 +580,48 @@ const FINISHES={};
 /* Sales tour — five chapters. beats = [u (panorama column to point at), lat, fov, {en:[headline, line], ar:[headline, line]}].
    Arabic is written as Arabic marketing copy, not translated. Facts come only from the plans or what the renders show. */
 const CHAPTERS=[{en:"Welcome home",ar:"أهلاً بك"},{en:"Ground floor · hosting & living",ar:"الدور الأرضي · الضيافة والمعيشة"},{en:"First floor · the bedrooms",ar:"الدور الأول · أجنحة النوم"},{en:"Second floor · the retreat",ar:"الدور الثاني · ملحق السطح"},{en:"Make it yours",ar:"اجعلها لك"}];
-const B=(u,la,f,eh,et,ah,at,act)=>[u,la,f,{en:[eh,et],ar:[ah,at]},act];
+/* a tour shot: where to look (u across the panorama, 0–1), tilt, field of view (wide by default so rooms read as spaces), and how far to pan slowly while the line is spoken */
+const B=(u,la,f,sw,eh,et,ah,at,act)=>[u,la,f,{en:[eh,et],ar:[ah,at]},act,sw];
 const ROUTE=[
  {id:"gf-majlis",ch:0,b:[
-  B(.45,-4,74,"Welcome to Villa Type C","A duplex family home of about 346 m² net saleable area, on three floors. Let me show you around.","أهلاً بك في فيلا C","فيلا دوبلكس عائلية بمساحة بيعية صافية تقارب ٣٤٦ م² على ثلاثة أدوار. دعني أرافقك في جولة.","facts"),
-  B(.3,-4,72,"Everything a family needs","5 bedrooms, 9 bathrooms & WCs, two separate entrances, staff rooms and a private roof terrace.","كل ما تحتاجه العائلة","٥ غرف نوم، ٩ دورات مياه، مدخلان مستقلان، غرف للعمالة، وتراس خاص على السطح.")]},
+  B(0.3,-3,98,0.2,"Welcome to Villa Type C","Welcome to Villa Type C. Three floors, about three hundred and forty-six square metres. Let me walk you through it.","حيّاك الله في فيلا C","حيّاك الله في فيلا C. ثلاثة أدوار، ومساحتها تقريباً ثلاثمية وستة وأربعين متر. تفضّل معي ناخذ جولة.","facts"),
+  B(0.62,-3,98,-0.16,"Everything a family needs","Five bedrooms, two separate entrances, staff rooms, and a private roof terrace.","كل اللي تحتاجه العائلة","خمس غرف نوم، مدخلين مستقلين، غرف للعمالة، وسطح خاص للعائلة.")]},
  {id:"gf-majlis",ch:1,b:[
-  B(.5,-2,70,"Ground floor · 166.6 m²","Almost half the home is here, where guests are hosted and the family spends the day.","الدور الأرضي · ١٦٦٫٦ م²","قرابة نصف مساحة البيت هنا، حيث استقبال الضيوف ويوم العائلة.","floor"),
-  B(.45,-4,70,"Men's majlis · 4.5 × 3.7 m","About 16.7 m² with its own entrance, so guests come straight in without crossing the family side.","مجلس الرجال · ٤٫٥ × ٣٫٧ م","نحو ١٦٫٧ م² بمدخل مستقل؛ يصل الضيف مباشرة دون المرور بجهة العائلة."),
-  B(.5,4,58,"A green outlook","Daylight from a private planted courtyard, for every gathering.","إطلالة خضراء","نور طبيعي من فناء خاص مزروع يرافق كل جلسة.")]},
+  B(0.42,-2,100,0.12,"Ground floor · 166.6 m²","We start on the ground floor, where you host, and where the family spends the day.","الدور الأرضي · ١٦٦٫٦ م²","نبدأ من الدور الأرضي، للضيافة ولجلسة العائلة كل يوم.","floor"),
+  B(0.54,-3,98,0.16,"Men's majlis · 4.5 × 3.7 m","Look around the majlis. It has its own entrance, so guests never cross the family side.","مجلس الرجال · ٤٫٥ × ٣٫٧ م","شوف المجلس. له مدخل مستقل، وضيوفك ما يمرّون على جهة العائلة."),
+  B(0.44,1,86,0.05,"A green outlook","And every gathering looks onto a private, planted courtyard.","إطلالة خضراء","وجلستكم تطل على فناء خاص مزروع.")]},
  {id:"gf-men-wash",b:[
-  B(.5,-6,66,"Guest wash area & toilet","The majlis has its own wash area and WC. Your family keeps its privacy.","مغسلة ودورة مياه للضيوف","للمجلس مغسلته ودورة مياهه الخاصة؛ وتبقى خصوصية العائلة محفوظة.")]},
+  B(0.4,-4,102,0.2,"Guest wash area & toilet","Right beside it, guests have their own wash area and toilet.","مغاسل ودورة مياه للضيوف","وجنبه على طول، مغاسل ودورة مياه خاصة للضيوف.")]},
  {id:"gf-dining",b:[
-  B(.5,4,66,"Dining · 4.0 × 3.0 m","About 12 m², linking the majlis and the family side, so serving guests is effortless.","غرفة الطعام · ٤٫٠ × ٣٫٠ م","نحو ١٢ م² تربط المجلس بجهة العائلة، فتصبح الضيافة بلا عناء.")]},
+  B(0.4,-2,102,0.24,"Dining · 4.0 × 3.0 m","The dining room sits between the majlis and the family living, so serving is easy.","غرفة الطعام · ٤٫٠ × ٣٫٠ م","غرفة الطعام بين المجلس وصالة العائلة، والضيافة تصير أسهل.")]},
  {id:"gf-living",b:[
-  B(.42,-4,68,"Living area · about 48 m²","With the hall, about 11 metres of open family space, the largest room in the home.","صالة المعيشة · قرابة ٤٨ م²","مع الصالة، قرابة ١١ متراً من المساحة العائلية المفتوحة؛ أكبر مساحة في البيت."),
-  B(.3,2,60,"The garden, brought inside","Full-height glass opens the living area to the garden.","الحديقة داخل البيت","زجاج بكامل الارتفاع يفتح المعيشة على الحديقة.")]},
+  B(0.76,-3,102,-0.08,"Living area · about 48 m²","Now look down the room. With the hall, about eleven metres of open family space.","صالة المعيشة · قرابة ٤٨ م²","والحين شوف طول الصالة. مع الممر، أحد عشر متر تقريباً من المساحة المفتوحة للعائلة."),
+  B(0.2,0,98,0.16,"The garden, brought inside","And along the side, full-height glass opens it to the garden.","الحديقة داخل البيت","وعلى الجنب، زجاج من الأرض للسقف يفتحها على الحديقة.")]},
  {id:"gf-stairs",b:[
-  B(.7,10,64,"A planted courtyard at the heart","The stair wraps around a courtyard tree, bringing daylight into the centre of the home.","فناء مزروع في القلب","يلتف الدرج حول شجرة الفناء، فيصل ضوء النهار إلى قلب البيت.")]},
+  B(0.6,3,100,0.2,"A planted courtyard at the heart","The stair wraps around a courtyard tree, pulling daylight into the centre of the home.","فناء مزروع في القلب","الدرج يلتف حول شجرة الفناء، والنور الطبيعي يوصل لوسط البيت.")]},
  {id:"gf-kitchen",b:[
-  B(.48,-6,68,"Closed kitchen · 3.5 × 3.5 m","About 12.3 m² on its own service side, with tall built-in units and a skylight.","مطبخ مغلق · ٣٫٥ × ٣٫٥ م","نحو ١٢٫٣ م² في جهة خدمات مستقلة، بخزائن مدمجة وفتحة سماوية."),
-  B(.2,-2,62,"Laundry next door","A 2.4 × 1.8 m laundry keeps the daily chores away from living spaces.","غرفة غسيل مجاورة","غرفة غسيل بمقاس ٢٫٤ × ١٫٨ م تُبعد أعمال اليوم عن مساحات المعيشة.")]},
+  B(0.22,24,104,0.3,"Closed kitchen · 3.5 × 3.5 m","The kitchen is closed, with worktops on three sides, a window, and a skylight above.","مطبخ مغلق · ٣٫٥ × ٣٫٥ م","المطبخ مغلق، أسطح العمل على ثلاث جهات، وشباك، وفوقه فتحة سماوية."),
+  B(0.78,6,102,0.1,"Laundry next door","Through this door is the service side, with the laundry right next to it.","غرفة الغسيل جنبه","ومن هذا الباب جهة الخدمات، وغرفة الغسيل جنبه.")]},
  {id:"gf-maid-room",b:[
-  B(.3,-14,70,"Staff rooms, each with a bathroom","A maid's room with its own bathroom, and a separate driver's room of 2.7 × 2.3 m with its own bathroom.","غرف العمالة بدورات مياه خاصة","غرفة خادمة بدورة مياه خاصة، وغرفة سائق مستقلة بمقاس ٢٫٧ × ٢٫٣ م بدورة مياهها.")]},
+  B(0.3,-12,102,0.34,"Staff rooms, each with a bathroom","Staff rooms are tucked away here, each with its own bathroom.","غرف العمالة بدورات مياهها","وغرف العمالة هنا، كل غرفة بدورة مياهها.")]},
  {id:"ff-lobby",ch:2,b:[
-  B(.25,-4,70,"First floor · 118.9 m²","The family's private floor, away from guests: four master bedrooms and four bathrooms.","الدور الأول · ١١٨٫٩ م²","دور العائلة الخاص بعيداً عن الضيوف: أربعة أجنحة رئيسية وأربع دورات مياه.","floor"),
-  B(.47,-4,66,"A central lobby · 4.3 × 4.3 m","Every bedroom opens off one bright lobby by the courtyard.","ردهة مركزية · ٤٫٣ × ٤٫٣ م","تنفتح جميع الغرف على ردهة واحدة مضيئة بجوار الفناء.")]},
+  B(0.12,-3,102,0.2,"First floor · 118.9 m²","Upstairs is the family's private floor. Four master bedrooms, four bathrooms.","الدور الأول · ١١٨٫٩ م²","الدور الأول للعائلة وبس. أربع غرف نوم رئيسية، وأربع دورات مياه.","floor"),
+  B(0.4,-3,100,0.22,"A central lobby · 4.3 × 4.3 m","Every bedroom opens off this one bright lobby, beside the courtyard.","صالة مركزية · ٤٫٣ × ٤٫٣ م","كل الغرف تفتح على هذي الصالة المنوّرة، جنب الفناء.")]},
  {id:"ff-bed-4",b:[
-  B(.5,-6,68,"Master Bedroom 04 · 4.1 × 3.5 m","A full suite: its own 4.3 × 1.5 m dressing area and a private bathroom.","الجناح الرئيسي ٤ · ٤٫١ × ٣٫٥ م","جناح متكامل: غرفة ملابس بمقاس ٤٫٣ × ١٫٥ م ودورة مياه خاصة."),
-  B(.63,4,60,"Rest, undisturbed","Tall windows with layered curtains, for bright mornings or full darkness.","سكينة تامة","نوافذ طويلة بستائر متعددة الطبقات، لصباح مشرق أو عتمة كاملة.")]},
+  B(0.6,-5,102,-0.26,"Master Bedroom 04 · 4.1 × 3.5 m","The main suite. Room for a full bed and seating, with its own dressing room and bathroom.","الغرفة الرئيسية ٤ · ٤٫١ × ٣٫٥ م","الغرفة الرئيسية. تكفي سرير كبير وجلسة، ومعها غرفة ملابس ودورة مياه."),
+  B(0.6,0,94,0.1,"Rest, undisturbed","Tall windows and layered curtains. Bright mornings, or full darkness.","راحة تامة","شبابيك طويلة وستاير بطبقتين. نور في الصباح، وعتمة كاملة وقت النوم.")]},
  {id:"ff-bed-3",b:[
-  B(.5,-6,68,"Master Bedroom 03 · 3.3 × 4.0 m","Screened windows soften the light, with a built-in wardrobe and its own bathroom.","الجناح الرئيسي ٣ · ٣٫٣ × ٤٫٠ م","نوافذ بمشربيات تُلطّف الضوء، مع خزانة مدمجة ودورة مياه خاصة.")]},
+  B(0.34,-4,102,0.3,"Master Bedroom 03 · 3.3 × 4.0 m","Bedroom three, with a glass wardrobe wall and screened windows that soften the light.","الغرفة الرئيسية ٣ · ٣٫٣ × ٤٫٠ م","الغرفة الثالثة، بدولاب زجاجي، ومشربيات تهدّي الضوء.")]},
  {id:"ff-bed-2",b:[
-  B(.32,-6,68,"Master Bedroom 02 · 4.5 × 3.0 m","Its own wardrobe and vanity, right next to a private terrace.","الجناح الرئيسي ٢ · ٤٫٥ × ٣٫٠ م","خزانة ملابس وتسريحة خاصة، بجوار تراس خاص."),
-  B(.97,2,62,"Step outside","Fresh air without leaving the bedroom floor.","خطوة إلى الهواء الطلق","هواء طلق دون مغادرة دور النوم.")]},
+  B(0.28,-5,102,0.34,"Master Bedroom 02 · 4.5 × 3.0 m","Bedroom two, with its own wardrobe and vanity.","الغرفة الرئيسية ٢ · ٤٫٥ × ٣٫٠ م","الغرفة الثانية، بدولابها وتسريحتها."),
+  B(0.9,0,96,0.12,"Step outside","And a private terrace, right off the bedroom.","خطوة للخارج","وتراس خاص، من الغرفة على طول.")]},
  {id:"2nd-floor-sitting-area",ch:3,b:[
-  B(.48,-6,68,"Second floor · 60.6 m²","A retreat of its own on the roof, starting with a 4.3 × 4.2 m family sitting area.","الدور الثاني · ٦٠٫٦ م²","ملحق مستقل على السطح، يبدأ بصالة جلوس عائلية بمقاس ٤٫٣ × ٤٫٢ م.","floor"),
-  B(.72,2,60,"Evenings on the roof terrace","The sitting area opens onto a large outdoor terrace, with a pantry close by.","سهرات على التراس","تنفتح الصالة على تراس خارجي واسع، ومطبخ تحضيري على بُعد خطوات.")]},
+  B(0.36,-4,102,0.22,"Second floor · 60.6 m²","The top floor is a retreat of its own, starting with a family sitting room.","الدور الثاني · ٦٠٫٦ م²","الدور الثاني ملحق مستقل، يبدأ بصالة جلوس للعائلة.","floor"),
+  B(0.6,0,98,0.14,"Evenings on the roof terrace","It opens onto a wide roof terrace, made for evenings.","سهرات على السطح","وتفتح على سطح واسع، يناسب سهرات العائلة.")]},
  {id:"2nd-floor-bedroom",b:[
-  B(.5,-6,68,"A flexible bedroom · 3.1 × 4.7 m","With a bathroom and wash area next door: a guest suite, a teenager's room or a home office.","غرفة مرنة · ٣٫١ × ٤٫٧ م","تجاورها دورة مياه ومغسلة: جناح للضيوف، أو غرفة لأحد الأبناء، أو مكتب منزلي.")]},
+  B(0.3,-4,102,0.34,"A flexible bedroom · 3.1 × 4.7 m","And a full bedroom, with a bathroom next door. A guest suite, a teenager's room, or a home office.","غرفة مرنة · ٣٫١ × ٤٫٧ م","وغرفة نوم كاملة ودورة مياه جنبها. للضيوف، أو لواحد من الأبناء، أو مكتب.")]},
  {id:"2nd-floor-sitting-area",ch:4,b:[
-  B(.6,-4,74,"Make Villa Type C yours","Register your interest and the Anara sales team will arrange your private visit.","اجعل فيلا C لك","سجّل اهتمامك وسيتواصل معك فريق مبيعات أنارا لترتيب زيارتك الخاصة.","reg")]}
+  B(0.44,-3,100,0.12,"Make Villa Type C yours","If you like what you have seen, register your interest, and we will arrange your private visit.","خلّها بيتك","إذا عجبك اللي شفته، سجّل اهتمامك، ونرتّب لك زيارة خاصة.","reg")]}
 ];
 const SUMMARY={en:{title:"Villa Type C at a glance",items:["Separate majlis and family entrances","Men's majlis with its own wash area and toilet","Open family hall and living area around a planted courtyard","Closed kitchen with a skylight and a separate service side","Four master bedrooms and four bathrooms","Roof floor with sitting room, outdoor terrace, pantry and bedroom","Maid's room and driver's room, each with a bathroom"],replay:"Replay",explore:"Explore on your own",lead:"See which Type C villas are still available on the Anara masterplan.",cta:"View available villas"},
  ar:{title:"فيلا C في سطور",items:["مدخلان مستقلان: للمجلس وللعائلة","مجلس رجال بمغسلته ودورة مياهه الخاصة","صالة عائلية مفتوحة حول فناء مزروع","مطبخ مغلق بفتحة سماوية، وجهة خدمات مستقلة","أربعة أجنحة رئيسية في الدور الأول","دور سطح بصالة وتراس خارجي ومطبخ تحضيري وغرفة نوم","غرفة للخادمة وأخرى للسائق، لكلٍّ منهما دورة مياه"],replay:"إعادة الجولة",explore:"تجوّل بنفسك",lead:"اكتشف فلل النموذج C المتاحة في المخطط العام لأنارا.",cta:"استعرض الفلل المتاحة"}};
@@ -872,12 +876,12 @@ function measureClick(cx,cy){if(mPts.length>=2)mPts=[];let p=null;
 
 /* ======================= LOOP ======================= */
 const $intro=document.getElementById("intro");
-let tourPan=0;
+let tourPan=0,tourLat=-6;
 function frame(ts){requestAnimationFrame(frame);const dtF=Math.min(80,ts-(frame.lt||ts));frame.lt=ts;if(!autoRotate||busy||ts-lastInteract<=2200)frame.rs=0;
   if(anim){const k=Math.min(1,(ts-anim.t0)/anim.ms);anim.fn(k);if(k>=1){const r=anim.r;anim=null;r()}}
   if(dollOn){dollFrame(ts);return}
   if(!$intro.hidden&&!$intro.classList.contains('out')&&!busy){lon+=.018;lat+=(-3-lat)*.01;targetFov=68}
-  else if(tourOn&&!tourPaused&&!busy){lon+=tourPan;lat+=(-6-lat)*.01}
+  else if(tourOn&&!tourPaused&&!busy){lon+=tourPan*dtF;lat+=(tourLat-lat)*.02}
   else if(autoRotate&&!busy&&!measuring&&ts-lastInteract>2200){frame.rs=Math.min(1,(frame.rs||0)+dtF/3200);const r=frame.rs*frame.rs*(3-2*frame.rs);lon+=dtF*.0024*r;lat+=(EYE_LAT-lat)*.015}
   lat=Math.max(-85,Math.min(85,lat));if(!busy)camera.fov+=(targetFov-camera.fov)*.085;
   camera.updateProjectionMatrix();camera.lookAt(dirVec(lon,lat).multiplyScalar(100));renderer.render(scene,camera);
@@ -1193,16 +1197,18 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
       if(!ok())return}
     else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(1500,ok))return;chapterHide()}
     tourUI();
-    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+1100-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+    for(const [bi,[u,la,fov,c,act,sw]] of st.b.entries()){tourPan=0;const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false;clearTimeout(window._ft);window._ft=setTimeout(()=>{if(tourOn)$("factsPop").hidden=true},7000)}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor"){floorIntro(cur.floor);planGlimpse()}const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+1100-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
-      if(!await hold(rd,ok))return}
+      tourLat=la;tourPan=reduceMotion()?0:(sw||0)*360/rd;const held=await hold(rd,ok);tourPan=0;if(!held)return}
     if(!ok())return;
-    if(!reduceMotion()&&!await beat(900,0,-4,75,ok))return;
+    if(!reduceMotion()&&!await beat(900,0,-4,90,ok))return;
     if(!$("factsPop").hidden)$("factsPop").hidden=true;
     if(tourIdx===ROUTE.length-1){const lb=st.b[st.b.length-1];if(lb[4]==="reg"){stopTour();renderReg();$("rgWa").hidden=true;$("rgSubmit").hidden=false;$("rgErr").hidden=true;$("regPop").hidden=false}else endTour();return}
     tourIdx++}}
 function pauseTour(p){if(!tourOn)return;tourPaused=p;voPause(p);if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
-function stopTour(){if(!tourOn)return;voStop();duck(false);tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
+/* a glimpse of the floor plan: the corner map grows for a few seconds at the start of each floor, then settles back; it stays on screen through the tour with the camera direction on it */
+let glT=null;function planGlimpse(){const m=$("mini");if(!m||getComputedStyle(m).display==="none")return;const keep=$("miniM").getAttribute("aria-pressed")==="true";m.classList.add("mid","glimpse");placeMini();setTimeout(placeMini,500);clearTimeout(glT);glT=setTimeout(()=>{m.classList.remove("glimpse");if(!keep)m.classList.remove("mid");placeMini();setTimeout(placeMini,500)},6500)}
+function stopTour(){if(!tourOn)return;tourPan=0;clearTimeout(glT);{const m=$("mini");if(m){m.classList.remove("glimpse");if($("miniM").getAttribute("aria-pressed")!=="true")m.classList.remove("mid")}}voStop();duck(false);tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
   if(dCine){dCine=false;dollOn=false;anim=null;busy=false;$("doll").classList.remove("on","cine");document.body.classList.remove("doll")}tourUI()}
 /* end of tour: the key selling points; replays by itself after a while (for screens in the sales centre) */
 function endTour(){stopTour();const S=SUMMARY[lang];$("sumTitle").textContent=S.title;$("sumList").innerHTML=S.items.map(x=>"<li>"+x+"</li>").join("");
