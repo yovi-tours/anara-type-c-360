@@ -455,6 +455,15 @@ body.touring #tags{display:none}
 @media (min-width:861px) and (max-height:820px){#zIn,#zOut,.tools hr:first-of-type{display:none}}
 @media (min-width:861px) and (max-height:700px){.tools{top:calc(var(--top) + 88px);padding:4px}.tools .ibtn{width:36px;height:36px}.tools .ibtn svg{width:18px;height:18px}}
 @media (min-width:861px){#mini{bottom:calc(var(--bot) + 56px)}}
+/* resized / tablet windows (641–860px): floor banner sits under the floor tabs, the room card stops short of the tool rail */
+@media (min-width:641px) and (max-width:860px){
+  #floorCard{top:calc(var(--top) + 146px);width:min(560px,calc(100vw - 190px))}
+  body.touring #floorCard{top:calc(var(--top) + 196px)}
+  .room{width:auto;inset-inline-end:calc(var(--gr) + 66px);max-width:520px}
+}
+@media (min-width:641px) and (max-width:860px) and (max-height:820px){#fcRooms,#floorCard>p{display:none}#fcStats{margin-bottom:14px}#zIn,#zOut,.tools hr:first-of-type{display:none}}
+@media (min-width:641px) and (max-width:860px) and (max-height:600px){#floorCard{padding-top:12px}#floorCard>span{display:none}#floorCard>b{font-size:22px}#fcStats{margin-top:8px;margin-bottom:10px}#fcStats div{padding:6px 8px}#fcStats b{font-size:17px}.room{padding:10px 14px}.room h1{font-size:20px}}
+@media (min-width:641px) and (max-width:860px) and (max-height:640px){.tools{padding:4px}.tools .ibtn{width:36px;height:36px}#bFull{display:none}}
 </style>
 
 <div id="stage"></div>
