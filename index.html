@@ -448,9 +448,10 @@ body.touring #tags{display:none}
 }
 @media (min-width:861px){
   body.touring #floorCard{top:calc(var(--top) + 160px)}
-  body.touring #factsPop{left:auto;transform:none;inset-inline-start:calc(var(--gl) + min(600px,100vw - 32px) + 36px);inset-inline-end:var(--gr);width:auto;top:calc(var(--top) + 160px);bottom:var(--bot)}
+  body.touring #factsPop{left:auto;transform:none;inset-inline-start:calc(var(--gl) + var(--capw,650px) + 18px);inset-inline-end:var(--gr);width:auto;top:calc(var(--top) + 160px);bottom:var(--bot)}
 }
-@media (max-width:860px){body.touring #factsPop{bottom:calc(var(--bot) + 190px)}body.touring #floorCard{top:calc(var(--top) + 150px)}}
+@media (max-width:1099px){body.touring #factsPop{transform:none;inset-inline-start:var(--gl);inset-inline-end:var(--gr);width:auto;bottom:calc(var(--bot) + var(--caph,170px) + 14px)}}
+@media (max-width:860px){body.touring #floorCard{top:calc(var(--top) + 150px)}}
 @media (min-width:861px) and (max-height:820px){#zIn,#zOut,.tools hr:first-of-type{display:none}}
 @media (min-width:861px) and (max-height:700px){.tools{top:calc(var(--top) + 88px);padding:4px}.tools .ibtn{width:36px;height:36px}.tools .ibtn svg{width:18px;height:18px}}
 @media (min-width:861px){#mini{bottom:calc(var(--bot) + 56px)}}
@@ -1049,7 +1050,7 @@ let tourOn=false,tourPaused=false,tourIdx=0,tourTok=0,capNow="",summaryT=null;
 const chapterAt=i=>{for(let j=i;j>=0;j--)if(ROUTE[j].ch!=null)return ROUTE[j].ch;return 0};
 function setCap(txt,head,step,ms){capNow=txt||"";$("cap").hidden=!capNow||!tourOn;if(!capNow)return;
   $("capCh").textContent=CHAPTERS[chapterAt(tourIdx)][lang];$("capStep").textContent=step||"";$("capHead").hidden=!head;$("capHead").textContent=head||"";$("capTxt").textContent=capNow;
-  const c=$("cap");c.classList.remove("in");void c.offsetWidth;c.classList.add("in");
+  const c=$("cap");c.classList.remove("in");void c.offsetWidth;c.classList.add("in");document.documentElement.style.setProperty("--capw",c.offsetWidth+"px");document.documentElement.style.setProperty("--caph",c.offsetHeight+"px");
   const pr=$("capProg");pr.classList.remove("run");pr.parentNode.hidden=!ms;if(ms){pr.style.setProperty("--d",ms+"ms");void pr.offsetWidth;pr.classList.add("run")}}
 function tourUI(){document.body.classList.toggle("tourpaused",tourOn&&tourPaused);$("tourbar").hidden=!tourOn;document.body.classList.toggle("presenting",tourOn&&!tourPaused);document.body.classList.toggle("touring",tourOn);
   $("tPlay").innerHTML=tourPaused?'<svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>':'<svg class="i" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>';
