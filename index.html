@@ -479,7 +479,7 @@ body.touring #tags{display:none}
   <button class="ibtn" id="bInfo" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
   <hr>
   <button class="ibtn" id="bRotate" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></button>
-  <button class="ibtn" id="bSound" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></button>
+  <button class="ibtn" id="bSound" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4Z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6M18.2 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
   <button class="ibtn" id="bShare"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg></button>
   <button class="ibtn" id="bFull"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
 </div>
@@ -542,7 +542,9 @@ const SHARE_BASE="";
 /* WhatsApp number of the Anara sales team, international format without + (e.g. 9665XXXXXXXX). Empty = WhatsApp asks who to send to. */
 const SALES_WHATSAPP="";
 /* Background music: path to a licensed track placed next to index.html, e.g. "music_anara-ambient.mp3". Empty = no music button. */
-const MUSIC_SRC="music_anara-ambient-2.mp3";
+const MUSIC_SRC="music_anara-home-ambience.mp3";
+/* Guided-tour narrator: one audio file per language plus [start,length] in seconds for every tour caption, in ROUTE order. No entry for a language = captions only. */
+const VOICE={en:{src:"voice_anara-guide-en.mp3",seg:[[0.0,7.514],[8.214,5.094],[14.008,4.224],[18.932,5.269],[24.901,2.844],[28.445,2.475],[31.619,5.312],[37.632,4.949],[43.281,2.64],[46.621,5.227],[52.548,3.704],[56.952,4.022],[61.673,2.466],[64.839,5.575],[71.114,2.907],[74.721,3.479],[78.9,4.384],[83.984,3.173],[87.857,2.923],[91.48,2.811],[94.991,2.463],[98.154,4.608],[103.462,4.958],[109.12,5.263]]}};
 /* Feature tags: [u, v] = position in the panorama image (0–1), {en:[title,text], ar:[title,text]} */
 const TAGS={
  "gf-majlis":[[.5,.42,{en:["Courtyard garden","Daylight from a private planted courtyard.","A green outlook for every gathering."],ar:["حديقة الفناء","ضوء النهار من فناء خاص مزروع.","إطلالة خضراء ترافق كل جلسة."]}],[.695,.5,{en:["Guest wash area","The majlis has its own wash area and toilet.","Guests stay on their side; the family keeps its privacy."],ar:["مغسلة الضيوف","للمجلس مغسلته ودورة مياهه الخاصة.","يبقى الضيف في جهته، وتحتفظ العائلة بخصوصيتها."]}]],
@@ -610,7 +612,7 @@ const SUMMARY={en:{title:"Villa Type C at a glance",items:["Separate majlis and 
 
 const T={
  en:{proj:"Villa Type C",floors:["Ground Floor","First Floor","Second Floor"],plan:"Floor plan",enlarge:"Enlarge",mapS:"Small map",mapM:"Medium map",mapL:"Full plan",szS:"S",szM:"M",szL:"L",tapPin:"Tap a space to go there · Scroll or pinch to zoom · Drag to move",
-  nextStop:"Next stop",measure:"Measure",info:"Room info",doll:"3D view",rotate:"Auto-rotate",sound:"Ambient music",share:"Share this view",full:"Full screen",zin:"Zoom in",zout:"Zoom out",close:"Close",
+  nextStop:"Next stop",measure:"Measure",info:"Room info",doll:"3D view",rotate:"Auto-rotate",sound:"Sound & narration",share:"Share this view",full:"Full screen",zin:"Zoom in",zout:"Zoom out",close:"Close",
   mStart:"Click a point on the floor",mNext:"Click a second point · on the floor, or straight up for a height",mDoneT:"Distance",mHeight:"Height",mFloorOnly:"Start from a point on the floor",clear:"Clear",done:"Done",
   size:"Clear size",area:"Area",open:"Open-plan circulation",dimsNote:"Approximate sizes, scaled from the architectural plans",
   hint:"Drag to look around · Click the floor to walk",noView:"No 360° view that way yet · use the floor plan",soon:"360° view coming soon",soonName:{mb01:"Master Bedroom 01"},enter:"Enter the home",tour:"Guided tour",watch:"Watch the guided tour",iEyebrow:"Anara · Riyadh",byFloor:"Explore by floor",fcShort:["Majlis · living · kitchen","4 master bedrooms","Sitting area · roof terrace"],iSub:"A family home on three floors, designed around privacy and generous hospitality.",
@@ -631,7 +633,7 @@ const T={
   ask:"Ask Anara",askTitle:"Interested in Villa Type C?",askText:"Book a visit to the sales centre or ask Anara about availability, prices and payment plans.",book:"Book a visit",chat:"Ask Anara",askNote:"Opens the Anara platform.",
   dHint:"Drag to rotate · Right-drag or two fingers to move · Scroll or pinch to zoom · Double-click to reset · Click a point to step inside",dBack:"Back to 360°",all:"All floors"},
  ar:{proj:"فيلا النموذج C",floors:["الدور الأرضي","الدور الأول","الدور الثاني"],plan:"المخطط",enlarge:"تكبير",mapS:"خريطة صغيرة",mapM:"خريطة متوسطة",mapL:"المخطط كاملًا",szS:"ص",szM:"م",szL:"ك",tapPin:"اضغط على مساحة للانتقال · مرر أو قرّب بإصبعين للتكبير · اسحب للتحريك",
-  nextStop:"المحطة التالية",measure:"القياس",info:"معلومات الغرفة",doll:"عرض ثلاثي الأبعاد",rotate:"دوران تلقائي",sound:"موسيقى هادئة",share:"مشاركة هذا المشهد",full:"ملء الشاشة",zin:"تكبير",zout:"تصغير",close:"إغلاق",
+  nextStop:"المحطة التالية",measure:"القياس",info:"معلومات الغرفة",doll:"عرض ثلاثي الأبعاد",rotate:"دوران تلقائي",sound:"الصوت والتعليق",share:"مشاركة هذا المشهد",full:"ملء الشاشة",zin:"تكبير",zout:"تصغير",close:"إغلاق",
   mStart:"اضغط على نقطة في الأرضية",mNext:"اضغط على نقطة ثانية · على الأرضية، أو للأعلى مباشرة لقياس الارتفاع",mDoneT:"المسافة",mHeight:"الارتفاع",mFloorOnly:"ابدأ من نقطة على الأرضية",clear:"مسح",done:"تم",
   size:"المقاس الصافي",area:"المساحة",open:"ممر مفتوح",dimsNote:"مقاسات تقريبية مأخوذة من المخططات المعمارية",
   hint:"اسحب للتجول · اضغط على الأرضية للتنقل",noView:"لا يوجد مشهد ٣٦٠° في هذا الاتجاه بعد · استخدم المخطط",soon:"مشهد ٣٦٠° قريبًا",soonName:{mb01:"غرفة النوم الرئيسية ٠١"},enter:"ادخل المنزل",tour:"جولة موجّهة",watch:"شاهد الجولة الموجّهة",iEyebrow:"أنارا · الرياض",byFloor:"تصفّح حسب الدور",fcShort:["المجلس · المعيشة · المطبخ","٤ غرف نوم رئيسية","الجلسة · تراس السطح"],iSub:"بيت عائلي على ثلاثة أدوار، صُمّم ليجمع بين خصوصية العائلة وكرم الضيافة.",
@@ -1046,7 +1048,7 @@ $("shClose").onclick=closePops;
 
 
 /* ======================= MUSIC — plays a licensed track file (set MUSIC_SRC); the button stays hidden until one is set ======================= */
-/* UI sounds: tiny synthesised clicks (no files). Follow the music button: muted when the visitor turns sound off. */
+/* UI sounds: tiny synthesised clicks (no files); always on. The sound button switches the home ambience and the tour narrator together. */
 let actx=null,uiLast=0;
 function uiSnd(kind){const now=performance.now();if(now-uiLast<45)return;uiLast=now;
   try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();const t0=actx.currentTime,out=actx.createGain();out.gain.value=.5;out.connect(actx.destination);
@@ -1060,16 +1062,26 @@ function uiSnd(kind){const now=performance.now();if(now-uiLast<45)return;uiLast=
     if(kind==="nav")tone(P[2]*1.5,.1,.14,.07);if(kind==="floor"){tone(P[2]*1.5,.09,.22,.09);tone(P[2]*2,.07,.3,.18)}}catch(e){}}
 document.addEventListener("click",e=>{const b=e.target.closest("button,a,.pin,.chip,[role=button]");if(!b)return;
   uiSnd(b.closest(".floors")?"floor":b.classList.contains("pin")||b.closest("#rooms")||b.closest("#arrows")?"nav":/close|Close/.test(b.id||"")?"close":b.closest(".actions,.tools")?"open":"tap")},true);
-let soundOn=false,aud=null,fadeT=null;
+let soundOn=false,aud=null,fadeT=null,ambT=.5;
+function ambFade(){clearInterval(fadeT);fadeT=setInterval(()=>{const d=ambT-aud.volume;if(Math.abs(d)<=.02){aud.volume=ambT;clearInterval(fadeT)}else aud.volume=Math.max(0,Math.min(1,aud.volume+Math.sign(d)*.02))},70)}
+function duck(on){ambT=on?.2:.5;if(soundOn&&aud)ambFade()}
 function startSound(){if(!MUSIC_SRC)return false;if(!aud){aud=new Audio(MUSIC_SRC);aud.loop=true;aud.volume=0}
-  clearInterval(fadeT);const p=aud.play();if(p&&p.catch)p.catch(()=>{});fadeT=setInterval(()=>{aud.volume=Math.min(.4,aud.volume+.02);if(aud.volume>=.4)clearInterval(fadeT)},80);return true}
+  const p=aud.play();if(p&&p.catch)p.catch(()=>{});ambFade();voPrep();return true}
+/* Narrator: follows the same button as the ambience (one switch for all sound except clicks). */
+let voCtx=null,voBuf={},voLoad={},voSrc=null;
+function voPrep(){const v=VOICE[lang];if(!v)return null;try{voCtx=voCtx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}
+  const l=lang;if(!voLoad[l])voLoad[l]=fetch(v.src).then(r=>r.arrayBuffer()).then(a=>new Promise((ok,no)=>voCtx.decodeAudioData(a,ok,no))).then(b=>{voBuf[l]=b}).catch(()=>{});return voLoad[l]}
+function voStop(){if(voSrc){try{voSrc.onended=null;voSrc.stop()}catch(e){}voSrc=null}}
+function voSay(i){voStop();const v=VOICE[lang];if(!soundOn||!v||!voBuf[lang]||!v.seg[i])return 0;try{if(voCtx.state==="suspended")voCtx.resume();
+  const s=voCtx.createBufferSource();s.buffer=voBuf[lang];s.connect(voCtx.destination);s.start(0,v.seg[i][0],v.seg[i][1]);voSrc=s;s.onended=()=>{if(voSrc===s)voSrc=null};return v.seg[i][1]*1000}catch(e){return 0}}
 function stopSound(){if(!aud)return;clearInterval(fadeT);fadeT=setInterval(()=>{aud.volume=Math.max(0,aud.volume-.04);if(aud.volume<=0){clearInterval(fadeT);aud.pause()}},60)}
 if(!MUSIC_SRC)$("bSound").hidden=true;
 let soundUserOff=false;function autoMusic(){if(!soundOn&&!soundUserOff&&startSound()){soundOn=true;$("bSound").setAttribute("aria-pressed",true)}}
-$("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!startSound())soundOn=false}else stopSound();$("bSound").setAttribute("aria-pressed",soundOn)};
+$("bSound").onclick=()=>{soundOn=!soundOn;soundUserOff=!soundOn;if(soundOn){if(!startSound())soundOn=false}else{stopSound();voStop()}$("bSound").setAttribute("aria-pressed",soundOn)};
 
 /* ======================= GUIDED TOUR ======================= */
 let tourOn=false,tourPaused=false,tourIdx=0,tourTok=0,capNow="",summaryT=null;
+const VOI=[];{let n=0;for(const r of ROUTE){VOI.push(n);n+=r.b.length}}
 const chapterAt=i=>{for(let j=i;j>=0;j--)if(ROUTE[j].ch!=null)return ROUTE[j].ch;return 0};
 function setCap(txt,head,step,ms){capNow=txt||"";$("cap").hidden=!capNow||!tourOn;if(!capNow)return;
   $("capCh").textContent=CHAPTERS[chapterAt(tourIdx)][lang];$("capStep").textContent=step||"";$("capHead").hidden=!head;$("capHead").textContent=head||"";$("capTxt").textContent=capNow;
@@ -1116,6 +1128,7 @@ async function flyTo(id,chapter,ok){const a=cur,b=byId[id];dollInit();
 async function startTour(from){closePops();closeSummary();if(measuring)setMeasure(false);if(dollOn)closeDoll();
   tourOn=true;tourPaused=false;const my=++tourTok;tourIdx=from??0;autoRotate=false;$("bRotate").setAttribute("aria-pressed",false);
   const ok=()=>my===tourTok&&tourOn;
+  voStop();if(soundOn&&VOICE[lang]){duck(true);const pr=voPrep();if(pr&&!voBuf[lang]){await Promise.race([pr,wait(3000)]);if(!ok())return}}
   while(ok()){const st=ROUTE[tourIdx],id=st.id;tourUI();
     if(cur.id!==id){
       const link=spots.find(s=>s.to===id);
@@ -1124,7 +1137,7 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
       if(!ok())return}
     else if(st.ch!=null){setCap("");chapterShow(st.ch);if(!await hold(1500,ok))return;chapterHide()}
     tourUI();
-    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),rd=readMs(head+" "+txt)+300;setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
+    for(const [bi,[u,la,fov,c,act]] of st.b.entries()){const [head,txt]=c[lang];if(act==="facts"){if($("factsPop").hidden){renderFacts();$("factsPop").hidden=false}}else if(!$("factsPop").hidden)$("factsPop").hidden=true;if(act==="floor")floorIntro(cur.floor);const dl0=norm(panoToPlan(cur,u)-lon),mv=Math.max(1400,Math.min(2400,800+Math.abs(dl0)*9)),vd=voSay(VOI[tourIdx]+bi),rd=Math.max(readMs(head+" "+txt)+300,vd?vd+450-(reduceMotion()?0:mv):0);setCap(txt,head,(bi+1)+" / "+st.b.length,(reduceMotion()?0:mv)+rd);
       if(!reduceMotion()){const dl=norm(panoToPlan(cur,u)-lon);if(!await beat(Math.max(1400,Math.min(2400,800+Math.abs(dl)*9)),dl,la,fov,ok))return}
       if(!await hold(rd,ok))return}
     if(!ok())return;
@@ -1132,8 +1145,8 @@ async function startTour(from){closePops();closeSummary();if(measuring)setMeasur
     if(!$("factsPop").hidden)$("factsPop").hidden=true;
     if(tourIdx===ROUTE.length-1){const lb=st.b[st.b.length-1];if(lb[4]==="reg"){stopTour();renderReg();$("rgWa").hidden=true;$("rgSubmit").hidden=false;$("rgErr").hidden=true;$("regPop").hidden=false}else endTour();return}
     tourIdx++}}
-function pauseTour(p){if(!tourOn)return;tourPaused=p;if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
-function stopTour(){if(!tourOn)return;tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
+function pauseTour(p){if(!tourOn)return;tourPaused=p;try{if(voCtx)p?voCtx.suspend():voCtx.resume()}catch(e){}if(p&&anim&&!busy&&!dollOn){const r=anim.r;anim=null;r()}tourUI()}
+function stopTour(){if(!tourOn)return;voStop();try{if(voCtx)voCtx.resume()}catch(e){}duck(false);tourOn=false;tourPaused=false;tourTok++;targetFov=FOV0;autoRotate=true;$("bRotate").setAttribute("aria-pressed",true);$("chap").hidden=true;
   if(dCine){dCine=false;dollOn=false;anim=null;busy=false;$("doll").classList.remove("on","cine");document.body.classList.remove("doll")}tourUI()}
 /* end of tour: the key selling points; replays by itself after a while (for screens in the sales centre) */
 function endTour(){stopTour();const S=SUMMARY[lang];$("sumTitle").textContent=S.title;$("sumList").innerHTML=S.items.map(x=>"<li>"+x+"</li>").join("");
